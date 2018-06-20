@@ -238,7 +238,7 @@ func MakeNodeNtfnHandlers() (*rpcclient.NotificationHandlers, *collectionQueue) 
 		// OnTxAcceptedVerbose is invoked same as OnTxAccepted but is used here
 		// for the mempool monitors to avoid an extra call to dcrd for
 		// the tx details
-		OnTxAcceptedVerbose: func(txDetails *dcrjson.TxRawResult) {
+		OnTxAcceptedVerbose: func(txDetails *exccjson.TxRawResult) {
 
 			select {
 			case NtfnChans.ExpNewTxChan <- &explorer.NewMempoolTx{

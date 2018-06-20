@@ -50,7 +50,7 @@ type DataSource interface {
 	GetBlockHash(idx int64) (string, error)
 }
 
-type StakeVersionsLatest func() (*dcrjson.StakeVersions, error)
+type StakeVersionsLatest func() (*exccjson.StakeVersions, error)
 
 // GetBlockStepCtx retrieves the ctxBlockStep data from the request context. If
 // not set, the return value is -1.

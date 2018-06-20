@@ -92,7 +92,7 @@ func TestFeeRateInfoBlock(t *testing.T) {
 	fib := FeeRateInfoBlock(block)
 	t.Log(*fib)
 
-	fibExpected := dcrjson.FeeInfoBlock{
+	fibExpected := exccjson.FeeInfoBlock{
 		Height: 138883,
 		Number: 20,
 		Min:    0.5786178114478114,
@@ -113,7 +113,7 @@ func TestFeeInfoBlock(t *testing.T) {
 	fib := FeeInfoBlock(block)
 	t.Log(*fib)
 
-	fibExpected := dcrjson.FeeInfoBlock{
+	fibExpected := exccjson.FeeInfoBlock{
 		Height: 138883,
 		Number: 20,
 		Min:    0.17184949,

@@ -84,11 +84,11 @@ func ConnectNodeRPC(host, user, pass, cert string, disableTLS bool,
 	return dcrdClient, nodeVer, nil
 }
 
-// BuildBlockHeaderVerbose creates a *dcrjson.GetBlockHeaderVerboseResult from
+// BuildBlockHeaderVerbose creates a *exccjson.GetBlockHeaderVerboseResult from
 // an input *wire.BlockHeader and current best block height, which is used to
 // compute confirmations.  The next block hash may optionally be provided.
 func BuildBlockHeaderVerbose(header *wire.BlockHeader, params *chaincfg.Params,
-	currentHeight int64, nextHash ...string) *dcrjson.GetBlockHeaderVerboseResult {
+	currentHeight int64, nextHash ...string) *exccjson.GetBlockHeaderVerboseResult {
 	if header == nil {
 		return nil
 	}
@@ -100,7 +100,7 @@ func BuildBlockHeaderVerbose(header *wire.BlockHeader, params *chaincfg.Params,
 		next = nextHash[0]
 	}
 
-	blockHeaderResult := dcrjson.GetBlockHeaderVerboseResult{
+	blockHeaderResult := exccjson.GetBlockHeaderVerboseResult{
 		Hash:          header.BlockHash().String(),
 		Confirmations: currentHeight - int64(header.Height),
 		Version:       header.Version,
@@ -126,10 +126,10 @@ func BuildBlockHeaderVerbose(header *wire.BlockHeader, params *chaincfg.Params,
 	return &blockHeaderResult
 }
 
-// GetBlockHeaderVerbose creates a *dcrjson.GetBlockHeaderVerboseResult for the
+// GetBlockHeaderVerbose creates a *exccjson.GetBlockHeaderVerboseResult for the
 // block index specified by idx via an RPC connection to a chain server.
 func GetBlockHeaderVerbose(client *rpcclient.Client, params *chaincfg.Params,
-	idx int64) *dcrjson.GetBlockHeaderVerboseResult {
+	idx int64) *exccjson.GetBlockHeaderVerboseResult {
 	blockhash, err := client.GetBlockHash(idx)
 	if err != nil {
 		log.Errorf("GetBlockHash(%d) failed: %v", idx, err)
@@ -145,10 +145,10 @@ func GetBlockHeaderVerbose(client *rpcclient.Client, params *chaincfg.Params,
 	return blockHeaderVerbose
 }
 
-// GetBlockVerbose creates a *dcrjson.GetBlockVerboseResult for the block index
+// GetBlockVerbose creates a *exccjson.GetBlockVerboseResult for the block index
 // specified by idx via an RPC connection to a chain server.
 func GetBlockVerbose(client *rpcclient.Client, params *chaincfg.Params,
-	idx int64, verboseTx bool) *dcrjson.GetBlockVerboseResult {
+	idx int64, verboseTx bool) *exccjson.GetBlockVerboseResult {
 	blockhash, err := client.GetBlockHash(idx)
 	if err != nil {
 		log.Errorf("GetBlockHash(%d) failed: %v", idx, err)
@@ -164,10 +164,10 @@ func GetBlockVerbose(client *rpcclient.Client, params *chaincfg.Params,
 	return blockVerbose
 }
 
-// GetBlockVerboseByHash creates a *dcrjson.GetBlockVerboseResult for the
+// GetBlockVerboseByHash creates a *exccjson.GetBlockVerboseResult for the
 // specified block hash via an RPC connection to a chain server.
 func GetBlockVerboseByHash(client *rpcclient.Client, params *chaincfg.Params,
-	hash string, verboseTx bool) *dcrjson.GetBlockVerboseResult {
+	hash string, verboseTx bool) *exccjson.GetBlockVerboseResult {
 	blockhash, err := chainhash.NewHashFromStr(hash)
 	if err != nil {
 		log.Errorf("Invalid block hash %s", hash)
@@ -195,7 +195,7 @@ func GetStakeDiffEstimates(client *rpcclient.Client) *apitypes.StakeDiff {
 		return nil
 	}
 	stakeDiffEstimates := apitypes.StakeDiff{
-		GetStakeDifficultyResult: dcrjson.GetStakeDifficultyResult{
+		GetStakeDifficultyResult: exccjson.GetStakeDifficultyResult{
 			CurrentStakeDifficulty: stakeDiff.CurrentStakeDifficulty,
 			NextStakeDifficulty:    stakeDiff.NextStakeDifficulty,
 		},
@@ -233,7 +233,7 @@ func GetBlockByHash(blockhash *chainhash.Hash, client *rpcclient.Client) (*exccu
 }
 
 // GetTransactionVerboseByID get a transaction by transaction id
-func GetTransactionVerboseByID(client *rpcclient.Client, txid string) (*dcrjson.TxRawResult, error) {
+func GetTransactionVerboseByID(client *rpcclient.Client, txid string) (*exccjson.TxRawResult, error) {
 	txhash, err := chainhash.NewHashFromStr(txid)
 	if err != nil {
 		log.Errorf("Invalid transaction hash %s", txid)
@@ -250,7 +250,7 @@ func GetTransactionVerboseByID(client *rpcclient.Client, txid string) (*dcrjson.
 
 // SearchRawTransaction fetch transactions the belong to an
 // address
-func SearchRawTransaction(client *rpcclient.Client, count int, address string) ([]*dcrjson.SearchRawTransactionsResult, error) {
+func SearchRawTransaction(client *rpcclient.Client, count int, address string) ([]*exccjson.SearchRawTransactionsResult, error) {
 	addr, err := exccutil.DecodeAddress(address)
 	if err != nil {
 		log.Infof("Invalid address %s: %v", address, err)

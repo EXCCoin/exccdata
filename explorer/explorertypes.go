@@ -131,7 +131,7 @@ type BlockValidation struct {
 
 // Vin models basic data about a tx input for display
 type Vin struct {
-	*dcrjson.Vin
+	*exccjson.Vin
 	Addresses       []string
 	FormattedAmount string
 }
@@ -266,7 +266,7 @@ type HomeInfo struct {
 	PoolInfo          TicketPoolInfo `json:"pool_info"`
 }
 
-// BlockSubsidy is an implementation of dcrjson.GetBlockSubsidyResult
+// BlockSubsidy is an implementation of exccjson.GetBlockSubsidyResult
 type BlockSubsidy struct {
 	Total int64 `json:"total"`
 	PoW   int64 `json:"pow"`

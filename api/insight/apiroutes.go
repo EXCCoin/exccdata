@@ -126,7 +126,7 @@ func (c *insightApiContext) getTransaction(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	txsOld := []*dcrjson.TxRawResult{txOld}
+	txsOld := []*exccjson.TxRawResult{txOld}
 
 	// convert to insight struct
 	txsNew, err := c.TxConverter(txsOld)
@@ -386,7 +386,7 @@ func (c *insightApiContext) getTransactions(w http.ResponseWriter, r *http.Reque
 		}
 
 		txsOutput := struct {
-			Txs []*dcrjson.SearchRawTransactionsResult `json:"txs"`
+			Txs []*exccjson.SearchRawTransactionsResult `json:"txs"`
 		}{
 			txs,
 		}
@@ -487,7 +487,7 @@ func (c *insightApiContext) getAddressesTxn(w http.ResponseWriter, r *http.Reque
 	addressOutput.From = int(from)
 	addressOutput.To = int(to)
 
-	txsOld := []*dcrjson.TxRawResult{}
+	txsOld := []*exccjson.TxRawResult{}
 	for _, rawTx := range rawTxs {
 		txOld, err := c.BlockData.GetRawTransaction(rawTx)
 		if err != nil {

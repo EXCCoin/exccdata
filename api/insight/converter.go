@@ -11,12 +11,12 @@ import (
 )
 
 // TxConverter converts dcrd-tx to insight tx
-func (c *insightApiContext) TxConverter(txs []*dcrjson.TxRawResult) ([]apitypes.InsightTx, error) {
+func (c *insightApiContext) TxConverter(txs []*exccjson.TxRawResult) ([]apitypes.InsightTx, error) {
 	return c.TxConverterWithParams(txs, false, false, false)
 }
 
 // TxConverterWithParams takes struct with filter params
-func (c *insightApiContext) TxConverterWithParams(txs []*dcrjson.TxRawResult, noAsm bool, noScriptSig bool, noSpent bool) ([]apitypes.InsightTx, error) {
+func (c *insightApiContext) TxConverterWithParams(txs []*exccjson.TxRawResult, noAsm bool, noScriptSig bool, noSpent bool) ([]apitypes.InsightTx, error) {
 	newTxs := []apitypes.InsightTx{}
 	for _, tx := range txs {
 

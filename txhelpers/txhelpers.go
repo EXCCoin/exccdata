@@ -43,7 +43,7 @@ type RawTransactionGetter interface {
 // required by functions that would otherwise require a rpcclient.Client just
 // for GetRawTransactionVerbose.
 type VerboseTransactionGetter interface {
-	GetRawTransactionVerbose(txHash *chainhash.Hash) (*dcrjson.TxRawResult, error)
+	GetRawTransactionVerbose(txHash *chainhash.Hash) (*exccjson.TxRawResult, error)
 }
 
 // BlockWatchedTx contains, for a certain block, the transactions for certain
@@ -645,8 +645,8 @@ func SSGenVoteChoices(tx *wire.MsgTx, params *chaincfg.Params) (BlockValidation,
 
 // FeeInfoBlock computes ticket fee statistics for the tickets included in the
 // specified block.
-func FeeInfoBlock(block *exccutil.Block) *dcrjson.FeeInfoBlock {
-	feeInfo := new(dcrjson.FeeInfoBlock)
+func FeeInfoBlock(block *exccutil.Block) *exccjson.FeeInfoBlock {
+	feeInfo := new(exccjson.FeeInfoBlock)
 	_, sstxMsgTxns := TicketsInBlock(block)
 
 	feeInfo.Height = uint32(block.Height())
@@ -698,8 +698,8 @@ func FeeInfoBlock(block *exccutil.Block) *dcrjson.FeeInfoBlock {
 
 // FeeRateInfoBlock computes ticket fee rate statistics for the tickets included
 // in the specified block.
-func FeeRateInfoBlock(block *exccutil.Block) *dcrjson.FeeInfoBlock {
-	feeInfo := new(dcrjson.FeeInfoBlock)
+func FeeRateInfoBlock(block *exccutil.Block) *exccjson.FeeInfoBlock {
+	feeInfo := new(exccjson.FeeInfoBlock)
 	_, sstxMsgTxns := TicketsInBlock(block)
 
 	feeInfo.Height = uint32(block.Height())
@@ -834,8 +834,8 @@ func TotalOutFromMsgTx(msgTx *wire.MsgTx) exccutil.Amount {
 	return exccutil.Amount(amtOut)
 }
 
-// TotalVout computes the total value of a slice of dcrjson.Vout
-func TotalVout(vouts []dcrjson.Vout) exccutil.Amount {
+// TotalVout computes the total value of a slice of exccjson.Vout
+func TotalVout(vouts []exccjson.Vout) exccutil.Amount {
 	var total exccutil.Amount
 	for _, v := range vouts {
 		a, err := exccutil.NewAmount(v.Value)

@@ -141,5 +141,5 @@ type WebSocketTx struct {
 // NewTx models data from the notification handler
 type NewTx struct {
 	Hex   string
-	Vouts []dcrjson.Vout
+	Vouts []exccjson.Vout
 }

@@ -286,7 +286,7 @@ type MempoolData struct {
 	NumTickets        uint32
 	NumVotes          uint32
 	NewTickets        uint32
-	Ticketfees        *dcrjson.TicketFeeInfoResult
+	Ticketfees        *exccjson.TicketFeeInfoResult
 	MinableFees       *MinableFeeInfo
 	AllTicketsDetails TicketsDetails
 }
@@ -334,12 +334,12 @@ func (t *mempoolDataCollector) Collect() (*MempoolData, error) {
 
 	// Get a map of ticket hashes to getrawmempool results
 	// mempoolTickets[ticketHashes[0].String()].Fee
-	mempoolTickets, err := c.GetRawMempoolVerbose(dcrjson.GRMTickets)
+	mempoolTickets, err := c.GetRawMempoolVerbose(exccjson.GRMTickets)
 	if err != nil {
 		return nil, err
 	}
 
-	mempoolVotes, err := c.GetRawMempoolVerbose(dcrjson.GRMVotes)
+	mempoolVotes, err := c.GetRawMempoolVerbose(exccjson.GRMVotes)
 	if err != nil {
 		return nil, err
 	}
