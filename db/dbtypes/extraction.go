@@ -1,7 +1,6 @@
 package dbtypes
 
 import (
-	"bytes"
 	"encoding/hex"
 	"fmt"
 
@@ -11,27 +10,6 @@ import (
 	"github.com/EXCCoin/exccd/wire"
 	"github.com/EXCCoin/exccdata/txhelpers"
 )
-
-// DevSubsidyAddress returns the development subsidy address for the specified
-// network.
-func DevSubsidyAddress(params *chaincfg.Params) (string, error) {
-	var devSubsidyAddress string
-	var err error
-	switch params.Name {
-	case "testnet2":
-		// TestNet2 uses an invalid organization PkScript
-		devSubsidyAddress = "TccTkqj8wFqrUemmHMRSx8SYEueQYLmuuFk"
-	default:
-		_, devSubsidyAddresses, _, err0 := txscript.ExtractPkScriptAddrs(
-			params.OrganizationPkScriptVersion, params.OrganizationPkScript, params)
-		if err0 != nil || len(devSubsidyAddresses) != 1 {
-			err = fmt.Errorf("failed to decode dev subsidy address: %v", err0)
-		} else {
-			devSubsidyAddress = devSubsidyAddresses[0].String()
-		}
-	}
-	return devSubsidyAddress, err
-}
 
 // ExtractBlockTransactions extracts transaction information from a
 // wire.MsgBlock and returns the processed information in slices of the dbtypes
@@ -135,7 +113,7 @@ func processTransactions(msgBlock *wire.MsgBlock, tree int8,
 			}
 			scriptClass, scriptAddrs, reqSigs, err := txscript.ExtractPkScriptAddrs(
 				vout.Version, vout.ScriptPubKey, chainParams)
-			if err != nil && !bytes.Equal(vout.ScriptPubKey, chainParams.OrganizationPkScript) {
+			if err != nil {
 				fmt.Println(len(vout.ScriptPubKey), err, hex.EncodeToString(vout.ScriptPubKey))
 			}
 			addys := make([]string, 0, len(scriptAddrs))

@@ -11,7 +11,6 @@ import (
 	"os"
 	"os/signal"
 	"reflect"
-	"runtime"
 	"sync"
 	"time"
 
@@ -22,7 +21,7 @@ import (
 	"github.com/EXCCoin/exccdata/blockdata"
 	"github.com/EXCCoin/exccdata/db/dbtypes"
 	"github.com/EXCCoin/exccdata/txhelpers"
-	humanize "github.com/dustin/go-humanize"
+	"github.com/dustin/go-humanize"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/rs/cors"
@@ -62,7 +61,6 @@ type explorerDataSource interface {
 	SpendingTransactions(fundingTxID string) ([]string, []uint32, []uint32, error)
 	PoolStatusForTicket(txid string) (dbtypes.TicketSpendType, dbtypes.TicketPoolStatus, error)
 	AddressHistory(address string, N, offset int64, txnType dbtypes.AddrTxnType) ([]*dbtypes.AddressRow, *AddressBalance, error)
-	DevBalance() (*AddressBalance, error)
 	FillAddressTransactions(addrInfo *AddressInfo) error
 	BlockMissedVotes(blockHash string) ([]string, error)
 }
@@ -170,16 +168,8 @@ func New(dataSource explorerDataSourceLite, primaryDataSource explorerDataSource
 	exp.ChainParams = params
 	exp.NetName = netName(exp.ChainParams)
 
-	// Development subsidy address of the current network
-	devSubsidyAddress, err := dbtypes.DevSubsidyAddress(params)
-	if err != nil {
-		log.Warnf("explorer.New: %v", err)
-	}
-	log.Debugf("Organization address: %s", devSubsidyAddress)
-
 	// Set default static values for ExtraInfo
 	exp.ExtraInfo = &HomeInfo{
-		DevAddress: devSubsidyAddress,
 		Params: ChainParams{
 			WindowSize:       exp.ChainParams.StakeDiffWindowSize,
 			RewardWindowSize: exp.ChainParams.SubsidyReductionInterval,
@@ -282,10 +272,6 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 
 	exp.NewBlockDataMtx.Unlock()
 
-	if !exp.liteMode {
-		go exp.updateDevFundBalance()
-	}
-
 	// Signal to the websocket hub that a new block was received, but do not
 	// block Store(), and do not hang forever in a goroutine waiting to send.
 	go func() {
@@ -299,20 +285,6 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 	log.Debugf("Got new block %d for the explorer.", newBlockData.Height)
 
 	return nil
-}
-
-func (exp *explorerUI) updateDevFundBalance() {
-	// yield processor to other goroutines
-	runtime.Gosched()
-	exp.NewBlockDataMtx.Lock()
-	defer exp.NewBlockDataMtx.Unlock()
-
-	devBalance, err := exp.explorerSource.DevBalance()
-	if err == nil && devBalance != nil {
-		exp.ExtraInfo.DevFund = devBalance.TotalUnspent
-	} else {
-		log.Errorf("explorerUI.updateDevFundBalance failed: %v", err)
-	}
 }
 
 func (exp *explorerUI) addRoutes() {

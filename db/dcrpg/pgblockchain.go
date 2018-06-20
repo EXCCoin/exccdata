@@ -8,7 +8,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -24,7 +23,7 @@ import (
 	"github.com/EXCCoin/exccdata/db/dbtypes"
 	"github.com/EXCCoin/exccdata/explorer"
 	"github.com/EXCCoin/exccdata/stakedb"
-	humanize "github.com/dustin/go-humanize"
+	"github.com/dustin/go-humanize"
 )
 
 var (
@@ -67,7 +66,6 @@ func (d *DevFundBalance) Balance() *explorer.AddressBalance {
 type ChainDB struct {
 	db                 *sql.DB
 	chainParams        *chaincfg.Params
-	devAddress         string
 	dupChecks          bool
 	bestBlock          int64
 	lastBlock          map[chainhash.Hash]uint64
@@ -185,12 +183,6 @@ func NewChainDB(dbi *DBInfo, params *chaincfg.Params, stakeDB *stakedb.StakeData
 		return nil, err
 	}
 
-	// Development subsidy address of the current network
-	var devSubsidyAddress string
-	if devSubsidyAddress, err = dbtypes.DevSubsidyAddress(params); err != nil {
-		log.Warnf("ChainDB.NewChainDB: %v", err)
-	}
-
 	if err = setupTables(db); err != nil {
 		log.Warnf("ATTENTION! %v", err)
 		// TODO: Actually handle the upgrades/reindexing somewhere.
@@ -211,7 +203,6 @@ func NewChainDB(dbi *DBInfo, params *chaincfg.Params, stakeDB *stakedb.StakeData
 	return &ChainDB{
 		db:                 db,
 		chainParams:        params,
-		devAddress:         devSubsidyAddress,
 		dupChecks:          true,
 		bestBlock:          int64(bestHeight),
 		lastBlock:          make(map[chainhash.Hash]uint64),
@@ -381,11 +372,7 @@ func (pgb *ChainDB) AddressTransactions(address string, N, offset int64,
 	case dbtypes.AddrTxnAll:
 		// The organization address occurs very frequently, so use the regular
 		// (non sub-query) select as it is much more efficient.
-		if address == pgb.devAddress {
-			addrFunc = RetrieveAddressTxnsAlt
-		} else {
-			addrFunc = RetrieveAddressTxns
-		}
+		addrFunc = RetrieveAddressTxns
 	case dbtypes.AddrTxnDebit:
 		addrFunc = RetrieveAddressDebitTxns
 	default:
@@ -400,80 +387,6 @@ func (pgb *ChainDB) AddressTransactions(address string, N, offset int64,
 // for the given address.
 func (pgb *ChainDB) AddressHistoryAll(address string, N, offset int64) ([]*dbtypes.AddressRow, *explorer.AddressBalance, error) {
 	return pgb.AddressHistory(address, N, offset, dbtypes.AddrTxnAll)
-}
-
-// retrieveDevBalance retrieves a new DevFundBalance without regard to the cache
-func (pgb *ChainDB) retrieveDevBalance() (*DevFundBalance, error) {
-	bb, hash, _, err := RetrieveBestBlockHeight(pgb.db)
-	if err != nil {
-		return nil, err
-	}
-	blockHeight := int64(bb)
-	blockHash, err := chainhash.NewHashFromStr(hash)
-	if err != nil {
-		return nil, err
-	}
-
-	_, devBalance, err := pgb.AddressHistoryAll(pgb.devAddress, 1, 0)
-	balance := &DevFundBalance{
-		AddressBalance: devBalance,
-		Height:         blockHeight,
-		Hash:           *blockHash,
-	}
-	return balance, err
-}
-
-// UpdateDevBalance forcibly updates the cached development/project fund balance
-// via DB queries. The bool output inidcates if the cached balance was updated
-// (if it was stale).
-func (pgb *ChainDB) UpdateDevBalance() (bool, error) {
-	pgb.DevFundBalance.Lock()
-	defer pgb.DevFundBalance.Unlock()
-	return pgb.updateDevBalance()
-}
-
-func (pgb *ChainDB) updateDevBalance() (bool, error) {
-	// Query for current balance.
-	balance, err := pgb.retrieveDevBalance()
-	if err != nil {
-		return false, err
-	}
-
-	// If cache is stale, update it's fields.
-	if balance.Hash != pgb.DevFundBalance.Hash || pgb.DevFundBalance.AddressBalance == nil {
-		pgb.DevFundBalance.AddressBalance = balance.AddressBalance
-		pgb.DevFundBalance.Height = balance.Height
-		pgb.DevFundBalance.Hash = balance.Hash
-		return true, nil
-	}
-
-	// Cache was not stale
-	return false, nil
-}
-
-// DevBalance returns the current development/project fund balance, updating the
-// cached balance if it is stale.
-func (pgb *ChainDB) DevBalance() (*explorer.AddressBalance, error) {
-	hash, err := pgb.HashDB()
-	if err != nil {
-		return nil, err
-	}
-
-	// Update cache if stale
-	if pgb.DevFundBalance.BlockHash().String() != hash || pgb.DevFundBalance.Balance() == nil {
-		if _, err = pgb.UpdateDevBalance(); err != nil {
-			return nil, err
-		}
-	}
-
-	bal := pgb.DevFundBalance.Balance()
-	if bal == nil {
-		return nil, fmt.Errorf("failed to update dev balance")
-	}
-
-	// return a copy of AddressBalance
-	balCopy := *bal
-	return &balCopy, nil
 }
 
 // addressBalance attempts to retrieve the explorer.AddressBalance from cache,
@@ -647,11 +560,7 @@ func (pgb *ChainDB) AddressTotals(address string) (*apitypes.AddressTotals, erro
 	// Fetch address totals
 	var err error
 	var ab *explorer.AddressBalance
-	if address == pgb.devAddress {
-		ab, err = pgb.DevBalance()
-	} else {
-		ab, err = pgb.addressBalance(address)
-	}
+	ab, err = pgb.addressBalance(address)
 
 	if err != nil || ab == nil {
 		return nil, err
@@ -1202,14 +1111,6 @@ func (pgb *ChainDB) StoreBlock(msgBlock *wire.MsgBlock, winningTickets []string,
 		pgb.addressCounts.validHeight = int64(msgBlock.Header.Height)
 		pgb.addressCounts.balance = map[string]explorer.AddressBalance{}
 		pgb.addressCounts.Unlock()
-
-		// Lazy update of DevFundBalance
-		go func() {
-			runtime.Gosched()
-			if _, err = pgb.UpdateDevBalance(); err != nil {
-				log.Errorf("Failed to update development fund balance: %v", err)
-			}
-		}()
 	}
 
 	return
