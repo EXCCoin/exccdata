@@ -114,7 +114,7 @@ func BuildBlockHeaderVerbose(header *wire.BlockHeader, params *chaincfg.Params,
 		Revocations:   header.Revocations,
 		PoolSize:      header.PoolSize,
 		Bits:          strconv.FormatInt(int64(header.Bits), 16),
-		SBits:         dcrutil.Amount(header.SBits).ToCoin(),
+		SBits:         exccutil.Amount(header.SBits).ToCoin(),
 		Height:        header.Height,
 		Size:          header.Size,
 		Time:          header.Timestamp.Unix(),
@@ -205,7 +205,7 @@ func GetStakeDiffEstimates(client *rpcclient.Client) *apitypes.StakeDiff {
 }
 
 // GetBlock gets a block at the given height from a chain server.
-func GetBlock(ind int64, client *rpcclient.Client) (*dcrutil.Block, *chainhash.Hash, error) {
+func GetBlock(ind int64, client *rpcclient.Client) (*exccutil.Block, *chainhash.Hash, error) {
 	blockhash, err := client.GetBlockHash(ind)
 	if err != nil {
 		return nil, nil, fmt.Errorf("GetBlockHash(%d) failed: %v", ind, err)
@@ -216,18 +216,18 @@ func GetBlock(ind int64, client *rpcclient.Client) (*dcrutil.Block, *chainhash.H
 		return nil, blockhash,
 			fmt.Errorf("GetBlock failed (%s): %v", blockhash, err)
 	}
-	block := dcrutil.NewBlock(msgBlock)
+	block := exccutil.NewBlock(msgBlock)
 
 	return block, blockhash, nil
 }
 
 // GetBlockByHash gets the block with the given hash from a chain server.
-func GetBlockByHash(blockhash *chainhash.Hash, client *rpcclient.Client) (*dcrutil.Block, error) {
+func GetBlockByHash(blockhash *chainhash.Hash, client *rpcclient.Client) (*exccutil.Block, error) {
 	msgBlock, err := client.GetBlock(blockhash)
 	if err != nil {
 		return nil, fmt.Errorf("GetBlock failed (%s): %v", blockhash, err)
 	}
-	block := dcrutil.NewBlock(msgBlock)
+	block := exccutil.NewBlock(msgBlock)
 
 	return block, nil
 }
@@ -251,7 +251,7 @@ func GetTransactionVerboseByID(client *rpcclient.Client, txid string) (*dcrjson.
 // SearchRawTransaction fetch transactions the belong to an
 // address
 func SearchRawTransaction(client *rpcclient.Client, count int, address string) ([]*dcrjson.SearchRawTransactionsResult, error) {
-	addr, err := dcrutil.DecodeAddress(address)
+	addr, err := exccutil.DecodeAddress(address)
 	if err != nil {
 		log.Infof("Invalid address %s: %v", address, err)
 		return nil, err

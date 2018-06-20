@@ -235,7 +235,7 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 		return (a / b) * 100
 	}
 
-	stakePerc := blockData.PoolInfo.Value / dcrutil.Amount(blockData.ExtraInfo.CoinSupply).ToCoin()
+	stakePerc := blockData.PoolInfo.Value / exccutil.Amount(blockData.ExtraInfo.CoinSupply).ToCoin()
 
 	// Update all ExtraInfo with latest data
 	exp.ExtraInfo.CoinSupply = blockData.ExtraInfo.CoinSupply
@@ -258,7 +258,7 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 	}()
 
 	exp.ExtraInfo.TicketReward = func() float64 {
-		PosSubPerVote := dcrutil.Amount(blockData.ExtraInfo.NextBlockSubsidy.PoS).ToCoin() / float64(exp.ChainParams.TicketsPerBlock)
+		PosSubPerVote := exccutil.Amount(blockData.ExtraInfo.NextBlockSubsidy.PoS).ToCoin() / float64(exp.ChainParams.TicketsPerBlock)
 		return percentage(PosSubPerVote, blockData.CurrentStakeDiff.CurrentStakeDifficulty)
 	}()
 
@@ -275,7 +275,7 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 	}()
 
 	asr, _ := exp.simulateASR(1000, false, stakePerc,
-		dcrutil.Amount(blockData.ExtraInfo.CoinSupply).ToCoin(),
+		exccutil.Amount(blockData.ExtraInfo.CoinSupply).ToCoin(),
 		float64(exp.NewBlockData.Height),
 		blockData.CurrentStakeDiff.CurrentStakeDifficulty)
 
@@ -363,12 +363,12 @@ func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty 
 	StakeRewardAtBlock := func(blocknum float64) float64 {
 		// Option 1:  RPC Call
 		Subsidy := exp.blockData.BlockSubsidy(int64(blocknum), 1)
-		return dcrutil.Amount(Subsidy.PoS).ToCoin()
+		return exccutil.Amount(Subsidy.PoS).ToCoin()
 
 		// Option 2:  Calculation
 		// epoch := math.Floor(blocknum / float64(exp.ChainParams.SubsidyReductionInterval))
 		// RewardProportionPerVote := float64(exp.ChainParams.StakeRewardProportion) / (10 * float64(exp.ChainParams.TicketsPerBlock))
-		// return float64(RewardProportionPerVote) * dcrutil.Amount(exp.ChainParams.BaseSubsidy).ToCoin() *
+		// return float64(RewardProportionPerVote) * exccutil.Amount(exp.ChainParams.BaseSubsidy).ToCoin() *
 		// 	math.Pow(float64(exp.ChainParams.MulSubsidy)/float64(exp.ChainParams.DivSubsidy), epoch)
 	}
 

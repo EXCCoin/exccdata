@@ -312,7 +312,7 @@ func (c *insightApiContext) getAddressesTxnOutput(w http.ResponseWriter, r *http
 					TxnID:         fundingTx.Hash().String(),
 					Vout:          f.Index,
 					ScriptPubKey:  hex.EncodeToString(fundingTx.Tx.TxOut[f.Index].PkScript),
-					Amount:        dcrutil.Amount(fundingTx.Tx.TxOut[f.Index].Value).ToCoin(),
+					Amount:        exccutil.Amount(fundingTx.Tx.TxOut[f.Index].Value).ToCoin(),
 					Satoshis:      fundingTx.Tx.TxOut[f.Index].Value,
 					Confirmations: 0,
 					BlockTime:     fundingTx.MemPoolTime,
@@ -421,7 +421,7 @@ func (c *insightApiContext) getAddressesTxn(w http.ResponseWriter, r *http.Reque
 
 	// Confirm all addresses are valid and pull unconfirmed transactions for all addresses
 	for _, addr := range addresses {
-		address, err := dcrutil.DecodeAddress(addr)
+		address, err := exccutil.DecodeAddress(addr)
 		if err != nil {
 			writeInsightError(w, fmt.Sprintf("Address is invalid (%s)", addr))
 			return

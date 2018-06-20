@@ -128,7 +128,7 @@ out:
 			}
 
 			msgBlock, _ := p.collector.dcrdChainSvr.GetBlock(hash)
-			block := dcrutil.NewBlock(msgBlock)
+			block := exccutil.NewBlock(msgBlock)
 			height := block.Height()
 			log.Infof("Block height %v connected. Collecting data...", height)
 

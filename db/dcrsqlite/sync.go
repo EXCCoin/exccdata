@@ -157,7 +157,7 @@ func (db *wiredDB) resyncDB(quit chan struct{}, blockGetter rpcutils.BlockGetter
 		}
 
 		// Either fetch the block or wait for a signal that it is ready
-		var block *dcrutil.Block
+		var block *exccutil.Block
 		var blockhash chainhash.Hash
 		if master || i < fetchToHeight {
 			// Not coordinating with blockGetter for this block
@@ -232,7 +232,7 @@ func (db *wiredDB) resyncDB(quit chan struct{}, blockGetter rpcutils.BlockGetter
 			Size:       header.Size,
 			Hash:       blockhash.String(),
 			Difficulty: diffRatio,
-			StakeDiff:  dcrutil.Amount(header.SBits).ToCoin(),
+			StakeDiff:  exccutil.Amount(header.SBits).ToCoin(),
 			Time:       header.Timestamp.Unix(),
 			PoolInfo:   *tpi,
 		}
@@ -284,7 +284,7 @@ func (db *wiredDB) resyncDB(quit chan struct{}, blockGetter rpcutils.BlockGetter
 	return height, nil
 }
 
-func (db *wiredDB) getBlock(ind int64) (*dcrutil.Block, *chainhash.Hash, error) {
+func (db *wiredDB) getBlock(ind int64) (*exccutil.Block, *chainhash.Hash, error) {
 	blockhash, err := db.client.GetBlockHash(ind)
 	if err != nil {
 		return nil, nil, fmt.Errorf("GetBlockHash(%d) failed: %v", ind, err)
@@ -295,7 +295,7 @@ func (db *wiredDB) getBlock(ind int64) (*dcrutil.Block, *chainhash.Hash, error) 
 		return nil, blockhash,
 			fmt.Errorf("GetBlock failed (%s): %v", blockhash, err)
 	}
-	block := dcrutil.NewBlock(msgBlock)
+	block := exccutil.NewBlock(msgBlock)
 
 	return block, blockhash, nil
 }

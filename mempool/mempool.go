@@ -137,7 +137,7 @@ func (p *mempoolMonitor) TxHandler(client *rpcclient.Client) {
 			// See if the transaction is a ticket purchase.  If not, just
 			// make a note of it and go back to the loop.
 			txType := stake.DetermineTxType(tx.MsgTx())
-			//s.Tree() == dcrutil.TxTreeRegular
+			//s.Tree() == exccutil.TxTreeRegular
 			// See dcrd/blockchain/stake/staketx.go for information about
 			// specifications for different transaction types.
 
@@ -150,7 +150,7 @@ func (p *mempoolMonitor) TxHandler(client *rpcclient.Client) {
 				// Ticket purchase
 				price := tx.MsgTx().TxOut[0].Value
 				log.Tracef("Received ticket purchase %v, price %v",
-					tx.Hash(), dcrutil.Amount(price).ToCoin())
+					tx.Hash(), exccutil.Amount(price).ToCoin())
 				// txHeight = tx.MsgTx().TxIn[0].BlockHeight // uh, no
 			case stake.TxTypeSSGen:
 				// Vote

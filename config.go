@@ -35,11 +35,11 @@ var activeNet = &netparams.MainNetParams
 var activeChain = &chaincfg.MainNetParams
 
 var (
-	defaultHomeDir           = dcrutil.AppDataDir("dcrdata", false)
+	defaultHomeDir           = exccutil.AppDataDir("dcrdata", false)
 	defaultConfigFile        = filepath.Join(defaultHomeDir, defaultConfigFilename)
 	defaultLogDir            = filepath.Join(defaultHomeDir, defaultLogDirname)
 	defaultDataDir           = filepath.Join(defaultHomeDir, defaultDataDirname)
-	dcrdHomeDir              = dcrutil.AppDataDir("dcrd", false)
+	dcrdHomeDir              = exccutil.AppDataDir("dcrd", false)
 	defaultDaemonRPCCertFile = filepath.Join(dcrdHomeDir, "rpc.cert")
 
 	defaultHost               = "localhost"

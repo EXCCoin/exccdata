@@ -75,7 +75,7 @@ func (pgb *ChainDB) RetrieveAddressIDsByOutpoint(txHash string,
 // TODO: Does this really need all the prev vout extra data?
 func (pgb *ChainDBRPC) InsightGetAddressTransactions(addr string, count,
 	skip int) []*dcrjson.SearchRawTransactionsResult {
-	address, err := dcrutil.DecodeAddress(addr)
+	address, err := exccutil.DecodeAddress(addr)
 	if err != nil {
 		log.Infof("Invalid address %s: %v", addr, err)
 		return nil
@@ -161,10 +161,10 @@ func (pgb *ChainDB) GetAddressInfo(address string, N, offset int64) *apitypes.In
 		return nil
 	}
 
-	var totalReceived, totalSent, unSpent dcrutil.Amount
-	totalReceived, _ = dcrutil.NewAmount(float64(balance.TotalSpent + balance.TotalUnspent))
-	totalSent, _ = dcrutil.NewAmount(float64(balance.TotalSpent))
-	unSpent, _ = dcrutil.NewAmount(float64(balance.TotalUnspent))
+	var totalReceived, totalSent, unSpent exccutil.Amount
+	totalReceived, _ = exccutil.NewAmount(float64(balance.TotalSpent + balance.TotalUnspent))
+	totalSent, _ = exccutil.NewAmount(float64(balance.TotalSpent))
+	unSpent, _ = exccutil.NewAmount(float64(balance.TotalUnspent))
 
 	var transactionIdList []string
 	for _, row := range rows {

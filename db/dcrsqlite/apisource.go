@@ -315,7 +315,7 @@ func (db *wiredDB) GetAllTxIn(txid string) []*apitypes.TxIn {
 				Tree:  allTxIn0[i].PreviousOutPoint.Tree,
 			},
 			Sequence:        allTxIn0[i].Sequence,
-			ValueIn:         dcrutil.Amount(allTxIn0[i].ValueIn).ToCoin(),
+			ValueIn:         exccutil.Amount(allTxIn0[i].ValueIn).ToCoin(),
 			BlockHeight:     allTxIn0[i].BlockHeight,
 			BlockIndex:      allTxIn0[i].BlockIndex,
 			SignatureScript: hex.EncodeToString(allTxIn0[i].SignatureScript),
@@ -356,7 +356,7 @@ func (db *wiredDB) GetAllTxOut(txid string) []*apitypes.TxOut {
 		}
 
 		txOut := &apitypes.TxOut{
-			Value:     dcrutil.Amount(allTxOut0[i].Value).ToCoin(),
+			Value:     exccutil.Amount(allTxOut0[i].Value).ToCoin(),
 			Version:   allTxOut0[i].Version,
 			PkScript:  hex.EncodeToString(allTxOut0[i].PkScript),
 			Addresses: addresses,
@@ -783,7 +783,7 @@ func (db *wiredDB) GetMempoolSSTxDetails(N int) *apitypes.MempoolTicketDetails {
 // GetAddressTransactionsWithSkip returns an apitypes.Address Object with at most the
 // last count transactions the address was in
 func (db *wiredDB) GetAddressTransactionsWithSkip(addr string, count, skip int) *apitypes.Address {
-	address, err := dcrutil.DecodeAddress(addr)
+	address, err := exccutil.DecodeAddress(addr)
 	if err != nil {
 		log.Infof("Invalid address %s: %v", addr, err)
 		return nil
@@ -825,7 +825,7 @@ func (db *wiredDB) GetAddressTransactionsRaw(addr string, count int) []*apitypes
 // GetAddressTransactionsRawWithSkip returns an array of apitypes.AddressTxRaw objects
 // representing the raw result of SearchRawTransactionsverbose
 func (db *wiredDB) GetAddressTransactionsRawWithSkip(addr string, count int, skip int) []*apitypes.AddressTxRaw {
-	address, err := dcrutil.DecodeAddress(addr)
+	address, err := exccutil.DecodeAddress(addr)
 	if err != nil {
 		log.Infof("Invalid address %s: %v", addr, err)
 		return nil
@@ -1060,15 +1060,15 @@ func (db *wiredDB) GetExplorerBlock(hash string) *explorer.BlockInfo {
 	sortTx(block.Revs)
 	sortTx(block.Tickets)
 
-	getTotalFee := func(txs []*explorer.TxBasic) (total dcrutil.Amount) {
+	getTotalFee := func(txs []*explorer.TxBasic) (total exccutil.Amount) {
 		for _, tx := range txs {
 			total += tx.Fee
 		}
 		return
 	}
-	getTotalSent := func(txs []*explorer.TxBasic) (total dcrutil.Amount) {
+	getTotalSent := func(txs []*explorer.TxBasic) (total exccutil.Amount) {
 		for _, tx := range txs {
-			amt, err := dcrutil.NewAmount(tx.Total)
+			amt, err := exccutil.NewAmount(tx.Total)
 			if err != nil {
 				continue
 			}
@@ -1198,7 +1198,7 @@ func (db *wiredDB) GetExplorerTx(txid string) *explorer.TxInfo {
 }
 
 func (db *wiredDB) GetExplorerAddress(address string, count, offset int64) *explorer.AddressInfo {
-	addr, err := dcrutil.DecodeAddress(address)
+	addr, err := exccutil.DecodeAddress(address)
 	if err != nil {
 		log.Infof("Invalid address %s: %v", address, err)
 		return nil
@@ -1232,7 +1232,7 @@ func (db *wiredDB) GetExplorerAddress(address string, count, offset int64) *expl
 	}
 
 	var numUnconfirmed, numReceiving, numSpending int64
-	var totalreceived, totalsent dcrutil.Amount
+	var totalreceived, totalsent exccutil.Amount
 
 	for _, tx := range txs {
 		if tx.Confirmations == 0 {
@@ -1241,7 +1241,7 @@ func (db *wiredDB) GetExplorerAddress(address string, count, offset int64) *expl
 		for _, y := range tx.Vout {
 			if len(y.ScriptPubKey.Addresses) != 0 {
 				if address == y.ScriptPubKey.Addresses[0] {
-					t, _ := dcrutil.NewAmount(y.Value)
+					t, _ := exccutil.NewAmount(y.Value)
 					if t > 0 {
 						totalreceived += t
 					}
@@ -1252,7 +1252,7 @@ func (db *wiredDB) GetExplorerAddress(address string, count, offset int64) *expl
 		for _, u := range tx.Vin {
 			if u.PrevOut != nil && len(u.PrevOut.Addresses) != 0 {
 				if address == u.PrevOut.Addresses[0] {
-					t, _ := dcrutil.NewAmount(*u.AmountIn)
+					t, _ := exccutil.NewAmount(*u.AmountIn)
 					if t > 0 {
 						totalsent += t
 					}
@@ -1293,7 +1293,7 @@ func (db *wiredDB) GetExplorerAddress(address string, count, offset int64) *expl
 	}
 }
 
-func ValidateNetworkAddress(address dcrutil.Address, p *chaincfg.Params) bool {
+func ValidateNetworkAddress(address exccutil.Address, p *chaincfg.Params) bool {
 	return address.IsForNet(p)
 }
 

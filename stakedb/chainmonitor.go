@@ -158,13 +158,13 @@ func (p *ChainMonitor) switchToSideChain() (int32, *chainhash.Hash, error) {
 	if err != nil {
 		return 0, nil, fmt.Errorf("unable to get block at root of side chain")
 	}
-	block := dcrutil.NewBlock(msgBlock)
+	block := exccutil.NewBlock(msgBlock)
 
 	prevMsgBlock, err := p.db.NodeClient.GetBlock(&msgBlock.Header.PrevBlock)
 	if err != nil {
 		return 0, nil, fmt.Errorf("unable to get common ancestor on side chain")
 	}
-	prevBlock := dcrutil.NewBlock(prevMsgBlock)
+	prevBlock := exccutil.NewBlock(prevMsgBlock)
 
 	commonAncestorHeight := block.Height() - 1
 	if prevBlock.Height() != commonAncestorHeight {

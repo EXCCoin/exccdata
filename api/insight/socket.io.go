@@ -59,7 +59,7 @@ func NewSocketServer(newTxChan chan *NewTx, params *chaincfg.Params) (*SocketSer
 			if len(room) > 64 || !isAlphaNumeric(room) {
 				return
 			}
-			if addr, err := dcrutil.DecodeAddress(room); err == nil {
+			if addr, err := exccutil.DecodeAddress(room); err == nil {
 				if addr.IsForNet(params) {
 					so.Join(room)
 					apiLog.Debugf("socket.io client joining room: %s", room)

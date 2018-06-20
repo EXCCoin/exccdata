@@ -17,10 +17,10 @@ import (
 )
 
 type TxGetter struct {
-	txLookup map[chainhash.Hash]*dcrutil.Tx
+	txLookup map[chainhash.Hash]*exccutil.Tx
 }
 
-func (t TxGetter) GetRawTransaction(txHash *chainhash.Hash) (*dcrutil.Tx, error) {
+func (t TxGetter) GetRawTransaction(txHash *chainhash.Hash) (*exccutil.Tx, error) {
 	tx, ok := t.txLookup[*txHash]
 	var err error
 	if !ok {
@@ -29,7 +29,7 @@ func (t TxGetter) GetRawTransaction(txHash *chainhash.Hash) (*dcrutil.Tx, error)
 	return tx, err
 }
 
-func LoadTestBlockAndSSTX(t *testing.T) (*dcrutil.Block, []*dcrutil.Tx) {
+func LoadTestBlockAndSSTX(t *testing.T) (*exccutil.Block, []*exccutil.Tx) {
 	// Load block data
 	blockTestFileName := "block138883.bin"
 	blockTestFile, err := os.Open(blockTestFileName)
@@ -37,7 +37,7 @@ func LoadTestBlockAndSSTX(t *testing.T) (*dcrutil.Block, []*dcrutil.Tx) {
 		t.Fatalf("Unable to open file %s: %v", blockTestFileName, err)
 	}
 	defer blockTestFile.Close()
-	block, err := dcrutil.NewBlockFromReader(blockTestFile)
+	block, err := exccutil.NewBlockFromReader(blockTestFile)
 	if err != nil {
 		t.Fatalf("Unable to load test block data.")
 	}
@@ -56,14 +56,14 @@ func LoadTestBlockAndSSTX(t *testing.T) (*dcrutil.Block, []*dcrutil.Tx) {
 		t.Fatalf("Unable to read file %s: %v", blockTestSSTXFileName, err)
 	}
 
-	allTxRead := make([]*dcrutil.Tx, numSSTX)
+	allTxRead := make([]*exccutil.Tx, numSSTX)
 	for i := range allTxRead {
 		var txSize int64
 		if err = binary.Read(txFile, binary.LittleEndian, &txSize); err != nil {
 			t.Fatalf("Unable to read file %s: %v", blockTestSSTXFileName, err)
 		}
 
-		allTxRead[i], err = dcrutil.NewTxFromReader(txFile)
+		allTxRead[i], err = exccutil.NewTxFromReader(txFile)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -130,7 +130,7 @@ func TestFeeInfoBlock(t *testing.T) {
 
 // Utilities for creating test data:
 
-func TxToWriter(tx *dcrutil.Tx, w io.Writer) error {
+func TxToWriter(tx *exccutil.Tx, w io.Writer) error {
 	msgTx := tx.MsgTx()
 	binary.Write(w, binary.LittleEndian, int64(msgTx.SerializeSize()))
 	msgTx.Serialize(w)

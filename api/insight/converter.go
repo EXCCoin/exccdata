@@ -63,13 +63,13 @@ func (c *insightApiContext) TxConverterWithParams(txs []*dcrjson.TxRawResult, no
 					// Update Vin due to DCRD AMOUNTIN - START
 					// NOTE THIS IS ONLY USEFUL FOR INPUT AMOUNTS THAT ARE NOT ALSO FROM MEMPOOL
 					if tx.Confirmations == 0 {
-						txNew.Vins[vinID].Value = dcrutil.Amount(value).ToCoin()
+						txNew.Vins[vinID].Value = exccutil.Amount(value).ToCoin()
 					}
 					// Update Vin due to DCRD AMOUNTIN - END
 					txNew.Vins[vinID].Addr = addresses[0]
 				}
 			}
-			dcramt, _ := dcrutil.NewAmount(txNew.Vins[vinID].Value)
+			dcramt, _ := exccutil.NewAmount(txNew.Vins[vinID].Value)
 			txNew.Vins[vinID].ValueSat = int64(dcramt)
 			vInSum += txNew.Vins[vinID].Value
 
@@ -100,13 +100,13 @@ func (c *insightApiContext) TxConverterWithParams(txs []*dcrjson.TxRawResult, no
 		txNew.Blocktime = tx.Blocktime
 		txNew.Size = uint32(len(tx.Hex) / 2)
 
-		dcramt, _ := dcrutil.NewAmount(vOutSum)
+		dcramt, _ := exccutil.NewAmount(vOutSum)
 		txNew.ValueOut = dcramt.ToCoin()
 
-		dcramt, _ = dcrutil.NewAmount(vInSum)
+		dcramt, _ = exccutil.NewAmount(vInSum)
 		txNew.ValueIn = dcramt.ToCoin()
 
-		dcramt, _ = dcrutil.NewAmount(txNew.ValueIn - txNew.ValueOut)
+		dcramt, _ = exccutil.NewAmount(txNew.ValueIn - txNew.ValueOut)
 		txNew.Fees = dcramt.ToCoin()
 
 		// Return true if coinbase value is not empty, return 0 at some fields

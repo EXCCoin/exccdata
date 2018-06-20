@@ -507,7 +507,7 @@ func (exp *explorerUI) AddressPage(w http.ResponseWriter, r *http.Request) {
 				InOutID:       f.Index,
 				FormattedSize: humanize.Bytes(uint64(fundingTx.Tx.SerializeSize())),
 				Total:         txhelpers.TotalOutFromMsgTx(fundingTx.Tx).ToCoin(),
-				ReceivedTotal: dcrutil.Amount(fundingTx.Tx.TxOut[f.Index].Value).ToCoin(),
+				ReceivedTotal: exccutil.Amount(fundingTx.Tx.TxOut[f.Index].Value).ToCoin(),
 			}
 			uctxn.Transactions = append(uctxn.Transactions, addrTx)
 			uctxn.TxnsFunding = append(uctxn.TxnsFunding, addrTx)
@@ -529,7 +529,7 @@ func (exp *explorerUI) AddressPage(w http.ResponseWriter, r *http.Request) {
 				InOutID:       uint32(f.InputIndex),
 				FormattedSize: humanize.Bytes(uint64(spendingTx.Tx.SerializeSize())),
 				Total:         txhelpers.TotalOutFromMsgTx(spendingTx.Tx).ToCoin(),
-				SentTotal:     dcrutil.Amount(spendingTx.Tx.TxIn[f.InputIndex].ValueIn).ToCoin(),
+				SentTotal:     exccutil.Amount(spendingTx.Tx.TxIn[f.InputIndex].ValueIn).ToCoin(),
 			}
 			uctxn.Transactions = append(uctxn.Transactions, addrTx)
 			uctxn.TxnsSpending = append(uctxn.TxnsSpending, addrTx)

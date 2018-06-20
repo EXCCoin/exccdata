@@ -147,7 +147,7 @@ func (t *Collector) CollectBlockInfo(hash *chainhash.Hash) (*apitypes.BlockDataB
 		return nil, nil, nil, nil, nil, err
 	}
 	height := msgBlock.Header.Height
-	block := dcrutil.NewBlock(msgBlock)
+	block := exccutil.NewBlock(msgBlock)
 	txLen := len(block.Transactions())
 	coinSupply, err := t.dcrdChainSvr.GetCoinSupply()
 	if err != nil {
@@ -179,7 +179,7 @@ func (t *Collector) CollectBlockInfo(hash *chainhash.Hash) (*apitypes.BlockDataB
 	// Work/Stake difficulty
 	header := block.MsgBlock().Header
 	diff := txhelpers.GetDifficultyRatio(header.Bits, t.netParams)
-	sdiff := dcrutil.Amount(header.SBits).ToCoin()
+	sdiff := exccutil.Amount(header.SBits).ToCoin()
 
 	blockHeaderResults, err := t.dcrdChainSvr.GetBlockHeaderVerbose(hash)
 	if err != nil {

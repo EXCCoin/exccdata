@@ -35,8 +35,8 @@ type TxBasic struct {
 	TxID          string
 	FormattedSize string
 	Total         float64
-	Fee           dcrutil.Amount
-	FeeRate       dcrutil.Amount
+	Fee           exccutil.Amount
+	FeeRate       exccutil.Amount
 	VoteInfo      *VoteInfo
 	Coinbase      bool
 }
@@ -172,7 +172,7 @@ type BlockInfo struct {
 	PreviousHash          string
 	NextHash              string
 	TotalSent             float64
-	MiningFee             dcrutil.Amount
+	MiningFee             exccutil.Amount
 	StakeValidationHeight int64
 }
 
@@ -207,9 +207,9 @@ type AddressInfo struct {
 	NumTransactions int64 // The number of transactions in the address
 	NumFundingTxns  int64 // number paying to the address
 	NumSpendingTxns int64 // number spending outpoints associated with the address
-	AmountReceived  dcrutil.Amount
-	AmountSent      dcrutil.Amount
-	AmountUnspent   dcrutil.Amount
+	AmountReceived  exccutil.Amount
+	AmountSent      exccutil.Amount
+	AmountUnspent   exccutil.Amount
 
 	// Balance is used in full mode, describing all known transactions
 	Balance *AddressBalance
@@ -323,7 +323,7 @@ func ReduceAddressHistory(addrHist []*dbtypes.AddressRow) *AddressInfo {
 	var received, sent int64
 	var transactions, creditTxns, debitTxns []*AddressTx
 	for _, addrOut := range addrHist {
-		coin := dcrutil.Amount(addrOut.Value).ToCoin()
+		coin := exccutil.Amount(addrOut.Value).ToCoin()
 
 		// Funding transaction
 		received += int64(addrOut.Value)
@@ -358,9 +358,9 @@ func ReduceAddressHistory(addrHist []*dbtypes.AddressRow) *AddressInfo {
 		TxnsSpending:    debitTxns,
 		NumFundingTxns:  int64(len(creditTxns)),
 		NumSpendingTxns: int64(len(debitTxns)),
-		AmountReceived:  dcrutil.Amount(received),
-		AmountSent:      dcrutil.Amount(sent),
-		AmountUnspent:   dcrutil.Amount(received - sent),
+		AmountReceived:  exccutil.Amount(received),
+		AmountSent:      exccutil.Amount(sent),
+		AmountUnspent:   exccutil.Amount(received - sent),
 	}
 }
 

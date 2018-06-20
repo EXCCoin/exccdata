@@ -597,8 +597,8 @@ func (pgb *ChainDB) AddressHistory(address string, N, offset int64,
 	}
 
 	log.Infof("%s: %d spent totalling %f DCR, %d unspent totalling %f DCR",
-		address, balanceInfo.NumSpent, dcrutil.Amount(balanceInfo.TotalSpent).ToCoin(),
-		balanceInfo.NumUnspent, dcrutil.Amount(balanceInfo.TotalUnspent).ToCoin())
+		address, balanceInfo.NumSpent, exccutil.Amount(balanceInfo.TotalSpent).ToCoin(),
+		balanceInfo.NumUnspent, exccutil.Amount(balanceInfo.TotalUnspent).ToCoin())
 	log.Infof("Caching address receive count for address %s: "+
 		"count = %d at block %d.", address,
 		balanceInfo.NumSpent+balanceInfo.NumUnspent, bestBlock)
@@ -625,7 +625,7 @@ func (pgb *ChainDB) FillAddressTransactions(addrInfo *explorer.AddressInfo) erro
 		}
 		txn.Size = dbTx.Size
 		txn.FormattedSize = humanize.Bytes(uint64(dbTx.Size))
-		txn.Total = dcrutil.Amount(dbTx.Sent).ToCoin()
+		txn.Total = exccutil.Amount(dbTx.Sent).ToCoin()
 		txn.Time = dbTx.BlockTime
 		if dbTx.BlockTime > 0 {
 			txn.Confirmations = pgb.Height() - uint64(dbTx.BlockHeight) + 1
@@ -668,14 +668,14 @@ func (pgb *ChainDB) AddressTotals(address string) (*apitypes.AddressTotals, erro
 		BlockHash:    bestHash,
 		NumSpent:     ab.NumSpent,
 		NumUnspent:   ab.NumUnspent,
-		CoinsSpent:   dcrutil.Amount(ab.TotalSpent).ToCoin(),
-		CoinsUnspent: dcrutil.Amount(ab.TotalUnspent).ToCoin(),
+		CoinsSpent:   exccutil.Amount(ab.TotalSpent).ToCoin(),
+		CoinsUnspent: exccutil.Amount(ab.TotalUnspent).ToCoin(),
 	}, nil
 }
 
 func (pgb *ChainDB) addressInfo(addr string, count, skip int64,
 	txnType dbtypes.AddrTxnType) (*explorer.AddressInfo, *explorer.AddressBalance, error) {
-	address, err := dcrutil.DecodeAddress(addr)
+	address, err := exccutil.DecodeAddress(addr)
 	if err != nil {
 		log.Infof("Invalid address %s: %v", addr, err)
 		return nil, nil, err

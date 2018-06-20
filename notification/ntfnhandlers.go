@@ -225,7 +225,7 @@ func MakeNodeNtfnHandlers() (*rpcclient.NotificationHandlers, *collectionQueue) 
 			if err != nil {
 				return
 			}
-			tx := dcrutil.NewTx(&rec.MsgTx)
+			tx := exccutil.NewTx(&rec.MsgTx)
 			txHash := rec.Hash
 			select {
 			case NtfnChans.RelevantTxMempoolChan <- tx:
