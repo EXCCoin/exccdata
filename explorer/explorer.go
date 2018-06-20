@@ -243,7 +243,6 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 	exp.ExtraInfo.IdxBlockInWindow = blockData.IdxBlockInWindow
 	exp.ExtraInfo.IdxInRewardWindow = int(newBlockData.Height % exp.ChainParams.SubsidyReductionInterval)
 	exp.ExtraInfo.Difficulty = blockData.Header.Difficulty
-	exp.ExtraInfo.NBlockSubsidy.Dev = blockData.ExtraInfo.NextBlockSubsidy.Developer
 	exp.ExtraInfo.NBlockSubsidy.PoS = blockData.ExtraInfo.NextBlockSubsidy.PoS
 	exp.ExtraInfo.NBlockSubsidy.PoW = blockData.ExtraInfo.NextBlockSubsidy.PoW
 	exp.ExtraInfo.NBlockSubsidy.Total = blockData.ExtraInfo.NextBlockSubsidy.Total

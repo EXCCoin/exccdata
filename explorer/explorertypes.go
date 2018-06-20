@@ -271,7 +271,6 @@ type BlockSubsidy struct {
 	Total int64 `json:"total"`
 	PoW   int64 `json:"pow"`
 	PoS   int64 `json:"pos"`
-	Dev   int64 `json:"dev"`
 }
 
 // MempoolInfo models data to update mempool info on the home page
