@@ -43,12 +43,12 @@
   version = "1.1.0"
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/decred/dcrd"
+  branch = "task/DEX-161_test_mainnet"
+  name = "github.com/EXCCoin/exccd"
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/decred/dcrwallet"
+  branch = "feature/DEX-152_mnemonic_compatibility"
+  name = "github.com/EXCCoin/exccwallet"
 
 [[constraint]]
   branch = "master"

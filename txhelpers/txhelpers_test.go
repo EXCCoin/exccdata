@@ -9,11 +9,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrdata/semver"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccdata/semver"
 )
 
 type TxGetter struct {

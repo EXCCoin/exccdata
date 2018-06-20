@@ -15,7 +15,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/decred/dcrd/wire"
+	"github.com/EXCCoin/exccd/wire"
 )
 
 // BlockDataSaver is an interface for saving/storing BlockData

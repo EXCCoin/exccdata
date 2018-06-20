@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil"
-	apitypes "github.com/decred/dcrdata/api/types"
-	"github.com/decred/dcrdata/rpcutils"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccutil"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 const (

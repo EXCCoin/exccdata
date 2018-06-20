@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
 )
 
 // BlockGetter is an interface for requesting blocks

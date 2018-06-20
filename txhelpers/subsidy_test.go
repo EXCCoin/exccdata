@@ -3,7 +3,7 @@ package txhelpers
 import (
 	"testing"
 
-	"github.com/decred/dcrd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg"
 )
 
 func TestBlockSubsidy(t *testing.T) {

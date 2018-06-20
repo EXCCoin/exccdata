@@ -6,8 +6,8 @@
 package txhelpers
 
 import (
-	"github.com/decred/dcrd/blockchain"
-	"github.com/decred/dcrd/chaincfg"
+	"github.com/EXCCoin/exccd/blockchain"
+	"github.com/EXCCoin/exccd/chaincfg"
 )
 
 // UltimateSubsidy computes the total subsidy over the entire subsidy

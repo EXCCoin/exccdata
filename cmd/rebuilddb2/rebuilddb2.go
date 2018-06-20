@@ -17,10 +17,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrdata/db/dcrpg"
-	"github.com/decred/dcrdata/rpcutils"
-	"github.com/decred/dcrdata/stakedb"
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccdata/db/dcrpg"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/stakedb"
 	"github.com/decred/slog"
 )
 

@@ -8,15 +8,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrd/wire"
-	apitypes "github.com/decred/dcrdata/api/types"
-	"github.com/decred/dcrdata/stakedb"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccd/wire"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/stakedb"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 // BlockData contains all the data collected by a Collector and stored

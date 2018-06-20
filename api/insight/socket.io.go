@@ -9,12 +9,12 @@ import (
 
 	"github.com/googollee/go-socket.io"
 
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/blockdata"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 var isAlphaNumeric = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString

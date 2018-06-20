@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/dcrjson"
-	apitypes "github.com/decred/dcrdata/api/types"
+	"github.com/EXCCoin/exccd/exccjson"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
 )
 
 // MempoolDataCache models the basic data for the mempool cache

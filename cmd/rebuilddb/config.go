@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	flags "github.com/btcsuite/go-flags"
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrwallet/netparams"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccwallet/netparams"
 )
 
 const (

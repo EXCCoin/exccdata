@@ -17,17 +17,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
-	apitypes "github.com/decred/dcrdata/api/types"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/db/dcrpg"
-	m "github.com/decred/dcrdata/middleware"
-	"github.com/decred/dcrdata/semver"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/db/dcrpg"
+	m "github.com/EXCCoin/exccdata/middleware"
+	"github.com/EXCCoin/exccdata/semver"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 // DataSourceLite specifies an interface for collecting data from the built-in

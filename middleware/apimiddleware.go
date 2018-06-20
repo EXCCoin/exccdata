@@ -13,9 +13,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrjson"
-	apitypes "github.com/decred/dcrdata/api/types"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccjson"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/docgen"
 )

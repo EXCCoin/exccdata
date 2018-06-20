@@ -8,13 +8,13 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/decred/dcrd/blockchain"
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
-	apitypes "github.com/decred/dcrdata/api/types"
-	"github.com/decred/dcrdata/rpcutils"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/blockchain"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/txhelpers"
 	"github.com/decred/slog"
 )
 

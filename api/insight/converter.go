@@ -5,9 +5,9 @@
 package insight
 
 import (
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	apitypes "github.com/decred/dcrdata/api/types"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
 )
 
 // TxConverter converts dcrd-tx to insight tx

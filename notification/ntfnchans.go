@@ -5,16 +5,16 @@
 package notification
 
 import (
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccutil"
 
-	"github.com/decred/dcrdata/api/insight"
-	"github.com/decred/dcrdata/blockdata"
-	"github.com/decred/dcrdata/db/dcrsqlite"
-	"github.com/decred/dcrdata/explorer"
-	"github.com/decred/dcrdata/mempool"
-	"github.com/decred/dcrdata/stakedb"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccdata/api/insight"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/db/dcrsqlite"
+	"github.com/EXCCoin/exccdata/explorer"
+	"github.com/EXCCoin/exccdata/mempool"
+	"github.com/EXCCoin/exccdata/stakedb"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 const (

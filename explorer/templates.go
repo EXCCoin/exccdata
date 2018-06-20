@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg"
 	humanize "github.com/dustin/go-humanize"
 )
 

@@ -9,14 +9,14 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/decred/dcrd/blockchain/stake"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/txscript"
-	"github.com/decred/dcrd/wire"
-	apitypes "github.com/decred/dcrdata/api/types"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/db/dcrpg/internal"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/blockchain/stake"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/txscript"
+	"github.com/EXCCoin/exccd/wire"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/db/dcrpg/internal"
+	"github.com/EXCCoin/exccdata/txhelpers"
 	"github.com/lib/pq"
 )
 

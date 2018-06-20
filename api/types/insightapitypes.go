@@ -6,7 +6,7 @@ package types
 import (
 	"encoding/json"
 
-	"github.com/decred/dcrd/dcrutil"
+	"github.com/EXCCoin/exccd/exccutil"
 )
 
 // InsightAddress models an address transactions

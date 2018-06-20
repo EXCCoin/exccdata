@@ -12,12 +12,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/txhelpers"
 	humanize "github.com/dustin/go-humanize"
 )
 

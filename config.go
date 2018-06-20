@@ -15,11 +15,11 @@ import (
 	"strings"
 
 	flags "github.com/btcsuite/go-flags"
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/version"
-	"github.com/decred/dcrwallet/netparams"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/version"
+	"github.com/EXCCoin/exccwallet/netparams"
 	"github.com/decred/slog"
 )
 

@@ -5,11 +5,11 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/decred/dcrd/blockchain/stake"
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/txscript"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/blockchain/stake"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/txscript"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 // DevSubsidyAddress returns the development subsidy address for the specified

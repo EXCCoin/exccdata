@@ -7,9 +7,9 @@ package blockdata
 import (
 	"sync"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 // ReorgData contains the information from a reoranization notification

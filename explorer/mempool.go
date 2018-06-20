@@ -7,8 +7,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/decred/dcrd/blockchain/stake"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/blockchain/stake"
+	"github.com/EXCCoin/exccdata/txhelpers"
 	humanize "github.com/dustin/go-humanize"
 )
 

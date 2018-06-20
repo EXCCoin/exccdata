@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"github.com/asdine/storm"
-	"github.com/decred/dcrd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 )
 
 // TicketPool contains the live ticket pool diffs (tickets in/out) between

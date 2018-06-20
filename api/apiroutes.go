@@ -13,14 +13,14 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/rpcclient"
-	apitypes "github.com/decred/dcrdata/api/types"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/explorer"
-	m "github.com/decred/dcrdata/middleware"
-	notify "github.com/decred/dcrdata/notification"
-	appver "github.com/decred/dcrdata/version"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/rpcclient"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/explorer"
+	m "github.com/EXCCoin/exccdata/middleware"
+	notify "github.com/EXCCoin/exccdata/notification"
+	appver "github.com/EXCCoin/exccdata/version"
 )
 
 // DataSourceLite specifies an interface for collecting data from the built-in

@@ -1,9 +1,9 @@
 package dbtypes
 
 import (
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 // MsgBlockToDBBlock creates a dbtypes.Block from a wire.MsgBlock

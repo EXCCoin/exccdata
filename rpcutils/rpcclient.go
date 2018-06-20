@@ -9,15 +9,15 @@ import (
 	"io/ioutil"
 	"strconv"
 
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrd/wire"
-	apitypes "github.com/decred/dcrdata/api/types"
-	"github.com/decred/dcrdata/semver"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccd/wire"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/semver"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 var requiredChainServerAPI = semver.NewSemver(3, 0, 0)

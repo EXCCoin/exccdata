@@ -4,13 +4,13 @@
 package dcrpg
 
 import (
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	apitypes "github.com/decred/dcrdata/api/types"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/explorer"
-	"github.com/decred/dcrdata/rpcutils"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/explorer"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 // GetRawTransaction gets a dcrjson.TxRawResult for the specified transaction

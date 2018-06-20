@@ -9,11 +9,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 // BlockBasic models data for the explorer's explorer page

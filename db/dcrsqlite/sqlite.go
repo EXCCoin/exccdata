@@ -12,9 +12,9 @@ import (
 
 	"github.com/decred/slog"
 
-	"github.com/decred/dcrd/wire"
-	apitypes "github.com/decred/dcrdata/api/types"
-	"github.com/decred/dcrdata/blockdata"
+	"github.com/EXCCoin/exccd/wire"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/blockdata"
 	_ "github.com/mattn/go-sqlite3" // register sqlite driver with database/sql
 )
 
