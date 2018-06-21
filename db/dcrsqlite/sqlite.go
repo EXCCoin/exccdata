@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/decred/slog"
+	"github.com/btcsuite/btclog"
 
 	"github.com/EXCCoin/exccd/wire"
 	apitypes "github.com/EXCCoin/exccdata/api/types"
@@ -813,7 +813,7 @@ func (db *DB) RetrieveStakeInfoExtended(ind int64) (*apitypes.StakeInfoExtended,
 // }
 
 func logDBResult(res sql.Result) error {
-	if log.Level() > slog.LevelTrace {
+	if log.Level() > btclog.LevelTrace {
 		return nil
 	}
 

@@ -21,14 +21,14 @@ import (
 	"github.com/EXCCoin/exccdata/db/dcrpg"
 	"github.com/EXCCoin/exccdata/rpcutils"
 	"github.com/EXCCoin/exccdata/stakedb"
-	"github.com/decred/slog"
+	"github.com/btcsuite/btclog"
 )
 
 var (
-	backendLog      *slog.Backend
-	rpcclientLogger slog.Logger
-	pgLogger        slog.Logger
-	stakedbLogger   slog.Logger
+	backendLog      *btclog.Backend
+	rpcclientLogger btclog.Logger
+	pgLogger        btclog.Logger
+	stakedbLogger   btclog.Logger
 )
 
 const (
@@ -41,7 +41,7 @@ func init() {
 		fmt.Printf("Unable to start logger: %v", err)
 		os.Exit(1)
 	}
-	backendLog = slog.NewBackend(log.Writer())
+	backendLog = btclog.NewBackend(log.Writer())
 	rpcclientLogger = backendLog.Logger("RPC")
 	rpcclient.UseLogger(rpcclientLogger)
 	pgLogger = backendLog.Logger("PSQL")

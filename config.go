@@ -20,7 +20,7 @@ import (
 	"github.com/EXCCoin/exccd/wire"
 	"github.com/EXCCoin/exccdata/version"
 	"github.com/EXCCoin/exccwallet/netparams"
-	"github.com/decred/slog"
+	"github.com/btcsuite/btclog"
 )
 
 const (
@@ -191,7 +191,7 @@ func cleanAndExpandPath(path string) string {
 
 // validLogLevel returns whether or not logLevel is a valid debug log level.
 func validLogLevel(logLevel string) bool {
-	_, ok := slog.LevelFromString(logLevel)
+	_, ok := btclog.LevelFromString(logLevel)
 	return ok
 }
 

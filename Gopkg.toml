@@ -43,11 +43,11 @@
   version = "1.1.0"
 
 [[constraint]]
-  branch = "task/DEX-161_test_mainnet"
+  branch = "task/block_explorer"
   name = "github.com/EXCCoin/exccd"
 
 [[constraint]]
-  branch = "feature/DEX-152_mnemonic_compatibility"
+  branch = "task/block_explorer"
   name = "github.com/EXCCoin/exccwallet"
 
 [[constraint]]
@@ -100,8 +100,8 @@
 
   
 [[constraint]]
-  name = "github.com/decred/slog"
-  version = "1.0.0"
+  branch = "master"
+  name = "github.com/btcsuite/btclog"
 
 [prune]
   go-tests = true
