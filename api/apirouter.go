@@ -179,7 +179,7 @@ func NewAPIRouter(app *appContext, userRealIP bool) apiMux {
 	// 	buf.WriteTo(os.Stdout)
 
 	// 	fmt.Println(docgen.MarkdownRoutesDoc(mux, docgen.MarkdownOpts{
-	// 		ProjectPath: "github.com/decred/dcrdata",
+	// 		ProjectPath: "github.com/EXCCoin/exccdata",
 	// 		Intro:       "dcrdata HTTP router directory",
 	// 	}))
 	// 	return

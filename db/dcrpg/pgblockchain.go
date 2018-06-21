@@ -262,7 +262,7 @@ func (pgb *ChainDB) VersionCheck() error {
 	return nil
 }
 
-// DropTables drops (deletes) all of the known dcrdata tables.
+// DropTables drops (deletes) all of the known exccdata tables.
 func (pgb *ChainDB) DropTables() {
 	DropTables(pgb.db)
 }

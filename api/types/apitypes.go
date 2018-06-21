@@ -8,7 +8,7 @@ import (
 	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
-// much of the time, dcrdata will be using the types in exccjson, but others are
+// much of the time, exccdata will be using the types in exccjson, but others are
 // defined here
 
 // BlockTransactions models an array of stake and regular transactions for a

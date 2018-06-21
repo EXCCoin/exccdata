@@ -201,7 +201,7 @@ out:
 // root is a http.Handler intended for the API root path. This essentially
 // provides a heartbeat, and no information about the application status.
 func (c *appContext) root(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "dcrdata api running")
+	fmt.Fprint(w, "exccdata api running")
 }
 
 func (c *appContext) writeJSONHandlerFunc(thing interface{}) http.HandlerFunc {

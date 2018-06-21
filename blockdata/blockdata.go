@@ -115,7 +115,7 @@ func NewCollector(dcrdChainSvr *rpcclient.Client, params *chaincfg.Params,
 }
 
 // CollectAPITypes uses CollectBlockInfo to collect block data, then organizes
-// it into the BlockDataBasic and StakeInfoExtended and dcrdataapi types.
+// it into the BlockDataBasic and StakeInfoExtended and exccdataapi types.
 func (t *Collector) CollectAPITypes(hash *chainhash.Hash) (*apitypes.BlockDataBasic, *apitypes.StakeInfoExtended) {
 	blockDataBasic, feeInfoBlock, _, _, _, err := t.CollectBlockInfo(hash)
 	if err != nil {
