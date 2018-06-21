@@ -35,7 +35,12 @@ func netName(chainParams *chaincfg.Params) string {
 func (exp *explorerUI) Home(w http.ResponseWriter, r *http.Request) {
 	height := exp.blockData.GetHeight()
 
-	blocks := exp.blockData.GetExplorerBlocks(height, height-5)
+	end := height - 5
+	if end < 0 {
+		end = 0
+	}
+	
+	blocks := exp.blockData.GetExplorerBlocks(height, end)
 
 	exp.NewBlockDataMtx.Lock()
 	exp.MempoolData.RLock()
