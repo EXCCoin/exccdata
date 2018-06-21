@@ -22,7 +22,7 @@ import (
 
 var requiredChainServerAPI = semver.NewSemver(3, 0, 0)
 
-// ConnectNodeRPC attempts to create a new websocket connection to a dcrd node,
+// ConnectNodeRPC attempts to create a new websocket connection to a exccd node,
 // with the given credentials and optional notification handlers.
 func ConnectNodeRPC(host, user, pass, cert string, disableTLS bool,
 	ntfnHandlers ...*rpcclient.NotificationHandlers) (*rpcclient.Client, semver.Semver, error) {
@@ -32,15 +32,15 @@ func ConnectNodeRPC(host, user, pass, cert string, disableTLS bool,
 	if !disableTLS {
 		dcrdCerts, err = ioutil.ReadFile(cert)
 		if err != nil {
-			log.Errorf("Failed to read dcrd cert file at %s: %s\n",
+			log.Errorf("Failed to read exccd cert file at %s: %s\n",
 				cert, err.Error())
 			return nil, nodeVer, err
 		}
-		log.Debugf("Attempting to connect to dcrd RPC %s as user %s "+
+		log.Debugf("Attempting to connect to exccd RPC %s as user %s "+
 			"using certificate located in %s",
 			host, user, cert)
 	} else {
-		log.Debugf("Attempting to connect to dcrd RPC %s as user %s (no TLS)",
+		log.Debugf("Attempting to connect to exccd RPC %s as user %s (no TLS)",
 			host, user)
 	}
 
@@ -62,7 +62,7 @@ func ConnectNodeRPC(host, user, pass, cert string, disableTLS bool,
 	}
 	dcrdClient, err := rpcclient.New(connCfgDaemon, ntfnHdlrs)
 	if err != nil {
-		return nil, nodeVer, fmt.Errorf("Failed to start dcrd RPC client: %s", err.Error())
+		return nil, nodeVer, fmt.Errorf("Failed to start exccd RPC client: %s", err.Error())
 	}
 
 	// Ensure the RPC server has a compatible API version.
