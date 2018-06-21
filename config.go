@@ -24,8 +24,8 @@ import (
 )
 
 const (
-	defaultConfigFilename = "dcrdata.conf"
-	defaultLogFilename    = "dcrdata.log"
+	defaultConfigFilename = "exccdata.conf"
+	defaultLogFilename    = "exccdata.log"
 	defaultDataDirname    = "data"
 	defaultLogLevel       = "info"
 	defaultLogDirname     = "logs"
@@ -35,11 +35,11 @@ var activeNet = &netparams.MainNetParams
 var activeChain = &chaincfg.MainNetParams
 
 var (
-	defaultHomeDir           = exccutil.AppDataDir("dcrdata", false)
+	defaultHomeDir           = exccutil.AppDataDir("exccdata", false)
 	defaultConfigFile        = filepath.Join(defaultHomeDir, defaultConfigFilename)
 	defaultLogDir            = filepath.Join(defaultHomeDir, defaultLogDirname)
 	defaultDataDir           = filepath.Join(defaultHomeDir, defaultDataDirname)
-	dcrdHomeDir              = exccutil.AppDataDir("dcrd", false)
+	dcrdHomeDir              = exccutil.AppDataDir("exccd", false)
 	defaultDaemonRPCCertFile = filepath.Join(dcrdHomeDir, "rpc.cert")
 
 	defaultHost               = "localhost"
@@ -54,12 +54,12 @@ var (
 	defaultMempoolMaxInterval = 120
 	defaultMPTriggerTickets   = 1
 
-	defaultDBFileName = "dcrdata.sqlt.db"
+	defaultDBFileName = "exccdata.sqlt.db"
 
 	defaultPGHost   = "127.0.0.1:5432"
-	defaultPGUser   = "dcrdata"
+	defaultPGUser   = "exccdata"
 	defaultPGPass   = ""
-	defaultPGDBName = "dcrdata"
+	defaultPGDBName = "exccdata"
 )
 
 type config struct {
@@ -92,7 +92,7 @@ type config struct {
 	MempoolMaxInterval int    `long:"mp-max-interval" description:"The maximum time in seconds between mempool reports (within a couple seconds), regarless of number of new tickets seen."`
 	MPTriggerTickets   int    `long:"mp-ticket-trigger" description:"The number minimum number of new tickets that must be seen to trigger a new mempool report."`
 	DumpAllMPTix       bool   `long:"dumpallmptix" description:"Dump to file the fees of all the tickets in mempool."`
-	DBFileName         string `long:"dbfile" description:"SQLite DB file name (default is dcrdata.sqlt.db)."`
+	DBFileName         string `long:"dbfile" description:"SQLite DB file name (default is exccdata.sqlt.db)."`
 
 	FullMode bool   `long:"pg" description:"Run in \"Full Mode\" mode,  enables postgresql support"`
 	PGDBName string `long:"pgdbname" description:"PostgreSQL DB name."`
@@ -105,13 +105,13 @@ type config struct {
 	// SMTPPass     string `long:"smtppass" description:"SMTP password"`
 	// SMTPServer   string `long:"smtpserver" description:"SMTP host name"`
 	// EmailAddr    string `long:"emailaddr" description:"Destination email address for alerts"`
-	// EmailSubject string `long:"emailsubj" description:"Email subject. (default \"dcrdataapi transaction notification\")"`
+	// EmailSubject string `long:"emailsubj" description:"Email subject. (default \"exccdataapi transaction notification\")"`
 
 	// RPC client options
-	DcrdUser         string `long:"dcrduser" description:"Daemon RPC user name"`
-	DcrdPass         string `long:"dcrdpass" description:"Daemon RPC password"`
-	DcrdServ         string `long:"dcrdserv" description:"Hostname/IP and port of dcrd RPC server to connect to (default localhost:9109, testnet: localhost:19109, simnet: localhost:19556)"`
-	DcrdCert         string `long:"dcrdcert" description:"File containing the dcrd certificate file"`
+	DcrdUser         string `long:"exccduser" description:"Daemon RPC user name"`
+	DcrdPass         string `long:"exccdpass" description:"Daemon RPC password"`
+	DcrdServ         string `long:"exccdserv" description:"Hostname/IP and port of exccd RPC server to connect to (default localhost:9109, testnet: localhost:19109, simnet: localhost:19556)"`
+	DcrdCert         string `long:"exccdcert" description:"File containing the exccd certificate file"`
 	DisableDaemonTLS bool   `long:"nodaemontls" description:"Disable TLS for the daemon RPC client -- NOTE: This is only allowed if the RPC client is connecting to localhost"`
 }
 
@@ -451,8 +451,8 @@ func loadConfig() (*config, error) {
 	return &cfg, nil
 }
 
-// netName returns the name used when referring to a decred network.  At the
-// time of writing, dcrd currently places blocks for testnet version 0 in the
+// netName returns the name used when referring to a excc network.  At the
+// time of writing, exccd currently places blocks for testnet version 0 in the
 // data and log directory "testnet", which does not match the Name field of the
 // chaincfg parameters.  This function can be used to override this directory
 // name as "testnet2" when the passed active network matches wire.TestNet2.

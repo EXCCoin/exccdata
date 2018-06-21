@@ -46,7 +46,7 @@ func mainCore() error {
 	// Parse the configuration file, and setup logger.
 	cfg, err := loadConfig()
 	if err != nil {
-		fmt.Printf("Failed to load dcrdata config: %s\n", err.Error())
+		fmt.Printf("Failed to load exccdata config: %s\n", err.Error())
 		return err
 	}
 	defer func() {
@@ -85,7 +85,7 @@ func mainCore() error {
 		log.Info(`Running in "Lite" mode with only SQLite backend and limited functionality.`)
 	}
 
-	// Connect to dcrd RPC server using websockets
+	// Connect to exccd RPC server using websockets
 
 	// Set up the notification handler to deliver blocks through a channel.
 	notify.MakeNtfnChans(cfg.MonitorMempool, usePG)
@@ -94,7 +94,7 @@ func mainCore() error {
 	ntfnHandlers, collectionQueue := notify.MakeNodeNtfnHandlers()
 	dcrdClient, nodeVer, err := connectNodeRPC(cfg, ntfnHandlers)
 	if err != nil || dcrdClient == nil {
-		return fmt.Errorf("Connection to dcrd failed: %v", err)
+		return fmt.Errorf("Connection to exccd failed: %v", err)
 	}
 
 	defer func() {
@@ -102,7 +102,7 @@ func mainCore() error {
 		notify.CloseNtfnChans()
 
 		if dcrdClient != nil {
-			log.Infof("Closing connection to dcrd.")
+			log.Infof("Closing connection to exccd.")
 			dcrdClient.Shutdown()
 		}
 
@@ -113,9 +113,9 @@ func mainCore() error {
 	// Display connected network
 	curnet, err := dcrdClient.GetCurrentNet()
 	if err != nil {
-		return fmt.Errorf("Unable to get current network from dcrd: %v", err)
+		return fmt.Errorf("Unable to get current network from exccd: %v", err)
 	}
-	log.Infof("Connected to dcrd (JSON-RPC API v%s) on %v",
+	log.Infof("Connected to exccd (JSON-RPC API v%s) on %v",
 		nodeVer.String(), curnet.String())
 
 	if curnet != activeNet.Net {
@@ -357,7 +357,7 @@ func mainCore() error {
 	}
 	log.Infof("All ready, at height %d.", baseDBHeight)
 
-	// Register for notifications from dcrd
+	// Register for notifications from exccd
 	cerr := notify.RegisterNodeNtfnHandlers(dcrdClient)
 	if cerr != nil {
 		return fmt.Errorf("RPC client error: %v (%v)", cerr.Error(), cerr.Cause())
@@ -380,7 +380,7 @@ func mainCore() error {
 
 	// Blockchain monitor for the collector
 	addrMap := make(map[string]txhelpers.TxAction) // for support of watched addresses
-	// On reorg, only update web UI since dcrsqlite's own reorg handler will
+	// On reorg, only update web UI since exccsqlite's own reorg handler will
 	// deal with patching up the block info database.
 	reorgBlockDataSavers := []blockdata.BlockDataSaver{explore}
 	wsChainMonitor := blockdata.NewChainMonitor(collector, blockDataSavers,
@@ -401,7 +401,7 @@ func mainCore() error {
 	collectionQueue.SetSynchronousHandlers([]func(*chainhash.Hash){
 		sdbChainMonitor.BlockConnectedSync,     // 1. Stake DB for pool info
 		wsChainMonitor.BlockConnectedSync,      // 2. blockdata for regular block data collection and storage
-		wiredDBChainMonitor.BlockConnectedSync, // 3. dcrsqlite for sqlite DB reorg handling
+		wiredDBChainMonitor.BlockConnectedSync, // 3. exccsqlite for sqlite DB reorg handling
 	})
 
 	// Initial data summary for web ui. stakedb must be at the same height, so
@@ -421,7 +421,7 @@ func mainCore() error {
 	wg.Add(2)
 	go wsChainMonitor.BlockConnectedHandler()
 	// The blockdata reorg handler disables collection during reorg, leaving
-	// dcrsqlite to do the switch, except for the last block which gets
+	// exccsqlite to do the switch, except for the last block which gets
 	// collected and stored via reorgBlockDataSavers.
 	go wsChainMonitor.ReorgHandler()
 
@@ -430,7 +430,7 @@ func mainCore() error {
 	go sdbChainMonitor.BlockConnectedHandler()
 	go sdbChainMonitor.ReorgHandler()
 
-	// dcrsqlite does not handle new blocks except during reorg
+	// exccsqlite does not handle new blocks except during reorg
 	wg.Add(2)
 	go wiredDBChainMonitor.BlockConnectedHandler()
 	go wiredDBChainMonitor.ReorgHandler()
@@ -570,7 +570,7 @@ func waitForSync(base chan dbtypes.SyncResult, aux chan dbtypes.SyncResult,
 	}
 
 	if baseRes.Error != nil {
-		log.Errorf("dcrsqlite.SyncDBAsync failed at height %d.", baseDBHeight)
+		log.Errorf("exccsqlite.SyncDBAsync failed at height %d.", baseDBHeight)
 		close(quit)
 		return baseDBHeight, auxDBHeight, baseRes.Error
 	}
@@ -580,13 +580,13 @@ func waitForSync(base chan dbtypes.SyncResult, aux chan dbtypes.SyncResult,
 		if auxRes.Error != nil {
 			close(quit)
 			if baseRes.Error != nil {
-				log.Error("dcrsqlite.SyncDBAsync AND dcrpg.SyncChainDBAsync "+
+				log.Error("exccsqlite.SyncDBAsync AND exccpg.SyncChainDBAsync "+
 					"failed at heights %d and %d, respectively.",
 					baseDBHeight, auxDBHeight)
 				errCombined := fmt.Sprintln(baseRes.Error, ", ", auxRes.Error)
 				return baseDBHeight, auxDBHeight, errors.New(errCombined)
 			}
-			log.Errorf("dcrpg.SyncChainDBAsync failed at height %d.", auxDBHeight)
+			log.Errorf("exccpg.SyncChainDBAsync failed at height %d.", auxDBHeight)
 			return baseDBHeight, auxDBHeight, auxRes.Error
 		}
 
@@ -616,7 +616,7 @@ func listenAndServeProto(listen, proto string, mux http.Handler) error {
 	errChan := make(chan error)
 	if proto == "https" {
 		go func() {
-			errChan <- server.ListenAndServeTLS("dcrdata.cert", "dcrdata.key")
+			errChan <- server.ListenAndServeTLS("exccdata.cert", "exccdata.key")
 		}()
 	} else {
 		go func() {
