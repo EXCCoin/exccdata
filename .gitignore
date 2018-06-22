@@ -7,13 +7,13 @@
 debug
 *.cert
 *.key
-dcrdata
-dcrdata*.conf
+exccdata
+exccdata*.conf
 vendor/
 *.orig
 *.db
 *.db-journal
-dcrdata.sqlt.db*
+exccdata.sqlt.db*
 rebuilddb.conf
 rebuilddb2.conf
 cmd/rebuilddb/rebuilddb
