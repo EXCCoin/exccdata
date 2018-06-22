@@ -186,7 +186,7 @@ type AddressTransactions struct {
 
 // AddressInfo models data for display on the address page
 type AddressInfo struct {
-	// Address is the decred address on the current page
+	// Address is the excc address on the current page
 	Address string
 
 	// Page parameters

@@ -344,7 +344,7 @@ func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty 
 	}
 
 	MaxCoinSupplyAtBlock := func(blocknum float64) float64 {
-		// 4th order poly best fit curve to Decred mainnet emissions plot.
+		// 4th order poly best fit curve to excc mainnet emissions plot.
 		// Curve fit was done with 0 Y intercept and Pre-Mine added after.
 
 		return (-9E-19*math.Pow(blocknum, 4) +

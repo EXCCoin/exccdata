@@ -21,7 +21,7 @@ import (
 	humanize "github.com/dustin/go-humanize"
 )
 
-// netName returns the name used when referring to a decred network.
+// netName returns the name used when referring to a excc network.
 func netName(chainParams *chaincfg.Params) string {
 	switch chainParams.Net {
 	case wire.TestNet2:

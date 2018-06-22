@@ -304,7 +304,7 @@ type ScriptSig struct {
 	Hex string `json:"hex"`
 }
 
-// Tx models a Decred transaction. It is stored in a Block.
+// Tx models a excc transaction. It is stored in a Block.
 type Tx struct {
 	//blockDbID  int64
 	BlockHash   string `json:"block_hash"`
