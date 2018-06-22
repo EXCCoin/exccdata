@@ -9,7 +9,7 @@ import (
 func TestBlockSubsidy(t *testing.T) {
 	totalSubsidy := UltimateSubsidy(&chaincfg.MainNetParams)
 
-	if totalSubsidy != 2099999999800912 {
-		t.Errorf("Bad total subsidy; want 2099999999800912, got %v", totalSubsidy)
+	if totalSubsidy != 3115773615157966 {
+		t.Errorf("Bad total subsidy; want 3115773615157966, got %v", totalSubsidy)
 	}
 }
