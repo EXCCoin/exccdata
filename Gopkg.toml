@@ -43,11 +43,11 @@
   version = "1.1.0"
 
 [[constraint]]
-  branch = "task/block_explorer"
+  branch = "master"
   name = "github.com/EXCCoin/exccd"
 
 [[constraint]]
-  branch = "task/block_explorer"
+  branch = "master"
   name = "github.com/EXCCoin/exccwallet"
 
 [[constraint]]
