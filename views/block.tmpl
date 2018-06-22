@@ -1,7 +1,7 @@
 {{define "block"}}
 <!DOCTYPE html>
 <html lang="en">
-{{template "html-head" printf "Decred Block %d" .Data.Height}}
+{{template "html-head" printf "ExchangeCoin Block %d" .Data.Height}}
 <body>
     {{ template "navbar" . }}
     <div class="container">
@@ -21,7 +21,7 @@
                 <table>
                     <tr class="h2rem">
                         <td class="pr-2 lh1rem vam text-right xs-w117 w120">TOTAL SENT</td>
-                        <td class="fs28 mono fs16-decimal d-flex align-items-center">{{template "decimalParts" (float64AsDecimalParts .TotalSent false)}}<span class="pl-1 unit">DCR</span></td>
+                        <td class="fs28 mono fs16-decimal d-flex align-items-center">{{template "decimalParts" (float64AsDecimalParts .TotalSent false)}}<span class="pl-1 unit">EXCC</span></td>
                     </tr>
                 </table>
             </div>
@@ -155,7 +155,7 @@
                         <table class="table table-sm striped">
                             <thead>
                                 <th>Transaction ID</th>
-                                <th class="text-right">Total DCR</th>
+                                <th class="text-right">Total EXCC</th>
                                 <th>Size</th>
                             </thead>
                             <tbody>
@@ -197,7 +197,7 @@
                             <th>Last Block Valid</th>
                             <th>Issue ID</th>
                             <th>Choice ID</th>
-                            <th class="text-right">Total DCR</th>
+                            <th class="text-right">Total EXCC</th>
                             <th>Size</th>
                         </thead>
                         <tbody>
@@ -278,7 +278,7 @@
                     <table class="table table-sm striped">
                         <thead>
                             <th>Transaction ID</th>
-                            <th class="text-right">Total DCR</th>
+                            <th class="text-right">Total EXCC</th>
                             <th class="text-right">Fee</th>
                             <th>Size</th>
                         </thead>
@@ -309,7 +309,7 @@
                 <table class="table table-sm striped">
                     <thead>
                         <th>Transaction ID</th>
-                        <th class="text-right">Total DCR</th>
+                        <th class="text-right">Total EXCC</th>
                         <th class="text-right">Fee</th>
                         <th>Size</th>
                     </thead>
@@ -346,7 +346,7 @@
                     <table class="table table-sm striped">
                         <thead>
                             <th>Transaction ID</th>
-                            <th class="text-right">Total DCR</th>
+                            <th class="text-right">Total EXCC</th>
                             <th class="text-right">Fee</th>
                             <th>Size</th>
                         </thead>

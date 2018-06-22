@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-{{template "html-head" printf "Decred Address %s" .Data.Address}}
+{{template "html-head" printf "ExchangeCoin Address %s" .Data.Address}}
 <body>
     {{template "navbar" . }}
     {{with .Data}}
@@ -30,9 +30,9 @@
                         {{if .Fullmode}}
                             <td class="fs28 mono nowrap fs16-decimal d-flex align-items-center justify-content-end">
                                 {{if .Balance}}
-                                    {{template "decimalParts" (amountAsDecimalParts .Balance.TotalUnspent true)}}<span class="pl-1 unit">DCR</span>
+                                    {{template "decimalParts" (amountAsDecimalParts .Balance.TotalUnspent true)}}<span class="pl-1 unit">EXCC</span>
                                 {{else}}
-                                <span class="pl-1 unit">0.000000000 DCR</span>
+                                <span class="pl-1 unit">0.000000000 EXCC</span>
                                 {{end}}
                             </td>
                         {{else}}
@@ -49,9 +49,9 @@
                             <td class="mono nowrap text-right">
                                 {{if .Balance}}
                                     {{$received := add .Balance.TotalSpent .Balance.TotalUnspent}}
-                                    {{template "decimalParts" (amountAsDecimalParts $received true)}}<span class="pl-1 unit">DCR</span>
+                                    {{template "decimalParts" (amountAsDecimalParts $received true)}}<span class="pl-1 unit">EXCC</span>
                                 {{else}}
-                                <span class="pl-1 unit">0.000000000 DCR</span>
+                                <span class="pl-1 unit">0.000000000 EXCC</span>
                                 {{end}}
                             </td>
                         {{else}}
@@ -67,9 +67,9 @@
                         {{if .Fullmode}}
                             <td class="mono nowrap text-right">
                                 {{if .Balance}}
-                                    {{template "decimalParts" (amountAsDecimalParts .Balance.TotalSpent true)}}<span class="pl-1 unit">DCR</span>
+                                    {{template "decimalParts" (amountAsDecimalParts .Balance.TotalSpent true)}}<span class="pl-1 unit">EXCC</span>
                                 {{else}}
-                                <span class="pl-1 unit">0.000000000 DCR</span>
+                                <span class="pl-1 unit">0.000000000 EXCC</span>
                                 {{end}}
                             </td>
                         {{else}}
@@ -132,8 +132,8 @@
                 <table class="table table-mono-cells table-sm striped">
                     <thead>
                         <th>Input/Output ID</th>
-                        <th class="text-right">Credit DCR</th>
-                        <th>Debit DCR</th>
+                        <th class="text-right">Credit EXCC</th>
+                        <th>Debit EXCC</th>
                         <th>Time</th>
                         <th>Age</th>
                         <th>Confirms</th>

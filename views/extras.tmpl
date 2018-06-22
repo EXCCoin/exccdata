@@ -14,8 +14,8 @@
     <link rel="manifest" href="/images/favicon/manifest.json">
     <link rel="mask-icon" href="/images/favicon/safari-pinned-tab.svg">
     <link rel="shortcut icon" href="/images/favicon/favicon.ico">
-    <meta name="apple-mobile-web-app-title" content="Decred - decentralized credits">
-    <meta name="application-name" content="Decred - decentralized credits">
+    <meta name="apple-mobile-web-app-title" content="ExchangeCoin - decentralized credits">
+    <meta name="application-name" content="ExchangeCoin - decentralized credits">
     <meta name="msapplication-TileColor" content="#2973ff">
     <meta name="msapplication-TileImage" content="/images/favicon/mstile-144x144.png">
     <meta name="msapplication-config" content="/images/favicon/browserconfig.xml">
@@ -68,8 +68,8 @@
                     <span class="patty short"></span>
                     <div id="menu">
                         <a data-keynav-skip href="/" title="Home">Home</a>
-                        <a data-keynav-skip href="/blocks" title="Decred blocks">Blocks</a>
-                        <a data-keynav-skip href="/mempool" title="Decred mempool">Mempool</a>
+                        <a data-keynav-skip href="/blocks" title="ExchangeCoin blocks">Blocks</a>
+                        <a data-keynav-skip href="/mempool" title="ExchangeCoin mempool">Mempool</a>
                         <a data-keynav-skip href="#" title="Charts">Charts</a>
                         <a data-keynav-skip href="/parameters" title="Chain Parameters">Parameters</a>
                         <a data-keynav-skip href="/decodetx" title="Decode or send a raw transaction">Decode/Broadcast Tx</a>
@@ -82,7 +82,7 @@
                         <a data-keynav-skip data-turbolinks="false" href="#" class="jsonly" id="keynav-toggle">
                             <span class="text">Enable Hot Keys</span><span class="keys-hint">(&nbsp;&nbsp;<span class="arrows"> &#8592;<br>&#8594;</span>&nbsp;&nbsp;enter&nbsp;&nbsp;\&nbsp;&nbsp;=&nbsp;&nbsp;)</span>
                         </a>
-                        <a data-keynav-skip href="https://github.com/decred/dcrdata#json-rest-api" title="API Endpoints" target="_blank">JSON API Docs</a>
+                        <a data-keynav-skip href="https://github.com/EXCCoin/exccdata#json-rest-api" title="API Endpoints" target="_blank">JSON API Docs</a>
                     </div>
                 </div>
             </nav>
@@ -469,7 +469,7 @@
     }
 
     function doNotification(block) {
-        var newBlockNtfn = new Notify('New Decred Block Mined', {
+        var newBlockNtfn = new Notify('New ExchangeCoin Block Mined', {
             body: 'Block mined at height ' + block.height,
             tag: 'blockheight',
             image: '/images/dcrdata144x128.png',
@@ -503,8 +503,8 @@
 <footer class="navbar-fixed-bottom">
     <div class="container wrapper text-center">
         <div style="text-align: left; margin:0 auto !important; display:inline-block">
-            <a class="nav-item" href="https://github.com/decred/dcrdata" title="dcrdata on GitHub" target="_blank">dcrdata v{{.Version}}</a>
-            <a class="nav-item" href="https://github.com/decred/dcrdata/blob/master/LICENSE" target="_blank">© 2018 The Decred developers (ISC)</a>
+            <a class="nav-item" href="https://github.com/EXCCoin/exccdata" title="exccdata on GitHub" target="_blank">dcrdata v{{.Version}}</a>
+            <a class="nav-item" href="https://github.com/EXCCoin/exccdata/blob/master/LICENSE" target="_blank">© 2018 The ExchangeCoin developers (ISC)</a>
         </div>
         <div style="float: right;">
             <span data-turbolinks-permanent class="nav-item" id="connection"
