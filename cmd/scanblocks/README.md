@@ -1,20 +1,20 @@
 # scanblocks
 
 This is a command line utility that scans the entire blockchain, up to the best
-block syncd by dcrd, to extract basic data from each block.
+block syncd by exccd, to extract basic data from each block.
 
 ## Usage
 
 You just need to specify the user, password, host:port, and (optionally) the RPC
-TLS certificate if using a TLS connection to dcrd.
+TLS certificate if using a TLS connection to exccd.
 
 ```sh
-./scanblocks -user dcrduser -pass dcrdpass
+./scanblocks -user exccduser -pass exccdpass
 ```
 
 The argument `-notls` is true by default, but if you set it to false, it is
-required to specify the RPC cert for dcrd with `-cert`.  I strongly suggest to
-run dcrd with `--notls` when using `scanblocks` for performance reasons.
+required to specify the RPC cert for exccd with `-cert`.  I strongly suggest to
+run exccd with `--notls` when using `scanblocks` for performance reasons.
 
 There is no config file. Options must be specified on the command line.
 
