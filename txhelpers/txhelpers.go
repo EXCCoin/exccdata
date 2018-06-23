@@ -461,7 +461,7 @@ func MedianAmount(s []exccutil.Amount) exccutil.Amount {
 	return (s[middle] + s[middle-1]) / 2
 }
 
-// MedianCoin gets the median DCR from a slice of float64s
+// MedianCoin gets the median EXCC from a slice of float64s
 func MedianCoin(s []float64) float64 {
 	if len(s) == 0 {
 		return 0
@@ -812,7 +812,7 @@ func TxFee(msgTx *wire.MsgTx) exccutil.Amount {
 	return exccutil.Amount(amtIn - amtOut)
 }
 
-// TxFeeRate computes and returns the fee rate in DCR/KB for a given tx
+// TxFeeRate computes and returns the fee rate in EXCC/KB for a given tx
 func TxFeeRate(msgTx *wire.MsgTx) (exccutil.Amount, exccutil.Amount) {
 	var amtIn int64
 	for iv := range msgTx.TxIn {

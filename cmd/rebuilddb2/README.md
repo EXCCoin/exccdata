@@ -1,11 +1,11 @@
 # Command line app `rebuilddb2`
 
-The `rebuilddb2` app is used for maintenance of exccdata's `dcrpg` database that
+The `rebuilddb2` app is used for maintenance of exccdata's `exccpg` database that
 uses PostgreSQL to store a nearly complete record of the EXCCoin blockchain data.
 
 **IMPORTANT**: When performing a bulk data import (e.g. full chain scan from
 genesis block), be sure to configure PostgreSQL appropriately.  Please see
-[postgresql-tuning.conf](../../db/dcrpg/postgresql-tuning.conf) for tips.
+[postgresql-tuning.conf](../../db/exccpg/postgresql-tuning.conf) for tips.
 
 ## Installation
 

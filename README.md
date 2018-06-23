@@ -19,8 +19,8 @@ The exccdata repository is a collection of golang packages and apps for [EXCCoin
 │   └── scanblocks      scanblocks utility.
 ├── db
 │   ├── dbtypes         Package dbtypes with common data types.
-│   ├── dcrpg           Package dcrpg providing PostgreSQL backend.
-│   └── dcrsqlite       Package dcrsqlite providing SQLite backend.
+│   ├── exccpg           Package exccpg providing PostgreSQL backend.
+│   └── exccsqlite       Package exccsqlite providing SQLite backend.
 ├── dev                 Shell scripts for maintenance and deployment.
 ├── public              Public resources for block explorer (css, js, etc.).
 ├── explorer            Package explorer, powering the block explorer.
@@ -100,7 +100,7 @@ If you intend to run exccdata in "full" mode (i.e. with the `--pg` switch), whic
 uses a PostgreSQL database backend, it is crucial that you configure your
 PostgreSQL server for your hardware and the exccdata workload.
 
-Read [postgresql-tuning.conf](./db/dcrpg/postgresql-tuning.conf) carefully for
+Read [postgresql-tuning.conf](./db/exccpg/postgresql-tuning.conf) carefully for
 details on how to make the necessary changes to your system.
 
 ### Create configuration file
@@ -320,7 +320,7 @@ of the exccdata daemon, but may be called alone with rebuilddb.
 
 ### rebuilddb2
 
-`rebuilddb2` is a CLI app used for maintenance of exccdata's `dcrpg` database
+`rebuilddb2` is a CLI app used for maintenance of exccdata's `exccpg` database
 (a.k.a. DB v2) that uses PostgreSQL to store a nearly complete record of the
 EXCCoin blockchain data. See the [README.md](./cmd/rebuilddb2/README.md) for
 `rebuilddb2` for important usage information.
@@ -356,7 +356,7 @@ from exccd.
 
 ## Internal-use packages
 
-Packages `blockdata` and `dcrsqlite` are currently designed only for internal
+Packages `blockdata` and `exccsqlite` are currently designed only for internal
 use internal use by other exccdata packages, but they may be of general value in
 the future.
 
@@ -370,15 +370,15 @@ the future.
 * The `BlockDataSaver` interface required by `chainMonitor` for storage of
   collected data.
 
-`dcrpg` defines:
+`exccpg` defines:
 
-* The `ChainDB` type, which is the primary exported type from `dcrpg`, providing
+* The `ChainDB` type, which is the primary exported type from `exccpg`, providing
   an interface for a PostgreSQL database.
 * A large set of lower-level functions to perform a range of queries given a
   `*sql.DB` instance and various parameters.
 * The internal package contains the raw SQL statements.
 
-`dcrsqlite` defines:
+`exccsqlite` defines:
 
 * A `sql.DB` wrapper type (`DB`) with the necessary SQLite queries for
   storage and retrieval of block and stake data.

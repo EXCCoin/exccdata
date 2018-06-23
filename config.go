@@ -14,13 +14,13 @@ import (
 	"sort"
 	"strings"
 
-	flags "github.com/btcsuite/go-flags"
 	"github.com/EXCCoin/exccd/chaincfg"
 	"github.com/EXCCoin/exccd/exccutil"
 	"github.com/EXCCoin/exccd/wire"
 	"github.com/EXCCoin/exccdata/version"
 	"github.com/EXCCoin/exccwallet/netparams"
 	"github.com/btcsuite/btclog"
+	flags "github.com/btcsuite/go-flags"
 )
 
 const (
@@ -39,8 +39,8 @@ var (
 	defaultConfigFile        = filepath.Join(defaultHomeDir, defaultConfigFilename)
 	defaultLogDir            = filepath.Join(defaultHomeDir, defaultLogDirname)
 	defaultDataDir           = filepath.Join(defaultHomeDir, defaultDataDirname)
-	dcrdHomeDir              = exccutil.AppDataDir("exccd", false)
-	defaultDaemonRPCCertFile = filepath.Join(dcrdHomeDir, "rpc.cert")
+	exccdHomeDir             = exccutil.AppDataDir("exccd", false)
+	defaultDaemonRPCCertFile = filepath.Join(exccdHomeDir, "rpc.cert")
 
 	defaultHost               = "localhost"
 	defaultHTTPProfPath       = "/p"
@@ -108,10 +108,10 @@ type config struct {
 	// EmailSubject string `long:"emailsubj" description:"Email subject. (default \"exccdataapi transaction notification\")"`
 
 	// RPC client options
-	DcrdUser         string `long:"exccduser" description:"Daemon RPC user name"`
-	DcrdPass         string `long:"exccdpass" description:"Daemon RPC password"`
-	DcrdServ         string `long:"exccdserv" description:"Hostname/IP and port of exccd RPC server to connect to (default localhost:9109, testnet: localhost:19109, simnet: localhost:19556)"`
-	DcrdCert         string `long:"exccdcert" description:"File containing the exccd certificate file"`
+	ExccdUser        string `long:"exccduser" description:"Daemon RPC user name"`
+	ExccdPass        string `long:"exccdpass" description:"Daemon RPC password"`
+	ExccdServ        string `long:"exccdserv" description:"Hostname/IP and port of exccd RPC server to connect to (default localhost:9109, testnet: localhost:19109, simnet: localhost:19556)"`
+	ExccdCert        string `long:"exccdcert" description:"File containing the exccd certificate file"`
 	DisableDaemonTLS bool   `long:"nodaemontls" description:"Disable TLS for the daemon RPC client -- NOTE: This is only allowed if the RPC client is connecting to localhost"`
 }
 
@@ -128,7 +128,7 @@ var (
 		APIListen:          defaultAPIListen,
 		IndentJSON:         defaultIndentJSON,
 		CacheControlMaxAge: defaultCacheControlMaxAge,
-		DcrdCert:           defaultDaemonRPCCertFile,
+		ExccdCert:          defaultDaemonRPCCertFile,
 		MonitorMempool:     defaultMonitorMempool,
 		MempoolMinInterval: defaultMempoolMinInterval,
 		MempoolMaxInterval: defaultMempoolMaxInterval,
@@ -416,8 +416,8 @@ func loadConfig() (*config, error) {
 
 	// Set the host names and ports to the default if the user does not specify
 	// them.
-	if cfg.DcrdServ == "" {
-		cfg.DcrdServ = defaultHost + ":" + activeNet.JSONRPCClientPort
+	if cfg.ExccdServ == "" {
+		cfg.ExccdServ = defaultHost + ":" + activeNet.JSONRPCClientPort
 	}
 
 	// Output folder

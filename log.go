@@ -13,8 +13,8 @@ import (
 	"github.com/EXCCoin/exccdata/api"
 	"github.com/EXCCoin/exccdata/api/insight"
 	"github.com/EXCCoin/exccdata/blockdata"
-	"github.com/EXCCoin/exccdata/db/dcrpg"
-	"github.com/EXCCoin/exccdata/db/dcrsqlite"
+	"github.com/EXCCoin/exccdata/db/exccpg"
+	"github.com/EXCCoin/exccdata/db/exccsqlite"
 	"github.com/EXCCoin/exccdata/explorer"
 	"github.com/EXCCoin/exccdata/mempool"
 	"github.com/EXCCoin/exccdata/middleware"
@@ -68,8 +68,8 @@ var (
 
 // Initialize package-global logger variables.
 func init() {
-	dcrsqlite.UseLogger(sqliteLog)
-	dcrpg.UseLogger(postgresqlLog)
+	exccsqlite.UseLogger(sqliteLog)
+	exccpg.UseLogger(postgresqlLog)
 	stakedb.UseLogger(stakedbLog)
 	blockdata.UseLogger(BlockdataLog)
 	rpcclient.UseLogger(clientLog)

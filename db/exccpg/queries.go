@@ -1,7 +1,7 @@
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
 
-package dcrpg
+package exccpg
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ import (
 	"github.com/EXCCoin/exccd/wire"
 	apitypes "github.com/EXCCoin/exccdata/api/types"
 	"github.com/EXCCoin/exccdata/db/dbtypes"
-	"github.com/EXCCoin/exccdata/db/dcrpg/internal"
+	"github.com/EXCCoin/exccdata/db/exccpg/internal"
 	"github.com/EXCCoin/exccdata/txhelpers"
 	"github.com/lib/pq"
 )
@@ -850,7 +850,7 @@ func RetrieveAddressCreditTxns(db *sql.DB, address string, N, offset int64) (ids
 }
 
 // Retreive All AddressIDs for a given Hash and Index
-// Update Vin due to DCRD AMOUNTIN - START - DO NOT MERGE CHANGES IF DCRD FIXED
+// Update Vin due to EXCCD AMOUNTIN - START - DO NOT MERGE CHANGES IF EXCCD FIXED
 func RetrieveAddressIDsByOutpoint(db *sql.DB, txHash string,
 	voutIndex uint32) ([]uint64, []string, int64, error) {
 	var ids []uint64
@@ -878,7 +878,7 @@ func RetrieveAddressIDsByOutpoint(db *sql.DB, txHash string,
 		addresses = append(addresses, addr)
 	}
 	return ids, addresses, value, err
-} // Update Vin due to DCRD AMOUNTIN - END
+} // Update Vin due to EXCCD AMOUNTIN - END
 
 func RetrieveAllVinDbIDs(db *sql.DB) (vinDbIDs []uint64, err error) {
 	rows, err := db.Query(internal.SelectVinIDsALL)

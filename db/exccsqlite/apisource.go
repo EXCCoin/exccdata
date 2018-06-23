@@ -2,7 +2,7 @@
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
 
-package dcrsqlite
+package exccsqlite
 
 import (
 	"database/sql"
@@ -61,7 +61,7 @@ func newWiredDB(DB *DB, statusC chan uint32, cl *rpcclient.Client,
 }
 
 // NewWiredDB creates a new wiredDB from a *sql.DB, a node client, network
-// parameters, and a status update channel. It calls dcrsqlite.NewDB to create a
+// parameters, and a status update channel. It calls exccsqlite.NewDB to create a
 // new DB that wrapps the sql.DB.
 func NewWiredDB(db *sql.DB, statusC chan uint32, cl *rpcclient.Client,
 	p *chaincfg.Params, datadir string) (wiredDB, func() error, error) {
@@ -506,7 +506,7 @@ func (db *wiredDB) getRawTransaction(txid string) (*apitypes.Tx, string) {
 	return tx, txraw.Hex
 }
 
-// GetVoteVersionInfo requests stake version info from the dcrd RPC server
+// GetVoteVersionInfo requests stake version info from the exccd RPC server
 func (db *wiredDB) GetVoteVersionInfo(ver uint32) (*exccjson.GetVoteInfoResult, error) {
 	return db.client.GetVoteInfo(ver)
 }
@@ -535,7 +535,7 @@ func (db *wiredDB) GetStakeVersionsLatest() (*exccjson.StakeVersions, error) {
 
 // GetVoteInfo attempts to decode the vote bits of a SSGen transaction. If the
 // transaction is not a valid SSGen, the VoteInfo output will be nil. Depending
-// on the stake version with which dcrdata is compiled with (chaincfg.Params),
+// on the stake version with which exccdata is compiled with (chaincfg.Params),
 // the Choices field of VoteInfo may be a nil slice even if the votebits were
 // set for a previously-valid agenda.
 func (db *wiredDB) GetVoteInfo(txid string) (*apitypes.VoteInfo, error) {
@@ -1319,7 +1319,7 @@ func (db *wiredDB) UnconfirmedTxnsForAddress(address string) (*txhelpers.Address
 	// Check each transaction for involvement with provided address.
 	addressOutpoints := txhelpers.NewAddressOutpoints(address)
 	for hash, tx := range mempoolTxns {
-		// Transaction details from dcrd
+		// Transaction details from exccd
 		txhash, err1 := chainhash.NewHashFromStr(hash)
 		if err1 != nil {
 			log.Errorf("Invalid transaction hash %s", hash)

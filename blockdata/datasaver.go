@@ -153,7 +153,7 @@ func (s *BlockDataToSummaryStdOut) Store(data *BlockData, _ *wire.MsgBlock) erro
 		data.FeeInfo.Number)
 
 	if data.PoolInfo.Value >= 0 {
-		fmt.Printf("  Ticket pool:  %v (size), %.3f (avg. price), %.2f (total DCR locked)\n",
+		fmt.Printf("  Ticket pool:  %v (size), %.3f (avg. price), %.2f (total EXCC locked)\n",
 			data.PoolInfo.Size, data.PoolInfo.ValAvg, data.PoolInfo.Value)
 	}
 

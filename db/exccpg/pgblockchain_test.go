@@ -1,15 +1,15 @@
 // +build mainnettest
 
-package dcrpg
+package exccpg
 
 import (
 	"fmt"
 	"os"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/EXCCoin/exccd/chaincfg"
 	"github.com/EXCCoin/exccd/wire"
+	"github.com/davecgh/go-spew/spew"
 )
 
 var (
@@ -20,9 +20,9 @@ func openDB() (func() error, error) {
 	dbi := DBInfo{
 		Host:   "localhost",
 		Port:   "5432",
-		User:   "dcrdata",
-		Pass:   "dcrdata",
-		DBName: "dcrdata",
+		User:   "exccdata",
+		Pass:   "exccdata",
+		DBName: "exccdata",
 	}
 	var err error
 	db, err = NewChainDB(&dbi, &chaincfg.MainNetParams)

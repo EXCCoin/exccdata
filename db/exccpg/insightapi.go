@@ -1,7 +1,7 @@
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
 
-package dcrpg
+package exccpg
 
 import (
 	"github.com/EXCCoin/exccd/exccjson"
@@ -63,11 +63,11 @@ func (pgb *ChainDB) InsightPgGetAddressTransactions(addr []string,
 	return RetrieveAddressTxnsOrdered(pgb.db, addr, recentBlockHeight)
 }
 
-// Update Vin due to DCRD AMOUNTIN - START
+// Update Vin due to EXCCD AMOUNTIN - START
 func (pgb *ChainDB) RetrieveAddressIDsByOutpoint(txHash string,
 	voutIndex uint32) ([]uint64, []string, int64, error) {
 	return RetrieveAddressIDsByOutpoint(pgb.db, txHash, voutIndex)
-} // Update Vin due to DCRD AMOUNTIN - END
+} // Update Vin due to EXCCD AMOUNTIN - END
 
 // InsightGetAddressTransactions performs a searchrawtransactions for the
 // specfied address, max number of transactions, and offset into the transaction

@@ -10,7 +10,7 @@ import (
 	apitypes "github.com/EXCCoin/exccdata/api/types"
 )
 
-// TxConverter converts dcrd-tx to insight tx
+// TxConverter converts exccd-tx to insight tx
 func (c *insightApiContext) TxConverter(txs []*exccjson.TxRawResult) ([]apitypes.InsightTx, error) {
 	return c.TxConverterWithParams(txs, false, false, false)
 }
@@ -60,17 +60,17 @@ func (c *insightApiContext) TxConverterWithParams(txs []*exccjson.TxRawResult, n
 			_, addresses, value, err := c.BlockData.ChainDB.RetrieveAddressIDsByOutpoint(vin.Txid, vin.Vout)
 			if err == nil {
 				if len(addresses) > 0 {
-					// Update Vin due to DCRD AMOUNTIN - START
+					// Update Vin due to EXCCD AMOUNTIN - START
 					// NOTE THIS IS ONLY USEFUL FOR INPUT AMOUNTS THAT ARE NOT ALSO FROM MEMPOOL
 					if tx.Confirmations == 0 {
 						txNew.Vins[vinID].Value = exccutil.Amount(value).ToCoin()
 					}
-					// Update Vin due to DCRD AMOUNTIN - END
+					// Update Vin due to EXCCD AMOUNTIN - END
 					txNew.Vins[vinID].Addr = addresses[0]
 				}
 			}
-			dcramt, _ := exccutil.NewAmount(txNew.Vins[vinID].Value)
-			txNew.Vins[vinID].ValueSat = int64(dcramt)
+			exccamt, _ := exccutil.NewAmount(txNew.Vins[vinID].Value)
+			txNew.Vins[vinID].ValueSat = int64(exccamt)
 			vInSum += txNew.Vins[vinID].Value
 
 		}
@@ -100,14 +100,14 @@ func (c *insightApiContext) TxConverterWithParams(txs []*exccjson.TxRawResult, n
 		txNew.Blocktime = tx.Blocktime
 		txNew.Size = uint32(len(tx.Hex) / 2)
 
-		dcramt, _ := exccutil.NewAmount(vOutSum)
-		txNew.ValueOut = dcramt.ToCoin()
+		exccamt, _ := exccutil.NewAmount(vOutSum)
+		txNew.ValueOut = exccamt.ToCoin()
 
-		dcramt, _ = exccutil.NewAmount(vInSum)
-		txNew.ValueIn = dcramt.ToCoin()
+		exccamt, _ = exccutil.NewAmount(vInSum)
+		txNew.ValueIn = exccamt.ToCoin()
 
-		dcramt, _ = exccutil.NewAmount(txNew.ValueIn - txNew.ValueOut)
-		txNew.Fees = dcramt.ToCoin()
+		exccamt, _ = exccutil.NewAmount(txNew.ValueIn - txNew.ValueOut)
+		txNew.Fees = exccamt.ToCoin()
 
 		// Return true if coinbase value is not empty, return 0 at some fields
 		if txNew.Vins != nil && len(txNew.Vins[0].CoinBase) > 0 {

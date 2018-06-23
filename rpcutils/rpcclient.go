@@ -26,11 +26,11 @@ var requiredChainServerAPI = semver.NewSemver(3, 0, 0)
 // with the given credentials and optional notification handlers.
 func ConnectNodeRPC(host, user, pass, cert string, disableTLS bool,
 	ntfnHandlers ...*rpcclient.NotificationHandlers) (*rpcclient.Client, semver.Semver, error) {
-	var dcrdCerts []byte
+	var exccdCerts []byte
 	var err error
 	var nodeVer semver.Semver
 	if !disableTLS {
-		dcrdCerts, err = ioutil.ReadFile(cert)
+		exccdCerts, err = ioutil.ReadFile(cert)
 		if err != nil {
 			log.Errorf("Failed to read exccd cert file at %s: %s\n",
 				cert, err.Error())
@@ -49,7 +49,7 @@ func ConnectNodeRPC(host, user, pass, cert string, disableTLS bool,
 		Endpoint:     "ws", // websocket
 		User:         user,
 		Pass:         pass,
-		Certificates: dcrdCerts,
+		Certificates: exccdCerts,
 		DisableTLS:   disableTLS,
 	}
 
@@ -60,20 +60,20 @@ func ConnectNodeRPC(host, user, pass, cert string, disableTLS bool,
 		}
 		ntfnHdlrs = ntfnHandlers[0]
 	}
-	dcrdClient, err := rpcclient.New(connCfgDaemon, ntfnHdlrs)
+	exccdClient, err := rpcclient.New(connCfgDaemon, ntfnHdlrs)
 	if err != nil {
 		return nil, nodeVer, fmt.Errorf("Failed to start exccd RPC client: %s", err.Error())
 	}
 
 	// Ensure the RPC server has a compatible API version.
-	ver, err := dcrdClient.Version()
+	ver, err := exccdClient.Version()
 	if err != nil {
 		log.Error("Unable to get RPC version: ", err)
 		return nil, nodeVer, fmt.Errorf("unable to get node RPC version")
 	}
 
-	dcrdVer := ver["exccdjsonrpcapi"]
-	nodeVer = semver.NewSemver(dcrdVer.Major, dcrdVer.Minor, dcrdVer.Patch)
+	exccdVer := ver["exccdjsonrpcapi"]
+	nodeVer = semver.NewSemver(exccdVer.Major, exccdVer.Minor, exccdVer.Patch)
 
 	if !semver.Compatible(requiredChainServerAPI, nodeVer) {
 		return nil, nodeVer, fmt.Errorf("Node JSON-RPC server does not have "+
@@ -81,7 +81,7 @@ func ConnectNodeRPC(host, user, pass, cert string, disableTLS bool,
 			nodeVer, requiredChainServerAPI)
 	}
 
-	return dcrdClient, nodeVer, nil
+	return exccdClient, nodeVer, nil
 }
 
 // BuildBlockHeaderVerbose creates a *exccjson.GetBlockHeaderVerboseResult from

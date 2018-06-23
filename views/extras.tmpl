@@ -4,8 +4,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="dcrdata web">
-    <meta name="author" content="dcrdata">
+    <meta name="description" content="exccdata web">
+    <meta name="author" content="exccdata">
     <!--  Custom favicon  -->
     <link rel="icon" href="/images/favicon/favicon.ico">
     <link rel="icon" type="image/png" href="/images/favicon/favicon-32x32.png" sizes="32x32">
@@ -69,11 +69,11 @@
                         <a data-keynav-skip href="/parameters" title="Chain Parameters">Parameters</a>
                         <a data-keynav-skip href="/decodetx" title="Decode or send a raw transaction">Decode/Broadcast Tx</a>
                         {{if eq .NetName "Mainnet"}}
-                           <a data-keynav-skip href="http://testnet.dcrdata.org/" title="Home">Switch To Testnet</a>
+                           <a data-keynav-skip href="http://testnet.exccdata.org/" title="Home">Switch To Testnet</a>
                         {{else}}
-                           <a data-keynav-skip href="https://mainnet.decred.org/" title="Home">Switch To Mainnet</a>
+                           <a data-keynav-skip href="https://mainnet.excc.org/" title="Home">Switch To Mainnet</a>
                         {{end}}
-                        <a data-keynav-skip data-turbolinks="false" href="javascript:toggleSun()" class="jsonly"><span id="sun-icon" class="dcricon-sun-fill no-underline pr-2"></span> Night Mode</a>
+                        <a data-keynav-skip data-turbolinks="false" href="javascript:toggleSun()" class="jsonly"><span id="sun-icon" class="exccicon-sun-fill no-underline pr-2"></span> Night Mode</a>
                         <a data-keynav-skip data-turbolinks="false" href="#" class="jsonly" id="keynav-toggle">
                             <span class="text">Enable Hot Keys</span><span class="keys-hint">(&nbsp;&nbsp;<span class="arrows"> &#8592;<br>&#8594;</span>&nbsp;&nbsp;enter&nbsp;&nbsp;\&nbsp;&nbsp;=&nbsp;&nbsp;)</span>
                         </a>
@@ -97,7 +97,7 @@
         document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
     }
     var sunIcon = document.getElementById("sun-icon")
-    var darkBGCookieName = 'dcrdataDarkBG';
+    var darkBGCookieName = 'exccdataDarkBG';
     function darkEnabled() {
         return document.cookie.includes(darkBGCookieName)
     }
@@ -107,14 +107,14 @@
         toggleToLightClasses(document.body)
     }
     function toggleToDarkClasses(body) {
-        $(sunIcon).removeClass('dcricon-sun-fill')
-        $(sunIcon).addClass('dcricon-sun-stroke')
+        $(sunIcon).removeClass('exccicon-sun-fill')
+        $(sunIcon).addClass('exccicon-sun-stroke')
         $(body).addClass('darkBG')
     }
     function toggleToLightClasses(body) {
         $(body).removeClass('darkBG');
-        $(sunIcon).removeClass('dcricon-sun-stroke')
-        $(sunIcon).addClass('dcricon-sun-fill')
+        $(sunIcon).removeClass('exccicon-sun-stroke')
+        $(sunIcon).addClass('exccicon-sun-fill')
     }
     function toggleSun() {
         if (darkEnabled()) {
@@ -467,8 +467,8 @@
         var newBlockNtfn = new Notify('New ExchangeCoin Block Mined', {
             body: 'Block mined at height ' + block.height,
             tag: 'blockheight',
-            image: '/images/dcrdata144x128.png',
-            icon: '/images/dcrdata144x128.png',
+            image: '/images/exccdata144x128.png',
+            icon: '/images/exccdata144x128.png',
             notifyShow: onShowNotification,
             notifyClose: onCloseNotification,
             notifyClick: onClickNotification,
@@ -530,7 +530,7 @@
     var targetsLength;
     var currentIndex = 0;
     var jumpToIndexOnLoad;
-    var keyNavCookieName = 'dcrdataKeyNav';
+    var keyNavCookieName = 'exccdataKeyNav';
     
     function keyNavEnabled() {
         return document.cookie.includes(keyNavCookieName)

@@ -24,7 +24,7 @@ import (
 	"github.com/EXCCoin/exccd/rpcclient"
 	apitypes "github.com/EXCCoin/exccdata/api/types"
 	"github.com/EXCCoin/exccdata/db/dbtypes"
-	"github.com/EXCCoin/exccdata/db/dcrpg"
+	"github.com/EXCCoin/exccdata/db/exccpg"
 	m "github.com/EXCCoin/exccdata/middleware"
 	"github.com/EXCCoin/exccdata/semver"
 	"github.com/EXCCoin/exccdata/txhelpers"
@@ -38,7 +38,7 @@ type DataSourceLite interface {
 
 type insightApiContext struct {
 	nodeClient *rpcclient.Client
-	BlockData  *dcrpg.ChainDBRPC
+	BlockData  *exccpg.ChainDBRPC
 	params     *chaincfg.Params
 	MemPool    DataSourceLite
 	Status     apitypes.Status
@@ -48,7 +48,7 @@ type insightApiContext struct {
 }
 
 // NewInsightContext Constructor for insightApiContext
-func NewInsightContext(client *rpcclient.Client, blockData *dcrpg.ChainDBRPC, params *chaincfg.Params, memPoolData DataSourceLite, JSONIndent string) *insightApiContext {
+func NewInsightContext(client *rpcclient.Client, blockData *exccpg.ChainDBRPC, params *chaincfg.Params, memPoolData DataSourceLite, JSONIndent string) *insightApiContext {
 	conns, _ := client.GetConnectionCount()
 	nodeHeight, _ := client.GetBlockCount()
 	version := semver.NewSemver(1, 0, 0)
@@ -62,7 +62,7 @@ func NewInsightContext(client *rpcclient.Client, blockData *dcrpg.ChainDBRPC, pa
 			Height:          uint32(nodeHeight),
 			NodeConnections: conns,
 			APIVersion:      APIVersion,
-			DcrdataVersion:  version.String(),
+			ExccdataVersion: version.String(),
 		},
 	}
 	return &newContext

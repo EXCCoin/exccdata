@@ -314,10 +314,10 @@ func (exp *explorerUI) addRoutes() {
 }
 
 // Simulate ticket purchase and re-investment over a full year for a given
-// starting amount of DCR and calculation parameters.  Generate a TEXT table of
+// starting amount of EXCC and calculation parameters.  Generate a TEXT table of
 // the simulation results that can optionally be used for future expansion of
-// dcrdata functionality.
-func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty bool,
+// exccdata functionality.
+func (exp *explorerUI) simulateASR(StartingEXCCBalance float64, IntegerTicketQty bool,
 	CurrentStakePercent float64, ActualCoinbase float64, CurrentBlockNum float64,
 	ActualTicketPrice float64) (ASR float64, ReturnTable string) {
 
@@ -369,11 +369,11 @@ func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty 
 	// Prepare for simulation
 	simblock := CurrentBlockNum
 	TicketPrice := ActualTicketPrice
-	DCRBalance := StartingDCRBalance
+	EXCCBalance := StartingEXCCBalance
 
-	ReturnTable += fmt.Sprintf("\n\nBLOCKNUM        DCR  TICKETS TKT_PRICE TKT_REWRD  ACTION\n")
+	ReturnTable += fmt.Sprintf("\n\nBLOCKNUM        EXCC  TICKETS TKT_PRICE TKT_REWRD  ACTION\n")
 	ReturnTable += fmt.Sprintf("%8d  %9.2f %8.1f %9.2f %9.2f    INIT\n",
-		int64(simblock), DCRBalance, TicketsPurchased,
+		int64(simblock), EXCCBalance, TicketsPurchased,
 		TicketPrice, StakeRewardAtBlock(simblock))
 
 	for simblock < (BlocksPerYear + CurrentBlockNum) {
@@ -383,36 +383,36 @@ func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty 
 
 		if IntegerTicketQty {
 			// Use this to simulate integer qtys of tickets up to max funds
-			TicketsPurchased = math.Floor(DCRBalance / TicketPrice)
+			TicketsPurchased = math.Floor(EXCCBalance / TicketPrice)
 		} else {
 			// Use this to simulate ALL funds used to buy tickets - even fractional tickets
 			// which is actually not possible
-			TicketsPurchased = (DCRBalance / TicketPrice)
+			TicketsPurchased = (EXCCBalance / TicketPrice)
 		}
 
-		DCRBalance -= (TicketPrice * TicketsPurchased)
+		EXCCBalance -= (TicketPrice * TicketsPurchased)
 		ReturnTable += fmt.Sprintf("%8d  %9.2f %8.1f %9.2f %9.2f     BUY\n",
-			int64(simblock), DCRBalance, TicketsPurchased,
+			int64(simblock), EXCCBalance, TicketsPurchased,
 			TicketPrice, StakeRewardAtBlock(simblock))
 
 		// Move forward to average vote
 		simblock += (float64(exp.ChainParams.TicketMaturity) + float64(exp.ExtraInfo.Params.MeanVotingBlocks))
 		ReturnTable += fmt.Sprintf("%8d  %9.2f %8.1f %9.2f %9.2f    VOTE\n",
-			int64(simblock), DCRBalance, TicketsPurchased,
+			int64(simblock), EXCCBalance, TicketsPurchased,
 			(TheoreticalTicketPrice(simblock) * TicketAdjustmentFactor), StakeRewardAtBlock(simblock))
 
 		// Simulate return of funds
-		DCRBalance += (TicketPrice * TicketsPurchased)
+		EXCCBalance += (TicketPrice * TicketsPurchased)
 
 		// Simulate reward
-		DCRBalance += (StakeRewardAtBlock(simblock) * TicketsPurchased)
+		EXCCBalance += (StakeRewardAtBlock(simblock) * TicketsPurchased)
 		TicketsPurchased = 0
 
 		// Move forward to coinbase maturity
 		simblock += float64(exp.ChainParams.CoinbaseMaturity)
 
 		ReturnTable += fmt.Sprintf("%8d  %9.2f %8.1f %9.2f %9.2f  REWARD\n",
-			int64(simblock), DCRBalance, TicketsPurchased,
+			int64(simblock), EXCCBalance, TicketsPurchased,
 			(TheoreticalTicketPrice(simblock) * TicketAdjustmentFactor), StakeRewardAtBlock(simblock))
 
 		// Need to receive funds before we can use them again so add 1 block
@@ -420,7 +420,7 @@ func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty 
 	}
 
 	// Scale down to exactly 365 days
-	SimulationReward := ((DCRBalance - StartingDCRBalance) / StartingDCRBalance) * 100
+	SimulationReward := ((EXCCBalance - StartingEXCCBalance) / StartingEXCCBalance) * 100
 	ASR = (BlocksPerYear / (simblock - CurrentBlockNum)) * SimulationReward
 	ReturnTable += fmt.Sprintf("ASR over 365 Days is %.2f.\n", ASR)
 	return
@@ -431,7 +431,7 @@ func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty 
 //      sum(B * P(B)), B=1 to 40960
 // Where B is the block number and P(B) is the probability of voting at
 // block B.  For more information see:
-// https://github.com/decred/dcrdata/issues/471#issuecomment-390063025
+// https://github.com/EXCCoin/exccdata/issues/471#issuecomment-390063025
 
 func calcMeanVotingBlocks(params *chaincfg.Params) int64 {
 	logPoolSizeM1 := math.Log(float64(params.TicketPoolSize) - 1)

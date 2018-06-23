@@ -26,8 +26,8 @@ import (
 	"github.com/EXCCoin/exccdata/api/insight"
 	"github.com/EXCCoin/exccdata/blockdata"
 	"github.com/EXCCoin/exccdata/db/dbtypes"
-	"github.com/EXCCoin/exccdata/db/dcrpg"
-	"github.com/EXCCoin/exccdata/db/dcrsqlite"
+	"github.com/EXCCoin/exccdata/db/exccpg"
+	"github.com/EXCCoin/exccdata/db/exccsqlite"
 	"github.com/EXCCoin/exccdata/explorer"
 	"github.com/EXCCoin/exccdata/mempool"
 	m "github.com/EXCCoin/exccdata/middleware"
@@ -92,8 +92,8 @@ func mainCore() error {
 
 	// Daemon client connection
 	ntfnHandlers, collectionQueue := notify.MakeNodeNtfnHandlers()
-	dcrdClient, nodeVer, err := connectNodeRPC(cfg, ntfnHandlers)
-	if err != nil || dcrdClient == nil {
+	exccdClient, nodeVer, err := connectNodeRPC(cfg, ntfnHandlers)
+	if err != nil || exccdClient == nil {
 		return fmt.Errorf("Connection to exccd failed: %v", err)
 	}
 
@@ -101,9 +101,9 @@ func mainCore() error {
 		// Closing these channels should be unnecessary if quit was handled right
 		notify.CloseNtfnChans()
 
-		if dcrdClient != nil {
+		if exccdClient != nil {
 			log.Infof("Closing connection to exccd.")
-			dcrdClient.Shutdown()
+			exccdClient.Shutdown()
 		}
 
 		log.Infof("Bye!")
@@ -111,7 +111,7 @@ func mainCore() error {
 	}()
 
 	// Display connected network
-	curnet, err := dcrdClient.GetCurrentNet()
+	curnet, err := exccdClient.GetCurrentNet()
 	if err != nil {
 		return fmt.Errorf("Unable to get current network from exccd: %v", err)
 	}
@@ -126,9 +126,9 @@ func mainCore() error {
 
 	// Sqlite output
 	dbPath := filepath.Join(cfg.DataDir, cfg.DBFileName)
-	dbInfo := dcrsqlite.DBInfo{FileName: dbPath}
-	baseDB, cleanupDB, err := dcrsqlite.InitWiredDB(&dbInfo,
-		notify.NtfnChans.UpdateStatusDBHeight, dcrdClient, activeChain, cfg.DataDir)
+	dbInfo := exccsqlite.DBInfo{FileName: dbPath}
+	baseDB, cleanupDB, err := exccsqlite.InitWiredDB(&dbInfo,
+		notify.NtfnChans.UpdateStatusDBHeight, exccdClient, activeChain, cfg.DataDir)
 	defer cleanupDB()
 	if err != nil {
 		return fmt.Errorf("Unable to initialize SQLite database: %v", err)
@@ -137,7 +137,7 @@ func mainCore() error {
 	defer baseDB.Close()
 
 	// PostgreSQL
-	var auxDB *dcrpg.ChainDB
+	var auxDB *exccpg.ChainDB
 	var newPGIndexes, updateAllAddresses, updateAllVotes bool
 	if usePG {
 		pgHost, pgPort := cfg.PGHost, ""
@@ -147,14 +147,14 @@ func mainCore() error {
 				return fmt.Errorf("SplitHostPort failed: %v", err)
 			}
 		}
-		dbi := dcrpg.DBInfo{
+		dbi := exccpg.DBInfo{
 			Host:   pgHost,
 			Port:   pgPort,
 			User:   cfg.PGUser,
 			Pass:   cfg.PGPass,
 			DBName: cfg.PGDBName,
 		}
-		auxDB, err = dcrpg.NewChainDB(&dbi, activeChain, baseDB.GetStakeDB())
+		auxDB, err = exccpg.NewChainDB(&dbi, activeChain, baseDB.GetStakeDB())
 		if auxDB != nil {
 			defer auxDB.Close()
 		}
@@ -195,7 +195,7 @@ func mainCore() error {
 		close(quit)
 	}()
 
-	_, height, err := dcrdClient.GetBestBlock()
+	_, height, err := exccdClient.GetBestBlock()
 	if err != nil {
 		return fmt.Errorf("Unable to get block from node: %v", err)
 	}
@@ -271,7 +271,7 @@ func mainCore() error {
 	}
 
 	// Block data collector. Needs a StakeDatabase too.
-	collector := blockdata.NewCollector(dcrdClient, activeChain, baseDB.GetStakeDB())
+	collector := blockdata.NewCollector(exccdClient, activeChain, baseDB.GetStakeDB())
 	if collector == nil {
 		return fmt.Errorf("Failed to create block data collector")
 	}
@@ -312,7 +312,7 @@ func mainCore() error {
 		pgSyncRes := make(chan dbtypes.SyncResult)
 
 		// Synchronization between DBs via rpcutils.BlockGate
-		smartClient := rpcutils.NewBlockGate(dcrdClient, 10)
+		smartClient := rpcutils.NewBlockGate(exccdClient, 10)
 
 		// stakedb (in baseDB) connects blocks *after* ChainDB retrieves them, but
 		// it has to get a notification channel first to receive them. The BlockGate
@@ -339,7 +339,7 @@ func mainCore() error {
 	// follow main sync loop. Before enabling the chain monitors, ensure the DBs
 	// are at the node's best block.
 	updateAllAddresses, updateAllVotes, newPGIndexes = false, false, false
-	_, height, err = dcrdClient.GetBestBlock()
+	_, height, err = exccdClient.GetBestBlock()
 	if err != nil {
 		return fmt.Errorf("unable to get block from node: %v", err)
 	}
@@ -350,7 +350,7 @@ func mainCore() error {
 		if err != nil {
 			return err
 		}
-		_, height, err = dcrdClient.GetBestBlock()
+		_, height, err = exccdClient.GetBestBlock()
 		if err != nil {
 			return fmt.Errorf("unable to get block from node: %v", err)
 		}
@@ -358,7 +358,7 @@ func mainCore() error {
 	log.Infof("All ready, at height %d.", baseDBHeight)
 
 	// Register for notifications from exccd
-	cerr := notify.RegisterNodeNtfnHandlers(dcrdClient)
+	cerr := notify.RegisterNodeNtfnHandlers(exccdClient)
 	if cerr != nil {
 		return fmt.Errorf("RPC client error: %v (%v)", cerr.Error(), cerr.Cause())
 	}
@@ -436,7 +436,7 @@ func mainCore() error {
 	go wiredDBChainMonitor.ReorgHandler()
 
 	if cfg.MonitorMempool {
-		mpoolCollector := mempool.NewMempoolDataCollector(dcrdClient, activeChain)
+		mpoolCollector := mempool.NewMempoolDataCollector(exccdClient, activeChain)
 		if mpoolCollector == nil {
 			return fmt.Errorf("Failed to create mempool data collector")
 		}
@@ -468,7 +468,7 @@ func mainCore() error {
 		mpm := mempool.NewMempoolMonitor(mpoolCollector, mempoolSavers,
 			notify.NtfnChans.NewTxChan, quit, &wg, newTicketLimit, mini, maxi, mpi)
 		wg.Add(1)
-		go mpm.TxHandler(dcrdClient)
+		go mpm.TxHandler(exccdClient)
 	}
 
 	select {
@@ -478,7 +478,7 @@ func mainCore() error {
 	}
 
 	// Start web API
-	app := api.NewContext(dcrdClient, &baseDB, auxDB, cfg.IndentJSON)
+	app := api.NewContext(exccdClient, &baseDB, auxDB, cfg.IndentJSON)
 	// Start notification hander to keep /status up-to-date
 	wg.Add(1)
 	go app.StatusNtfnHandler(&wg, quit)
@@ -512,8 +512,8 @@ func mainCore() error {
 	webMux.Get("/search", explore.Search)
 
 	if usePG {
-		chainDBRPC, _ := dcrpg.NewChainDBRPC(auxDB, dcrdClient)
-		insightApp := insight.NewInsightContext(dcrdClient, chainDBRPC, activeChain, &baseDB, cfg.IndentJSON)
+		chainDBRPC, _ := exccpg.NewChainDBRPC(auxDB, exccdClient)
+		insightApp := insight.NewInsightContext(exccdClient, chainDBRPC, activeChain, &baseDB, cfg.IndentJSON)
 		insightMux := insight.NewInsightApiRouter(insightApp, cfg.UseRealIP)
 		webMux.Mount("/insight/api", insightMux.Mux)
 
@@ -601,8 +601,8 @@ func waitForSync(base chan dbtypes.SyncResult, aux chan dbtypes.SyncResult,
 }
 
 func connectNodeRPC(cfg *config, ntfnHandlers *rpcclient.NotificationHandlers) (*rpcclient.Client, semver.Semver, error) {
-	return rpcutils.ConnectNodeRPC(cfg.DcrdServ, cfg.DcrdUser, cfg.DcrdPass,
-		cfg.DcrdCert, cfg.DisableDaemonTLS, ntfnHandlers)
+	return rpcutils.ConnectNodeRPC(cfg.ExccdServ, cfg.ExccdUser, cfg.ExccdPass,
+		cfg.ExccdCert, cfg.DisableDaemonTLS, ntfnHandlers)
 }
 
 func listenAndServeProto(listen, proto string, mux http.Handler) error {

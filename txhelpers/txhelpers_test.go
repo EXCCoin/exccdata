@@ -120,14 +120,14 @@ func TxToWriter(tx *exccutil.Tx, w io.Writer) error {
 	return nil
 }
 
-// ConnectNodeRPC attempts to create a new websocket connection to a dcrd node,
+// ConnectNodeRPC attempts to create a new websocket connection to a exccd node,
 // with the given credentials and optional notification handlers.
 func ConnectNodeRPC(host, user, pass, cert string, disableTLS bool) (*rpcclient.Client, semver.Semver, error) {
-	var dcrdCerts []byte
+	var exccdCerts []byte
 	var err error
 	var nodeVer semver.Semver
 	if !disableTLS {
-		dcrdCerts, err = ioutil.ReadFile(cert)
+		exccdCerts, err = ioutil.ReadFile(cert)
 		if err != nil {
 			return nil, nodeVer, err
 		}
@@ -139,25 +139,25 @@ func ConnectNodeRPC(host, user, pass, cert string, disableTLS bool) (*rpcclient.
 		Endpoint:     "ws", // websocket
 		User:         user,
 		Pass:         pass,
-		Certificates: dcrdCerts,
+		Certificates: exccdCerts,
 		DisableTLS:   disableTLS,
 	}
 
-	dcrdClient, err := rpcclient.New(connCfgDaemon, nil)
+	exccdClient, err := rpcclient.New(connCfgDaemon, nil)
 	if err != nil {
-		return nil, nodeVer, fmt.Errorf("Failed to start dcrd RPC client: %s", err.Error())
+		return nil, nodeVer, fmt.Errorf("Failed to start exccd RPC client: %s", err.Error())
 	}
 
 	// Ensure the RPC server has a compatible API version.
-	ver, err := dcrdClient.Version()
+	ver, err := exccdClient.Version()
 	if err != nil {
 		return nil, nodeVer, fmt.Errorf("unable to get node RPC version")
 	}
 
-	dcrdVer := ver["dcrdjsonrpcapi"]
-	nodeVer = semver.NewSemver(dcrdVer.Major, dcrdVer.Minor, dcrdVer.Patch)
+	exccdVer := ver["exccdjsonrpcapi"]
+	nodeVer = semver.NewSemver(exccdVer.Major, exccdVer.Minor, exccdVer.Patch)
 
-	return dcrdClient, nodeVer, nil
+	return exccdClient, nodeVer, nil
 }
 
 func TestFilterHashSlice(t *testing.T) {

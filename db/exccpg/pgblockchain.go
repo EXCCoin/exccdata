@@ -1,7 +1,7 @@
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
 
-package dcrpg
+package exccpg
 
 import (
 	"bytes"
@@ -167,7 +167,7 @@ type DBInfo struct {
 	Host, Port, User, Pass, DBName string
 }
 
-// NewChainDB constructs a ChainDB for the given connection and Decred network
+// NewChainDB constructs a ChainDB for the given connection and EXCCoin network
 // parameters. By default, duplicate row checks on insertion are enabled.
 func NewChainDB(dbi *DBInfo, params *chaincfg.Params, stakeDB *stakedb.StakeDatabase) (*ChainDB, error) {
 	// Connect to the PostgreSQL daemon and return the *sql.DB
@@ -509,7 +509,7 @@ func (pgb *ChainDB) AddressHistory(address string, N, offset int64,
 		}
 	}
 
-	log.Infof("%s: %d spent totalling %f DCR, %d unspent totalling %f DCR",
+	log.Infof("%s: %d spent totalling %f EXCC, %d unspent totalling %f EXCC",
 		address, balanceInfo.NumSpent, exccutil.Amount(balanceInfo.TotalSpent).ToCoin(),
 		balanceInfo.NumUnspent, exccutil.Amount(balanceInfo.TotalUnspent).ToCoin())
 	log.Infof("Caching address receive count for address %s: "+
@@ -707,7 +707,7 @@ func (pgb *ChainDB) DeleteDuplicates() error {
 	log.Info("Finding and removing duplicate vins entries...")
 	var numVinsRemoved int64
 	if numVinsRemoved, err = pgb.DeleteDuplicateVins(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateVins failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateVins failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate vins entries.", numVinsRemoved)
 
@@ -715,7 +715,7 @@ func (pgb *ChainDB) DeleteDuplicates() error {
 	log.Info("Finding and removing duplicate vouts entries before indexing...")
 	var numVoutsRemoved int64
 	if numVoutsRemoved, err = pgb.DeleteDuplicateVouts(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateVouts failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateVouts failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate vouts entries.", numVoutsRemoved)
 
@@ -723,7 +723,7 @@ func (pgb *ChainDB) DeleteDuplicates() error {
 	log.Info("Finding and removing duplicate transactions entries before indexing...")
 	var numTxnsRemoved int64
 	if numTxnsRemoved, err = pgb.DeleteDuplicateTxns(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateTxns failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateTxns failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate transactions entries.", numTxnsRemoved)
 
@@ -739,7 +739,7 @@ func (pgb *ChainDB) DeleteDuplicatesRecovery() error {
 	log.Info("Finding and removing duplicate vins entries...")
 	var numVinsRemoved int64
 	if numVinsRemoved, err = pgb.DeleteDuplicateVins(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateVins failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateVins failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate vins entries.", numVinsRemoved)
 
@@ -747,7 +747,7 @@ func (pgb *ChainDB) DeleteDuplicatesRecovery() error {
 	log.Info("Finding and removing duplicate vouts entries before indexing...")
 	var numVoutsRemoved int64
 	if numVoutsRemoved, err = pgb.DeleteDuplicateVouts(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateVouts failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateVouts failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate vouts entries.", numVoutsRemoved)
 
@@ -758,28 +758,28 @@ func (pgb *ChainDB) DeleteDuplicatesRecovery() error {
 	log.Info("Finding and removing duplicate transactions entries before indexing...")
 	var numTxnsRemoved int64
 	if numTxnsRemoved, err = pgb.DeleteDuplicateTxns(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateTxns failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateTxns failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate transactions entries.", numTxnsRemoved)
 
 	// Remove duplicate tickets
 	log.Info("Finding and removing duplicate tickets entries before indexing...")
 	if numTxnsRemoved, err = pgb.DeleteDuplicateTickets(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateTickets failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateTickets failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate tickets entries.", numTxnsRemoved)
 
 	// Remove duplicate votes
 	log.Info("Finding and removing duplicate votes entries before indexing...")
 	if numTxnsRemoved, err = pgb.DeleteDuplicateVotes(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateVotes failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateVotes failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate votes entries.", numTxnsRemoved)
 
 	// Remove duplicate misses
 	log.Info("Finding and removing duplicate misses entries before indexing...")
 	if numTxnsRemoved, err = pgb.DeleteDuplicateMisses(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateMisses failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateMisses failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate misses entries.", numTxnsRemoved)
 

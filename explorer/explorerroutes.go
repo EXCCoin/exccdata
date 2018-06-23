@@ -39,7 +39,7 @@ func (exp *explorerUI) Home(w http.ResponseWriter, r *http.Request) {
 	if end < 0 {
 		end = 0
 	}
-	
+
 	blocks := exp.blockData.GetExplorerBlocks(height, end)
 
 	exp.NewBlockDataMtx.Lock()

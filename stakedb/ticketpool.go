@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/asdine/storm"
 	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/asdine/storm"
 )
 
 // TicketPool contains the live ticket pool diffs (tickets in/out) between

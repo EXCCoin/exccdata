@@ -89,7 +89,7 @@ type DataSourceAux interface {
 	AddressTotals(address string) (*apitypes.AddressTotals, error)
 }
 
-// dcrdata application context used by all route handlers
+// exccdata application context used by all route handlers
 type appContext struct {
 	nodeClient    *rpcclient.Client
 	BlockData     DataSourceLite
@@ -119,7 +119,7 @@ func NewContext(client *rpcclient.Client, dataSource DataSourceLite, auxDataSour
 			Height:          uint32(nodeHeight),
 			NodeConnections: conns,
 			APIVersion:      APIVersion,
-			DcrdataVersion:  appver.Ver.String(),
+			ExccdataVersion: appver.Ver.String(),
 		},
 		JSONIndent: JSONIndent,
 	}

@@ -129,7 +129,7 @@ func (p *mempoolMonitor) TxHandler(client *rpcclient.Client) {
 			// OnTxAccepted probably sent on newTxChan
 			tx, err := client.GetRawTransaction(s.Hash)
 			if err != nil {
-				log.Errorf("Failed to get transaction (do you have --txindex with dcrd?) %v: %v",
+				log.Errorf("Failed to get transaction (do you have --txindex with exccd?) %v: %v",
 					s.Hash.String(), err)
 				continue
 			}
@@ -138,7 +138,7 @@ func (p *mempoolMonitor) TxHandler(client *rpcclient.Client) {
 			// make a note of it and go back to the loop.
 			txType := stake.DetermineTxType(tx.MsgTx())
 			//s.Tree() == exccutil.TxTreeRegular
-			// See dcrd/blockchain/stake/staketx.go for information about
+			// See exccd/blockchain/stake/staketx.go for information about
 			// specifications for different transaction types.
 
 			switch txType {
@@ -302,24 +302,24 @@ func (m *MempoolData) GetNumTickets() uint32 {
 }
 
 type mempoolDataCollector struct {
-	mtx          sync.Mutex
-	dcrdChainSvr *rpcclient.Client
-	activeChain  *chaincfg.Params
+	mtx           sync.Mutex
+	exccdChainSvr *rpcclient.Client
+	activeChain   *chaincfg.Params
 }
 
 // NewMempoolDataCollector creates a new mempoolDataCollector.
-func NewMempoolDataCollector(dcrdChainSvr *rpcclient.Client, params *chaincfg.Params) *mempoolDataCollector {
+func NewMempoolDataCollector(exccdChainSvr *rpcclient.Client, params *chaincfg.Params) *mempoolDataCollector {
 	return &mempoolDataCollector{
-		mtx:          sync.Mutex{},
-		dcrdChainSvr: dcrdChainSvr,
-		activeChain:  params,
+		mtx:           sync.Mutex{},
+		exccdChainSvr: exccdChainSvr,
+		activeChain:   params,
 	}
 }
 
 // Collect is the main handler for collecting chain data
 func (t *mempoolDataCollector) Collect() (*MempoolData, error) {
 	// In case of a very fast block, make sure previous call to collect is not
-	// still running, or dcrd may be mad.
+	// still running, or exccd may be mad.
 	t.mtx.Lock()
 	defer t.mtx.Unlock()
 
@@ -330,7 +330,7 @@ func (t *mempoolDataCollector) Collect() (*MempoolData, error) {
 	}(time.Now())
 
 	// client
-	c := t.dcrdChainSvr
+	c := t.exccdChainSvr
 
 	// Get a map of ticket hashes to getrawmempool results
 	// mempoolTickets[ticketHashes[0].String()].Fee
@@ -357,7 +357,7 @@ func (t *mempoolDataCollector) Collect() (*MempoolData, error) {
 	allTicketsDetails := make(TicketsDetails, 0, N)
 	for hash, t := range mempoolTickets {
 		//ageSec := time.Since(time.Unix(t.Time, 0)).Seconds()
-		// Compute fee in DCR / kB
+		// Compute fee in EXCC / kB
 		feeRate := t.Fee / float64(t.Size) * 1000
 		allTicketsDetails = append(allTicketsDetails, &apitypes.TicketDetails{
 			Hash:    hash,

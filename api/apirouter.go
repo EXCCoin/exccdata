@@ -180,7 +180,7 @@ func NewAPIRouter(app *appContext, userRealIP bool) apiMux {
 
 	// 	fmt.Println(docgen.MarkdownRoutesDoc(mux, docgen.MarkdownOpts{
 	// 		ProjectPath: "github.com/EXCCoin/exccdata",
-	// 		Intro:       "dcrdata HTTP router directory",
+	// 		Intro:       "exccdata HTTP router directory",
 	// 	}))
 	// 	return
 	// }
@@ -211,7 +211,7 @@ func NewAPIRouter(app *appContext, userRealIP bool) apiMux {
 func (mux *apiMux) ListenAndServeProto(listen, proto string) {
 	apiLog.Infof("Now serving on %s://%v/", proto, listen)
 	if proto == "https" {
-		go http.ListenAndServeTLS(listen, "dcrdata.cert", "dcrdata.key", mux)
+		go http.ListenAndServeTLS(listen, "exccdata.cert", "exccdata.key", mux)
 	}
 	go http.ListenAndServe(listen, mux)
 }

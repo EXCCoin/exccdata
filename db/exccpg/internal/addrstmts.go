@@ -97,10 +97,10 @@ const (
 		WHERE address=$1
 		ORDER BY id DESC LIMIT $2 OFFSET $3;`
 
-	// Update Vin due to DCRD AMOUNTIN - START
+	// Update Vin due to EXCCD AMOUNTIN - START
 	SelectAddressIDsByFundingOutpoint = `SELECT id, address, value FROM addresses
 		WHERE funding_tx_hash=$1 and funding_tx_vout_index=$2;`
-	// Update Vin due to DCRD AMOUNTIN - END
+	// Update Vin due to EXCCD AMOUNTIN - END
 
 	SelectAddressIDByVoutIDAddress = `SELECT id FROM addresses
 		WHERE address=$1 and vout_row_id=$2

@@ -97,20 +97,20 @@ func (b *BlockData) ToBlockExplorerSummary() apitypes.BlockExplorerBasic {
 
 // Collector models a structure for the source of the blockdata
 type Collector struct {
-	mtx          sync.Mutex
-	dcrdChainSvr *rpcclient.Client
-	netParams    *chaincfg.Params
-	stakeDB      *stakedb.StakeDatabase
+	mtx           sync.Mutex
+	exccdChainSvr *rpcclient.Client
+	netParams     *chaincfg.Params
+	stakeDB       *stakedb.StakeDatabase
 }
 
 // NewCollector creates a new Collector.
-func NewCollector(dcrdChainSvr *rpcclient.Client, params *chaincfg.Params,
+func NewCollector(exccdChainSvr *rpcclient.Client, params *chaincfg.Params,
 	stakeDB *stakedb.StakeDatabase) *Collector {
 	return &Collector{
-		mtx:          sync.Mutex{},
-		dcrdChainSvr: dcrdChainSvr,
-		netParams:    params,
-		stakeDB:      stakeDB,
+		mtx:           sync.Mutex{},
+		exccdChainSvr: exccdChainSvr,
+		netParams:     params,
+		stakeDB:       stakeDB,
 	}
 }
 
@@ -142,18 +142,18 @@ func (t *Collector) CollectAPITypes(hash *chainhash.Hash) (*apitypes.BlockDataBa
 func (t *Collector) CollectBlockInfo(hash *chainhash.Hash) (*apitypes.BlockDataBasic,
 	*exccjson.FeeInfoBlock, *exccjson.GetBlockHeaderVerboseResult,
 	*apitypes.BlockExplorerExtraInfo, *wire.MsgBlock, error) {
-	msgBlock, err := t.dcrdChainSvr.GetBlock(hash)
+	msgBlock, err := t.exccdChainSvr.GetBlock(hash)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
 	height := msgBlock.Header.Height
 	block := exccutil.NewBlock(msgBlock)
 	txLen := len(block.Transactions())
-	coinSupply, err := t.dcrdChainSvr.GetCoinSupply()
+	coinSupply, err := t.exccdChainSvr.GetCoinSupply()
 	if err != nil {
 		log.Error("GetCoinSupply failed: ", err)
 	}
-	nbSubsidy, err := t.dcrdChainSvr.GetBlockSubsidy(int64(msgBlock.Header.Height)+1, 5)
+	nbSubsidy, err := t.exccdChainSvr.GetBlockSubsidy(int64(msgBlock.Header.Height)+1, 5)
 	if err != nil {
 		log.Errorf("GetBlockSubsidy for %d failed: %v", msgBlock.Header.Height, err)
 	}
@@ -181,7 +181,7 @@ func (t *Collector) CollectBlockInfo(hash *chainhash.Hash) (*apitypes.BlockDataB
 	diff := txhelpers.GetDifficultyRatio(header.Bits, t.netParams)
 	sdiff := exccutil.Amount(header.SBits).ToCoin()
 
-	blockHeaderResults, err := t.dcrdChainSvr.GetBlockHeaderVerbose(hash)
+	blockHeaderResults, err := t.exccdChainSvr.GetBlockHeaderVerbose(hash)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
@@ -207,7 +207,7 @@ func (t *Collector) CollectBlockInfo(hash *chainhash.Hash) (*apitypes.BlockDataB
 // CollectHash collects chain data at the block with the specified hash.
 func (t *Collector) CollectHash(hash *chainhash.Hash) (*BlockData, *wire.MsgBlock, error) {
 	// In case of a very fast block, make sure previous call to collect is not
-	// still running, or dcrd may be mad.
+	// still running, or exccd may be mad.
 	t.mtx.Lock()
 	defer t.mtx.Unlock()
 
@@ -223,7 +223,7 @@ func (t *Collector) CollectHash(hash *chainhash.Hash) (*BlockData, *wire.MsgBloc
 	}
 
 	// Number of peer connection to chain server
-	numConn, err := t.dcrdChainSvr.GetConnectionCount()
+	numConn, err := t.exccdChainSvr.GetConnectionCount()
 	if err != nil {
 		log.Warn("Unable to get connection count: ", err)
 	}
@@ -249,7 +249,7 @@ func (t *Collector) CollectHash(hash *chainhash.Hash) (*BlockData, *wire.MsgBloc
 // Collect collects chain data at the current best block.
 func (t *Collector) Collect() (*BlockData, *wire.MsgBlock, error) {
 	// In case of a very fast block, make sure previous call to collect is not
-	// still running, or dcrd may be mad.
+	// still running, or exccd may be mad.
 	t.mtx.Lock()
 	defer t.mtx.Unlock()
 
@@ -267,7 +267,7 @@ func (t *Collector) Collect() (*BlockData, *wire.MsgBlock, error) {
 
 	// Pull and store relevant data about the blockchain.
 	go func() {
-		bestBlockHash, err := t.dcrdChainSvr.GetBestBlockHash()
+		bestBlockHash, err := t.exccdChainSvr.GetBestBlockHash()
 		toch <- bbhRes{err, bestBlockHash}
 	}()
 
@@ -275,18 +275,18 @@ func (t *Collector) Collect() (*BlockData, *wire.MsgBlock, error) {
 	select {
 	case bbs = <-toch:
 	case <-time.After(time.Second * 10):
-		log.Errorf("Timeout waiting for dcrd.")
+		log.Errorf("Timeout waiting for exccd.")
 		return nil, nil, errors.New("Timeout")
 	}
 
 	// Stake difficulty
-	stakeDiff, err := t.dcrdChainSvr.GetStakeDifficulty()
+	stakeDiff, err := t.exccdChainSvr.GetStakeDifficulty()
 	if err != nil {
 		return nil, nil, err
 	}
 
 	// estimatestakediff
-	estStakeDiff, err := t.dcrdChainSvr.EstimateStakeDiff(nil)
+	estStakeDiff, err := t.exccdChainSvr.EstimateStakeDiff(nil)
 	if err != nil {
 		log.Warn("estimatestakediff is broken: ", err)
 		estStakeDiff = &exccjson.EstimateStakeDiffResult{}
@@ -299,7 +299,7 @@ func (t *Collector) Collect() (*BlockData, *wire.MsgBlock, error) {
 	}
 
 	// Number of peer connection to chain server
-	numConn, err := t.dcrdChainSvr.GetConnectionCount()
+	numConn, err := t.exccdChainSvr.GetConnectionCount()
 	if err != nil {
 		log.Warn("Unable to get connection count: ", err)
 	}

@@ -175,7 +175,7 @@ func NewStakeDatabase(client *rpcclient.Client, params *chaincfg.Params,
 		return nil, fmt.Errorf("failed to advance ticket pool DB to tip: %v", err)
 	}
 
-	// Live tickets from dcrdata's stake Node's perspective
+	// Live tickets from exccdata's stake Node's perspective
 	liveTickets := sDB.BestNode.LiveTickets()
 
 	log.Info("Pre-populating live ticket cache and computing pool value...")
@@ -562,7 +562,7 @@ func (db *StakeDatabase) Open(dbName string) error {
 	if err != nil {
 		if strings.Contains(err.Error(), "resource temporarily unavailable") ||
 			strings.Contains(err.Error(), "is being used by another process") {
-			return fmt.Errorf("Stake DB already opened. dcrdata running?")
+			return fmt.Errorf("Stake DB already opened. exccdata running?")
 		}
 		if strings.Contains(err.Error(), "does not exist") {
 			log.Info("Creating new stake DB.")

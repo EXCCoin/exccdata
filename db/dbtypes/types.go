@@ -332,7 +332,7 @@ type Tx struct {
 	// vout will have a tx_dbid
 }
 
-// Block models a Decred block.
+// Block models a EXCCoin block.
 type Block struct {
 	Hash         string `json:"hash"`
 	Size         uint32 `json:"size"`

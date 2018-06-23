@@ -10,7 +10,7 @@ import (
 
 	"github.com/EXCCoin/exccdata/api/insight"
 	"github.com/EXCCoin/exccdata/blockdata"
-	"github.com/EXCCoin/exccdata/db/dcrsqlite"
+	"github.com/EXCCoin/exccdata/db/exccsqlite"
 	"github.com/EXCCoin/exccdata/explorer"
 	"github.com/EXCCoin/exccdata/mempool"
 	"github.com/EXCCoin/exccdata/stakedb"
@@ -38,7 +38,7 @@ var NtfnChans struct {
 	ConnectChan                       chan *chainhash.Hash
 	ReorgChanBlockData                chan *blockdata.ReorgData
 	ConnectChanWiredDB                chan *chainhash.Hash
-	ReorgChanWiredDB                  chan *dcrsqlite.ReorgData
+	ReorgChanWiredDB                  chan *exccsqlite.ReorgData
 	ConnectChanStakeDB                chan *chainhash.Hash
 	ReorgChanStakeDB                  chan *stakedb.ReorgData
 	UpdateStatusNodeHeight            chan uint32
@@ -67,7 +67,7 @@ func MakeNtfnChans(monitorMempool, postgresEnabled bool) {
 
 	// Reorg data channels
 	NtfnChans.ReorgChanBlockData = make(chan *blockdata.ReorgData)
-	NtfnChans.ReorgChanWiredDB = make(chan *dcrsqlite.ReorgData)
+	NtfnChans.ReorgChanWiredDB = make(chan *exccsqlite.ReorgData)
 	NtfnChans.ReorgChanStakeDB = make(chan *stakedb.ReorgData)
 
 	// To update app status
