@@ -32,9 +32,6 @@
 .exccicon-sun-stroke:before {
   content: "\e902";
 }
-.exccicon-excc:before {
-  content: "\e900";
-}
 
 /*fonts*/
 @font-face {
@@ -265,11 +262,6 @@ body.darkBG .progress {
 }
 .top-nav a {
   color: #052f4b;
-}
-.top-nav .exccicon-excc {
-  font-size: 25px;
-  top: 1px;
-  position: relative;
 }
 .top-search {
   height: 30px;

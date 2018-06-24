@@ -344,7 +344,7 @@ func (exp *explorerUI) simulateASR(StartingEXCCBalance float64, IntegerTicketQty
 	}
 
 	MaxCoinSupplyAtBlock := func(blocknum float64) float64 {
-		// 4th order poly best fit curve to excc mainnet emissions plot.
+		// 4th order poly best fit curve to EXCCoin mainnet emissions plot.
 		// Curve fit was done with 0 Y intercept and Pre-Mine added after.
 
 		return (-9E-19*math.Pow(blocknum, 4) +
@@ -430,8 +430,7 @@ func (exp *explorerUI) simulateASR(StartingEXCCBalance float64, IntegerTicketQty
 // The expected block (aka mean) of the probability distribution is given by:
 //      sum(B * P(B)), B=1 to 40960
 // Where B is the block number and P(B) is the probability of voting at
-// block B.  For more information see:
-// https://github.com/EXCCoin/exccdata/issues/471#issuecomment-390063025
+// block B.
 
 func calcMeanVotingBlocks(params *chaincfg.Params) int64 {
 	logPoolSizeM1 := math.Log(float64(params.TicketPoolSize) - 1)

@@ -19,8 +19,8 @@ The exccdata repository is a collection of golang packages and apps for [EXCCoin
 │   └── scanblocks      scanblocks utility.
 ├── db
 │   ├── dbtypes         Package dbtypes with common data types.
-│   ├── exccpg           Package exccpg providing PostgreSQL backend.
-│   └── exccsqlite       Package exccsqlite providing SQLite backend.
+│   ├── exccpg          Package exccpg providing PostgreSQL backend.
+│   └── exccsqlite      Package exccsqlite providing SQLite backend.
 ├── dev                 Shell scripts for maintenance and deployment.
 ├── public              Public resources for block explorer (css, js, etc.).
 ├── explorer            Package explorer, powering the block explorer.
@@ -345,9 +345,9 @@ provided.
 `package stakedb` defines the `StakeDatabase` and `ChainMonitor` types for
 efficiently tracking live tickets, with the primary purpose of computing ticket
 pool value quickly.  It uses the `database.DB` type from
-`github.com/EXCCoin/exccdata/database` with an ffldb storage backend from
-`github.com/EXCCoin/exccdata/database/ffldb`.  It also makes use of the `stake.Node`
-type from `github.com/EXCCoin/exccdata/blockchain/stake`.  The `ChainMonitor` type
+`github.com/EXCCoin/exccd/database` with an ffldb storage backend from
+`github.com/EXCCoin/exccd/database/ffldb`.  It also makes use of the `stake.Node`
+type from `github.com/EXCCoin/exccd/blockchain/stake`.  The `ChainMonitor` type
 handles connecting new blocks and chain reorganization in response to notifications
 from exccd.
 
