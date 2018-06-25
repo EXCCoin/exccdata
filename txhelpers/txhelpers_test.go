@@ -88,6 +88,29 @@ func LoadTestBlockAndSSTX(t *testing.T) (*exccutil.Block, []*exccutil.Tx) {
 	return block, allTxRead
 }
 
+func TestFeeRateInfoBlock(t *testing.T) {
+	// TODO update fibExpected values based on binary blob loaded in LoadTestBlockAndSSTX
+	t.SkipNow()
+	block, _ := LoadTestBlockAndSSTX(t)
+
+	fib := FeeRateInfoBlock(block)
+	t.Log(*fib)
+
+	fibExpected := exccjson.FeeInfoBlock{
+		Height: 138883,
+		Number: 20,
+		Min:    0.5786178114478114,
+		Max:    0.70106,
+		Mean:   0.5969256371196103,
+		Median: 0.595365723905724,
+		StdDev: 0.02656563242880357,
+	}
+
+	if !reflect.DeepEqual(fibExpected, *fib) {
+		t.Errorf("Fee Info Block mismatch. Expected %v, got %v.", fibExpected, *fib)
+	}
+}
+
 func TestFeeInfoBlock(t *testing.T) {
 	block, _ := LoadTestBlockAndSSTX(t)
 
