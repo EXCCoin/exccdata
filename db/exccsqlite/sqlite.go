@@ -1,7 +1,7 @@
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
 
-package dcrsqlite
+package exccsqlite
 
 import (
 	"database/sql"
@@ -10,11 +10,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/decred/slog"
+	"github.com/btcsuite/btclog"
 
-	"github.com/decred/dcrd/wire"
-	apitypes "github.com/decred/dcrdata/api/types"
-	"github.com/decred/dcrdata/blockdata"
+	"github.com/EXCCoin/exccd/wire"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/blockdata"
 	_ "github.com/mattn/go-sqlite3" // register sqlite driver with database/sql
 )
 
@@ -37,9 +37,9 @@ type DBInfo struct {
 
 const (
 	// TableNameSummaries is name of the table used to store block summary data
-	TableNameSummaries = "dcrdata_block_summary"
+	TableNameSummaries = "exccdata_block_summary"
 	// TableNameStakeInfo is name of the table used to store extended stake info
-	TableNameStakeInfo = "dcrdata_stakeinfo_extended"
+	TableNameStakeInfo = "exccdata_stakeinfo_extended"
 )
 
 // DB is a wrapper around sql.DB that adds methods for storing and retrieving
@@ -813,7 +813,7 @@ func (db *DB) RetrieveStakeInfoExtended(ind int64) (*apitypes.StakeInfoExtended,
 // }
 
 func logDBResult(res sql.Result) error {
-	if log.Level() > slog.LevelTrace {
+	if log.Level() > btclog.LevelTrace {
 		return nil
 	}
 

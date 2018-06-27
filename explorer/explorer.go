@@ -11,18 +11,17 @@ import (
 	"os"
 	"os/signal"
 	"reflect"
-	"runtime"
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/blockdata"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/txhelpers"
-	humanize "github.com/dustin/go-humanize"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/txhelpers"
+	"github.com/dustin/go-humanize"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/rs/cors"
@@ -45,14 +44,14 @@ type explorerDataSourceLite interface {
 	GetBlockHash(idx int64) (string, error)
 	GetExplorerTx(txid string) *TxInfo
 	GetExplorerAddress(address string, count, offset int64) *AddressInfo
-	DecodeRawTransaction(txhex string) (*dcrjson.TxRawResult, error)
+	DecodeRawTransaction(txhex string) (*exccjson.TxRawResult, error)
 	SendRawTransaction(txhex string) (string, error)
 	GetHeight() int
 	GetChainParams() *chaincfg.Params
 	UnconfirmedTxnsForAddress(address string) (*txhelpers.AddressOutpoints, int64, error)
 	GetMempool() []MempoolTx
 	TxHeight(txid string) (height int64)
-	BlockSubsidy(height int64, voters uint16) *dcrjson.GetBlockSubsidyResult
+	BlockSubsidy(height int64, voters uint16) *exccjson.GetBlockSubsidyResult
 }
 
 // explorerDataSource implements extra data retrieval functions that require a
@@ -62,7 +61,6 @@ type explorerDataSource interface {
 	SpendingTransactions(fundingTxID string) ([]string, []uint32, []uint32, error)
 	PoolStatusForTicket(txid string) (dbtypes.TicketSpendType, dbtypes.TicketPoolStatus, error)
 	AddressHistory(address string, N, offset int64, txnType dbtypes.AddrTxnType) ([]*dbtypes.AddressRow, *AddressBalance, error)
-	DevBalance() (*AddressBalance, error)
 	FillAddressTransactions(addrInfo *AddressInfo) error
 	BlockMissedVotes(blockHash string) ([]string, error)
 }
@@ -170,16 +168,8 @@ func New(dataSource explorerDataSourceLite, primaryDataSource explorerDataSource
 	exp.ChainParams = params
 	exp.NetName = netName(exp.ChainParams)
 
-	// Development subsidy address of the current network
-	devSubsidyAddress, err := dbtypes.DevSubsidyAddress(params)
-	if err != nil {
-		log.Warnf("explorer.New: %v", err)
-	}
-	log.Debugf("Organization address: %s", devSubsidyAddress)
-
 	// Set default static values for ExtraInfo
 	exp.ExtraInfo = &HomeInfo{
-		DevAddress: devSubsidyAddress,
 		Params: ChainParams{
 			WindowSize:       exp.ChainParams.StakeDiffWindowSize,
 			RewardWindowSize: exp.ChainParams.SubsidyReductionInterval,
@@ -235,7 +225,7 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 		return (a / b) * 100
 	}
 
-	stakePerc := blockData.PoolInfo.Value / dcrutil.Amount(blockData.ExtraInfo.CoinSupply).ToCoin()
+	stakePerc := blockData.PoolInfo.Value / exccutil.Amount(blockData.ExtraInfo.CoinSupply).ToCoin()
 
 	// Update all ExtraInfo with latest data
 	exp.ExtraInfo.CoinSupply = blockData.ExtraInfo.CoinSupply
@@ -243,7 +233,6 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 	exp.ExtraInfo.IdxBlockInWindow = blockData.IdxBlockInWindow
 	exp.ExtraInfo.IdxInRewardWindow = int(newBlockData.Height % exp.ChainParams.SubsidyReductionInterval)
 	exp.ExtraInfo.Difficulty = blockData.Header.Difficulty
-	exp.ExtraInfo.NBlockSubsidy.Dev = blockData.ExtraInfo.NextBlockSubsidy.Developer
 	exp.ExtraInfo.NBlockSubsidy.PoS = blockData.ExtraInfo.NextBlockSubsidy.PoS
 	exp.ExtraInfo.NBlockSubsidy.PoW = blockData.ExtraInfo.NextBlockSubsidy.PoW
 	exp.ExtraInfo.NBlockSubsidy.Total = blockData.ExtraInfo.NextBlockSubsidy.Total
@@ -258,7 +247,7 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 	}()
 
 	exp.ExtraInfo.TicketReward = func() float64 {
-		PosSubPerVote := dcrutil.Amount(blockData.ExtraInfo.NextBlockSubsidy.PoS).ToCoin() / float64(exp.ChainParams.TicketsPerBlock)
+		PosSubPerVote := exccutil.Amount(blockData.ExtraInfo.NextBlockSubsidy.PoS).ToCoin() / float64(exp.ChainParams.TicketsPerBlock)
 		return percentage(PosSubPerVote, blockData.CurrentStakeDiff.CurrentStakeDifficulty)
 	}()
 
@@ -275,17 +264,13 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 	}()
 
 	asr, _ := exp.simulateASR(1000, false, stakePerc,
-		dcrutil.Amount(blockData.ExtraInfo.CoinSupply).ToCoin(),
+		exccutil.Amount(blockData.ExtraInfo.CoinSupply).ToCoin(),
 		float64(exp.NewBlockData.Height),
 		blockData.CurrentStakeDiff.CurrentStakeDifficulty)
 
 	exp.ExtraInfo.ASR = asr
 
 	exp.NewBlockDataMtx.Unlock()
-
-	if !exp.liteMode {
-		go exp.updateDevFundBalance()
-	}
 
 	// Signal to the websocket hub that a new block was received, but do not
 	// block Store(), and do not hang forever in a goroutine waiting to send.
@@ -300,20 +285,6 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 	log.Debugf("Got new block %d for the explorer.", newBlockData.Height)
 
 	return nil
-}
-
-func (exp *explorerUI) updateDevFundBalance() {
-	// yield processor to other goroutines
-	runtime.Gosched()
-	exp.NewBlockDataMtx.Lock()
-	defer exp.NewBlockDataMtx.Unlock()
-
-	devBalance, err := exp.explorerSource.DevBalance()
-	if err == nil && devBalance != nil {
-		exp.ExtraInfo.DevFund = devBalance.TotalUnspent
-	} else {
-		log.Errorf("explorerUI.updateDevFundBalance failed: %v", err)
-	}
 }
 
 func (exp *explorerUI) addRoutes() {
@@ -343,10 +314,10 @@ func (exp *explorerUI) addRoutes() {
 }
 
 // Simulate ticket purchase and re-investment over a full year for a given
-// starting amount of DCR and calculation parameters.  Generate a TEXT table of
+// starting amount of EXCC and calculation parameters.  Generate a TEXT table of
 // the simulation results that can optionally be used for future expansion of
-// dcrdata functionality.
-func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty bool,
+// exccdata functionality.
+func (exp *explorerUI) simulateASR(StartingEXCCBalance float64, IntegerTicketQty bool,
 	CurrentStakePercent float64, ActualCoinbase float64, CurrentBlockNum float64,
 	ActualTicketPrice float64) (ASR float64, ReturnTable string) {
 
@@ -363,17 +334,17 @@ func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty 
 	StakeRewardAtBlock := func(blocknum float64) float64 {
 		// Option 1:  RPC Call
 		Subsidy := exp.blockData.BlockSubsidy(int64(blocknum), 1)
-		return dcrutil.Amount(Subsidy.PoS).ToCoin()
+		return exccutil.Amount(Subsidy.PoS).ToCoin()
 
 		// Option 2:  Calculation
 		// epoch := math.Floor(blocknum / float64(exp.ChainParams.SubsidyReductionInterval))
 		// RewardProportionPerVote := float64(exp.ChainParams.StakeRewardProportion) / (10 * float64(exp.ChainParams.TicketsPerBlock))
-		// return float64(RewardProportionPerVote) * dcrutil.Amount(exp.ChainParams.BaseSubsidy).ToCoin() *
+		// return float64(RewardProportionPerVote) * exccutil.Amount(exp.ChainParams.BaseSubsidy).ToCoin() *
 		// 	math.Pow(float64(exp.ChainParams.MulSubsidy)/float64(exp.ChainParams.DivSubsidy), epoch)
 	}
 
 	MaxCoinSupplyAtBlock := func(blocknum float64) float64 {
-		// 4th order poly best fit curve to Decred mainnet emissions plot.
+		// 4th order poly best fit curve to EXCCoin mainnet emissions plot.
 		// Curve fit was done with 0 Y intercept and Pre-Mine added after.
 
 		return (-9E-19*math.Pow(blocknum, 4) +
@@ -398,11 +369,11 @@ func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty 
 	// Prepare for simulation
 	simblock := CurrentBlockNum
 	TicketPrice := ActualTicketPrice
-	DCRBalance := StartingDCRBalance
+	EXCCBalance := StartingEXCCBalance
 
-	ReturnTable += fmt.Sprintf("\n\nBLOCKNUM        DCR  TICKETS TKT_PRICE TKT_REWRD  ACTION\n")
+	ReturnTable += fmt.Sprintf("\n\nBLOCKNUM        EXCC  TICKETS TKT_PRICE TKT_REWRD  ACTION\n")
 	ReturnTable += fmt.Sprintf("%8d  %9.2f %8.1f %9.2f %9.2f    INIT\n",
-		int64(simblock), DCRBalance, TicketsPurchased,
+		int64(simblock), EXCCBalance, TicketsPurchased,
 		TicketPrice, StakeRewardAtBlock(simblock))
 
 	for simblock < (BlocksPerYear + CurrentBlockNum) {
@@ -412,36 +383,36 @@ func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty 
 
 		if IntegerTicketQty {
 			// Use this to simulate integer qtys of tickets up to max funds
-			TicketsPurchased = math.Floor(DCRBalance / TicketPrice)
+			TicketsPurchased = math.Floor(EXCCBalance / TicketPrice)
 		} else {
 			// Use this to simulate ALL funds used to buy tickets - even fractional tickets
 			// which is actually not possible
-			TicketsPurchased = (DCRBalance / TicketPrice)
+			TicketsPurchased = (EXCCBalance / TicketPrice)
 		}
 
-		DCRBalance -= (TicketPrice * TicketsPurchased)
+		EXCCBalance -= (TicketPrice * TicketsPurchased)
 		ReturnTable += fmt.Sprintf("%8d  %9.2f %8.1f %9.2f %9.2f     BUY\n",
-			int64(simblock), DCRBalance, TicketsPurchased,
+			int64(simblock), EXCCBalance, TicketsPurchased,
 			TicketPrice, StakeRewardAtBlock(simblock))
 
 		// Move forward to average vote
 		simblock += (float64(exp.ChainParams.TicketMaturity) + float64(exp.ExtraInfo.Params.MeanVotingBlocks))
 		ReturnTable += fmt.Sprintf("%8d  %9.2f %8.1f %9.2f %9.2f    VOTE\n",
-			int64(simblock), DCRBalance, TicketsPurchased,
+			int64(simblock), EXCCBalance, TicketsPurchased,
 			(TheoreticalTicketPrice(simblock) * TicketAdjustmentFactor), StakeRewardAtBlock(simblock))
 
 		// Simulate return of funds
-		DCRBalance += (TicketPrice * TicketsPurchased)
+		EXCCBalance += (TicketPrice * TicketsPurchased)
 
 		// Simulate reward
-		DCRBalance += (StakeRewardAtBlock(simblock) * TicketsPurchased)
+		EXCCBalance += (StakeRewardAtBlock(simblock) * TicketsPurchased)
 		TicketsPurchased = 0
 
 		// Move forward to coinbase maturity
 		simblock += float64(exp.ChainParams.CoinbaseMaturity)
 
 		ReturnTable += fmt.Sprintf("%8d  %9.2f %8.1f %9.2f %9.2f  REWARD\n",
-			int64(simblock), DCRBalance, TicketsPurchased,
+			int64(simblock), EXCCBalance, TicketsPurchased,
 			(TheoreticalTicketPrice(simblock) * TicketAdjustmentFactor), StakeRewardAtBlock(simblock))
 
 		// Need to receive funds before we can use them again so add 1 block
@@ -449,7 +420,7 @@ func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty 
 	}
 
 	// Scale down to exactly 365 days
-	SimulationReward := ((DCRBalance - StartingDCRBalance) / StartingDCRBalance) * 100
+	SimulationReward := ((EXCCBalance - StartingEXCCBalance) / StartingEXCCBalance) * 100
 	ASR = (BlocksPerYear / (simblock - CurrentBlockNum)) * SimulationReward
 	ReturnTable += fmt.Sprintf("ASR over 365 Days is %.2f.\n", ASR)
 	return
@@ -459,8 +430,7 @@ func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty 
 // The expected block (aka mean) of the probability distribution is given by:
 //      sum(B * P(B)), B=1 to 40960
 // Where B is the block number and P(B) is the probability of voting at
-// block B.  For more information see:
-// https://github.com/decred/dcrdata/issues/471#issuecomment-390063025
+// block B.
 
 func calcMeanVotingBlocks(params *chaincfg.Params) int64 {
 	logPoolSizeM1 := math.Log(float64(params.TicketPoolSize) - 1)

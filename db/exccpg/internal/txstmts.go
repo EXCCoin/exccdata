@@ -3,7 +3,7 @@ package internal
 import (
 	"fmt"
 
-	"github.com/decred/dcrd/blockchain/stake"
+	"github.com/EXCCoin/exccd/blockchain/stake"
 )
 
 const (

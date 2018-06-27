@@ -3,6 +3,57 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/EXCCoin/base58"
+  packages = ["."]
+  revision = "56c501706f00d9e1cfacee19a27117e12da24734"
+
+[[projects]]
+  branch = "task/DEX-161_test_mainnet"
+  name = "github.com/EXCCoin/exccd"
+  packages = [
+    "blockchain",
+    "blockchain/internal/dbnamespace",
+    "blockchain/internal/progresslog",
+    "blockchain/stake",
+    "blockchain/stake/internal/dbnamespace",
+    "blockchain/stake/internal/ticketdb",
+    "blockchain/stake/internal/tickettreap",
+    "cequihash",
+    "chaincfg",
+    "chaincfg/chainec",
+    "chaincfg/chainhash",
+    "database",
+    "database/ffldb",
+    "database/internal/treap",
+    "exccec/edwards",
+    "exccec/secp256k1",
+    "exccec/secp256k1/schnorr",
+    "exccjson",
+    "exccutil",
+    "gcs",
+    "gcs/blockcf",
+    "hdkeychain",
+    "rpcclient",
+    "txscript",
+    "wire"
+  ]
+  revision = "345d947f002ed7b4bbc59ed56089fbc74f5d48bb"
+
+[[projects]]
+  branch = "feature/DEX-152_mnemonic_compatibility"
+  name = "github.com/EXCCoin/exccwallet"
+  packages = [
+    "apperrors",
+    "internal/zero",
+    "netparams",
+    "snacl",
+    "wallet/udb",
+    "walletdb"
+  ]
+  revision = "88e3d55f4a52cafac425cb7e66114df2b16654f5"
+
+[[projects]]
+  branch = "master"
   name = "github.com/aead/siphash"
   packages = ["."]
   revision = "e404fcfc888570cadd1610538e2dbc89f66af814"
@@ -28,6 +79,12 @@
   ]
   revision = "bda68dab90fc908ee5dbccb36400edf4f54972d6"
   version = "v2.1.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/btcsuite/btclog"
+  packages = ["."]
+  revision = "84c8d2346e9fc8c7b947e243b9c24e6df9fd206a"
 
 [[projects]]
   branch = "master"
@@ -68,6 +125,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/btcsuite/websocket"
+  packages = ["."]
+  revision = "31079b6807923eb23992c421b114992b95131b55"
+
+[[projects]]
+  branch = "master"
   name = "github.com/chappjc/logrus-prefix"
   packages = ["."]
   revision = "3a1d64819adb569fb9952144dd90c0abe92e2822"
@@ -89,62 +152,6 @@
   name = "github.com/dchest/blake256"
   packages = ["."]
   revision = "dee3fe6eb0e98dc774a94fc231f85baf7c29d360"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/decred/base58"
-  packages = ["."]
-  revision = "56c501706f00d9e1cfacee19a27117e12da24734"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/decred/dcrd"
-  packages = [
-    "blockchain",
-    "blockchain/internal/dbnamespace",
-    "blockchain/internal/progresslog",
-    "blockchain/stake",
-    "blockchain/stake/internal/dbnamespace",
-    "blockchain/stake/internal/ticketdb",
-    "blockchain/stake/internal/tickettreap",
-    "chaincfg",
-    "chaincfg/chainec",
-    "chaincfg/chainhash",
-    "database",
-    "database/ffldb",
-    "database/internal/treap",
-    "dcrec/edwards",
-    "dcrec/secp256k1",
-    "dcrec/secp256k1/schnorr",
-    "dcrjson",
-    "dcrutil",
-    "gcs",
-    "gcs/blockcf",
-    "hdkeychain",
-    "rpcclient",
-    "txscript",
-    "wire"
-  ]
-  revision = "5386a6375874cbbc001ee915c887a8240933751b"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/decred/dcrwallet"
-  packages = [
-    "errors",
-    "internal/zero",
-    "netparams",
-    "snacl",
-    "wallet/udb",
-    "walletdb"
-  ]
-  revision = "03d9f2fbabf9db9803bd48a03185fc8cda59d0d6"
-
-[[projects]]
-  name = "github.com/decred/slog"
-  packages = ["."]
-  revision = "fbd821ef791ba2b8ae945f5d44f4e49396d230c5"
-  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/didip/tollbooth"
@@ -253,6 +260,12 @@
   version = "v0.0.3"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/mattn/go-pointer"
+  packages = ["."]
+  revision = "1d30dc4b6f28271a3bd126071d4d0363e618415b"
+
+[[projects]]
   name = "github.com/mattn/go-sqlite3"
   packages = ["."]
   revision = "6c771bb9887719704b210e87e934f08be014bdb1"
@@ -335,6 +348,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b0d2e972ec426db76162229ab52c5ac0688d06aea98fedbd2c23603dee1e82ca"
+  inputs-digest = "420a6694189b400d691b117a50f142dd2dea095ab9652fa9b4f37a035a8056e8"
   solver-name = "gps-cdcl"
   solver-version = 1

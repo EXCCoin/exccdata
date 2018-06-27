@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/decred/dcrdata/db/dbtypes/internal"
+	"github.com/EXCCoin/exccdata/db/dbtypes/internal"
 )
 
 // Tickets have 6 states, 5 possible fates:
@@ -304,7 +304,7 @@ type ScriptSig struct {
 	Hex string `json:"hex"`
 }
 
-// Tx models a Decred transaction. It is stored in a Block.
+// Tx models a EXCCoin transaction. It is stored in a Block.
 type Tx struct {
 	//blockDbID  int64
 	BlockHash   string `json:"block_hash"`
@@ -332,7 +332,7 @@ type Tx struct {
 	// vout will have a tx_dbid
 }
 
-// Block models a Decred block.
+// Block models a EXCCoin block.
 type Block struct {
 	Hash         string `json:"hash"`
 	Size         uint32 `json:"size"`

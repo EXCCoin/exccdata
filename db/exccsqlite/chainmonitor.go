@@ -2,14 +2,14 @@
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
 
-package dcrsqlite
+package exccsqlite
 
 import (
 	"fmt"
 	"sync"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrdata/blockdata"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccdata/blockdata"
 )
 
 // ReorgData contains the information from a reoranization notification

@@ -14,13 +14,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/blockchain/stake"
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
-	apitypes "github.com/decred/dcrdata/api/types"
+	"github.com/EXCCoin/exccd/blockchain/stake"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
 )
 
 // NewTx models data for a new transaction
@@ -129,7 +129,7 @@ func (p *mempoolMonitor) TxHandler(client *rpcclient.Client) {
 			// OnTxAccepted probably sent on newTxChan
 			tx, err := client.GetRawTransaction(s.Hash)
 			if err != nil {
-				log.Errorf("Failed to get transaction (do you have --txindex with dcrd?) %v: %v",
+				log.Errorf("Failed to get transaction (do you have --txindex with exccd?) %v: %v",
 					s.Hash.String(), err)
 				continue
 			}
@@ -137,8 +137,8 @@ func (p *mempoolMonitor) TxHandler(client *rpcclient.Client) {
 			// See if the transaction is a ticket purchase.  If not, just
 			// make a note of it and go back to the loop.
 			txType := stake.DetermineTxType(tx.MsgTx())
-			//s.Tree() == dcrutil.TxTreeRegular
-			// See dcrd/blockchain/stake/staketx.go for information about
+			//s.Tree() == exccutil.TxTreeRegular
+			// See exccd/blockchain/stake/staketx.go for information about
 			// specifications for different transaction types.
 
 			switch txType {
@@ -150,7 +150,7 @@ func (p *mempoolMonitor) TxHandler(client *rpcclient.Client) {
 				// Ticket purchase
 				price := tx.MsgTx().TxOut[0].Value
 				log.Tracef("Received ticket purchase %v, price %v",
-					tx.Hash(), dcrutil.Amount(price).ToCoin())
+					tx.Hash(), exccutil.Amount(price).ToCoin())
 				// txHeight = tx.MsgTx().TxIn[0].BlockHeight // uh, no
 			case stake.TxTypeSSGen:
 				// Vote
@@ -286,7 +286,7 @@ type MempoolData struct {
 	NumTickets        uint32
 	NumVotes          uint32
 	NewTickets        uint32
-	Ticketfees        *dcrjson.TicketFeeInfoResult
+	Ticketfees        *exccjson.TicketFeeInfoResult
 	MinableFees       *MinableFeeInfo
 	AllTicketsDetails TicketsDetails
 }
@@ -302,24 +302,24 @@ func (m *MempoolData) GetNumTickets() uint32 {
 }
 
 type mempoolDataCollector struct {
-	mtx          sync.Mutex
-	dcrdChainSvr *rpcclient.Client
-	activeChain  *chaincfg.Params
+	mtx           sync.Mutex
+	exccdChainSvr *rpcclient.Client
+	activeChain   *chaincfg.Params
 }
 
 // NewMempoolDataCollector creates a new mempoolDataCollector.
-func NewMempoolDataCollector(dcrdChainSvr *rpcclient.Client, params *chaincfg.Params) *mempoolDataCollector {
+func NewMempoolDataCollector(exccdChainSvr *rpcclient.Client, params *chaincfg.Params) *mempoolDataCollector {
 	return &mempoolDataCollector{
-		mtx:          sync.Mutex{},
-		dcrdChainSvr: dcrdChainSvr,
-		activeChain:  params,
+		mtx:           sync.Mutex{},
+		exccdChainSvr: exccdChainSvr,
+		activeChain:   params,
 	}
 }
 
 // Collect is the main handler for collecting chain data
 func (t *mempoolDataCollector) Collect() (*MempoolData, error) {
 	// In case of a very fast block, make sure previous call to collect is not
-	// still running, or dcrd may be mad.
+	// still running, or exccd may be mad.
 	t.mtx.Lock()
 	defer t.mtx.Unlock()
 
@@ -330,16 +330,16 @@ func (t *mempoolDataCollector) Collect() (*MempoolData, error) {
 	}(time.Now())
 
 	// client
-	c := t.dcrdChainSvr
+	c := t.exccdChainSvr
 
 	// Get a map of ticket hashes to getrawmempool results
 	// mempoolTickets[ticketHashes[0].String()].Fee
-	mempoolTickets, err := c.GetRawMempoolVerbose(dcrjson.GRMTickets)
+	mempoolTickets, err := c.GetRawMempoolVerbose(exccjson.GRMTickets)
 	if err != nil {
 		return nil, err
 	}
 
-	mempoolVotes, err := c.GetRawMempoolVerbose(dcrjson.GRMVotes)
+	mempoolVotes, err := c.GetRawMempoolVerbose(exccjson.GRMVotes)
 	if err != nil {
 		return nil, err
 	}
@@ -357,7 +357,7 @@ func (t *mempoolDataCollector) Collect() (*MempoolData, error) {
 	allTicketsDetails := make(TicketsDetails, 0, N)
 	for hash, t := range mempoolTickets {
 		//ageSec := time.Since(time.Unix(t.Time, 0)).Seconds()
-		// Compute fee in DCR / kB
+		// Compute fee in EXCC / kB
 		feeRate := t.Fee / float64(t.Size) * 1000
 		allTicketsDetails = append(allTicketsDetails, &apitypes.TicketDetails{
 			Hash:    hash,

@@ -5,18 +5,18 @@
 package insight
 
 import (
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	apitypes "github.com/decred/dcrdata/api/types"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
 )
 
-// TxConverter converts dcrd-tx to insight tx
-func (c *insightApiContext) TxConverter(txs []*dcrjson.TxRawResult) ([]apitypes.InsightTx, error) {
+// TxConverter converts exccd-tx to insight tx
+func (c *insightApiContext) TxConverter(txs []*exccjson.TxRawResult) ([]apitypes.InsightTx, error) {
 	return c.TxConverterWithParams(txs, false, false, false)
 }
 
 // TxConverterWithParams takes struct with filter params
-func (c *insightApiContext) TxConverterWithParams(txs []*dcrjson.TxRawResult, noAsm bool, noScriptSig bool, noSpent bool) ([]apitypes.InsightTx, error) {
+func (c *insightApiContext) TxConverterWithParams(txs []*exccjson.TxRawResult, noAsm bool, noScriptSig bool, noSpent bool) ([]apitypes.InsightTx, error) {
 	newTxs := []apitypes.InsightTx{}
 	for _, tx := range txs {
 
@@ -60,17 +60,17 @@ func (c *insightApiContext) TxConverterWithParams(txs []*dcrjson.TxRawResult, no
 			_, addresses, value, err := c.BlockData.ChainDB.RetrieveAddressIDsByOutpoint(vin.Txid, vin.Vout)
 			if err == nil {
 				if len(addresses) > 0 {
-					// Update Vin due to DCRD AMOUNTIN - START
+					// Update Vin due to EXCCD AMOUNTIN - START
 					// NOTE THIS IS ONLY USEFUL FOR INPUT AMOUNTS THAT ARE NOT ALSO FROM MEMPOOL
 					if tx.Confirmations == 0 {
-						txNew.Vins[vinID].Value = dcrutil.Amount(value).ToCoin()
+						txNew.Vins[vinID].Value = exccutil.Amount(value).ToCoin()
 					}
-					// Update Vin due to DCRD AMOUNTIN - END
+					// Update Vin due to EXCCD AMOUNTIN - END
 					txNew.Vins[vinID].Addr = addresses[0]
 				}
 			}
-			dcramt, _ := dcrutil.NewAmount(txNew.Vins[vinID].Value)
-			txNew.Vins[vinID].ValueSat = int64(dcramt)
+			exccamt, _ := exccutil.NewAmount(txNew.Vins[vinID].Value)
+			txNew.Vins[vinID].ValueSat = int64(exccamt)
 			vInSum += txNew.Vins[vinID].Value
 
 		}
@@ -100,14 +100,14 @@ func (c *insightApiContext) TxConverterWithParams(txs []*dcrjson.TxRawResult, no
 		txNew.Blocktime = tx.Blocktime
 		txNew.Size = uint32(len(tx.Hex) / 2)
 
-		dcramt, _ := dcrutil.NewAmount(vOutSum)
-		txNew.ValueOut = dcramt.ToCoin()
+		exccamt, _ := exccutil.NewAmount(vOutSum)
+		txNew.ValueOut = exccamt.ToCoin()
 
-		dcramt, _ = dcrutil.NewAmount(vInSum)
-		txNew.ValueIn = dcramt.ToCoin()
+		exccamt, _ = exccutil.NewAmount(vInSum)
+		txNew.ValueIn = exccamt.ToCoin()
 
-		dcramt, _ = dcrutil.NewAmount(txNew.ValueIn - txNew.ValueOut)
-		txNew.Fees = dcramt.ToCoin()
+		exccamt, _ = exccutil.NewAmount(txNew.ValueIn - txNew.ValueOut)
+		txNew.Fees = exccamt.ToCoin()
 
 		// Return true if coinbase value is not empty, return 0 at some fields
 		if txNew.Vins != nil && len(txNew.Vins[0].CoinBase) > 0 {

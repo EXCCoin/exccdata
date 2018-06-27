@@ -17,17 +17,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
-	apitypes "github.com/decred/dcrdata/api/types"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/db/dcrpg"
-	m "github.com/decred/dcrdata/middleware"
-	"github.com/decred/dcrdata/semver"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/db/exccpg"
+	m "github.com/EXCCoin/exccdata/middleware"
+	"github.com/EXCCoin/exccdata/semver"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 // DataSourceLite specifies an interface for collecting data from the built-in
@@ -38,7 +38,7 @@ type DataSourceLite interface {
 
 type insightApiContext struct {
 	nodeClient *rpcclient.Client
-	BlockData  *dcrpg.ChainDBRPC
+	BlockData  *exccpg.ChainDBRPC
 	params     *chaincfg.Params
 	MemPool    DataSourceLite
 	Status     apitypes.Status
@@ -48,7 +48,7 @@ type insightApiContext struct {
 }
 
 // NewInsightContext Constructor for insightApiContext
-func NewInsightContext(client *rpcclient.Client, blockData *dcrpg.ChainDBRPC, params *chaincfg.Params, memPoolData DataSourceLite, JSONIndent string) *insightApiContext {
+func NewInsightContext(client *rpcclient.Client, blockData *exccpg.ChainDBRPC, params *chaincfg.Params, memPoolData DataSourceLite, JSONIndent string) *insightApiContext {
 	conns, _ := client.GetConnectionCount()
 	nodeHeight, _ := client.GetBlockCount()
 	version := semver.NewSemver(1, 0, 0)
@@ -62,7 +62,7 @@ func NewInsightContext(client *rpcclient.Client, blockData *dcrpg.ChainDBRPC, pa
 			Height:          uint32(nodeHeight),
 			NodeConnections: conns,
 			APIVersion:      APIVersion,
-			DcrdataVersion:  version.String(),
+			ExccdataVersion: version.String(),
 		},
 	}
 	return &newContext
@@ -126,7 +126,7 @@ func (c *insightApiContext) getTransaction(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	txsOld := []*dcrjson.TxRawResult{txOld}
+	txsOld := []*exccjson.TxRawResult{txOld}
 
 	// convert to insight struct
 	txsNew, err := c.TxConverter(txsOld)
@@ -312,7 +312,7 @@ func (c *insightApiContext) getAddressesTxnOutput(w http.ResponseWriter, r *http
 					TxnID:         fundingTx.Hash().String(),
 					Vout:          f.Index,
 					ScriptPubKey:  hex.EncodeToString(fundingTx.Tx.TxOut[f.Index].PkScript),
-					Amount:        dcrutil.Amount(fundingTx.Tx.TxOut[f.Index].Value).ToCoin(),
+					Amount:        exccutil.Amount(fundingTx.Tx.TxOut[f.Index].Value).ToCoin(),
 					Satoshis:      fundingTx.Tx.TxOut[f.Index].Value,
 					Confirmations: 0,
 					BlockTime:     fundingTx.MemPoolTime,
@@ -386,7 +386,7 @@ func (c *insightApiContext) getTransactions(w http.ResponseWriter, r *http.Reque
 		}
 
 		txsOutput := struct {
-			Txs []*dcrjson.SearchRawTransactionsResult `json:"txs"`
+			Txs []*exccjson.SearchRawTransactionsResult `json:"txs"`
 		}{
 			txs,
 		}
@@ -421,7 +421,7 @@ func (c *insightApiContext) getAddressesTxn(w http.ResponseWriter, r *http.Reque
 
 	// Confirm all addresses are valid and pull unconfirmed transactions for all addresses
 	for _, addr := range addresses {
-		address, err := dcrutil.DecodeAddress(addr)
+		address, err := exccutil.DecodeAddress(addr)
 		if err != nil {
 			writeInsightError(w, fmt.Sprintf("Address is invalid (%s)", addr))
 			return
@@ -487,7 +487,7 @@ func (c *insightApiContext) getAddressesTxn(w http.ResponseWriter, r *http.Reque
 	addressOutput.From = int(from)
 	addressOutput.To = int(to)
 
-	txsOld := []*dcrjson.TxRawResult{}
+	txsOld := []*exccjson.TxRawResult{}
 	for _, rawTx := range rawTxs {
 		txOld, err := c.BlockData.GetRawTransaction(rawTx)
 		if err != nil {

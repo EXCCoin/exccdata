@@ -1,7 +1,7 @@
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
 
-package dcrpg
+package exccpg
 
 import (
 	"bytes"
@@ -9,14 +9,14 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/decred/dcrd/blockchain/stake"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/txscript"
-	"github.com/decred/dcrd/wire"
-	apitypes "github.com/decred/dcrdata/api/types"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/db/dcrpg/internal"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/blockchain/stake"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/txscript"
+	"github.com/EXCCoin/exccd/wire"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/db/exccpg/internal"
+	"github.com/EXCCoin/exccdata/txhelpers"
 	"github.com/lib/pq"
 )
 
@@ -850,7 +850,7 @@ func RetrieveAddressCreditTxns(db *sql.DB, address string, N, offset int64) (ids
 }
 
 // Retreive All AddressIDs for a given Hash and Index
-// Update Vin due to DCRD AMOUNTIN - START - DO NOT MERGE CHANGES IF DCRD FIXED
+// Update Vin due to EXCCD AMOUNTIN - START - DO NOT MERGE CHANGES IF EXCCD FIXED
 func RetrieveAddressIDsByOutpoint(db *sql.DB, txHash string,
 	voutIndex uint32) ([]uint64, []string, int64, error) {
 	var ids []uint64
@@ -878,7 +878,7 @@ func RetrieveAddressIDsByOutpoint(db *sql.DB, txHash string,
 		addresses = append(addresses, addr)
 	}
 	return ids, addresses, value, err
-} // Update Vin due to DCRD AMOUNTIN - END
+} // Update Vin due to EXCCD AMOUNTIN - END
 
 func RetrieveAllVinDbIDs(db *sql.DB) (vinDbIDs []uint64, err error) {
 	rows, err := db.Query(internal.SelectVinIDsALL)
@@ -1121,7 +1121,7 @@ func RetrieveAddressTxnOutputWithTransaction(db *sql.DB, address string, current
 			log.Error(err)
 		}
 		txnOutput.ScriptPubKey = hex.EncodeToString(pkScript)
-		txnOutput.Amount = dcrutil.Amount(atoms).ToCoin()
+		txnOutput.Amount = exccutil.Amount(atoms).ToCoin()
 		txnOutput.Satoshis = atoms
 		txnOutput.Height = blockHeight
 		txnOutput.Confirmations = currentBlockHeight - blockHeight + 1
@@ -1527,8 +1527,8 @@ func InsertTickets(db *sql.DB, dbTxns []*dbtypes.Tx, txDbIDs []uint64, checked b
 			isMultisig = scriptSubClass == txscript.MultiSigTy
 		}
 
-		price := dcrutil.Amount(tx.Vouts[0].Value).ToCoin()
-		fee := dcrutil.Amount(tx.Fees).ToCoin()
+		price := exccutil.Amount(tx.Vouts[0].Value).ToCoin()
+		fee := exccutil.Amount(tx.Fees).ToCoin()
 		isSplit := tx.NumVin > 1
 
 		var id uint64
@@ -1619,7 +1619,7 @@ func InsertVotes(db *sql.DB, dbTxns []*dbtypes.Tx, _ /*txDbIDs*/ []uint64,
 			return nil, nil, nil, nil, nil, err
 		}
 
-		stakeSubmissionAmount := dcrutil.Amount(msgTx.TxIn[1].ValueIn).ToCoin()
+		stakeSubmissionAmount := exccutil.Amount(msgTx.TxIn[1].ValueIn).ToCoin()
 		stakeSubmissionTxHash := msgTx.TxIn[1].PreviousOutPoint.Hash.String()
 		spentTicketHashes = append(spentTicketHashes, stakeSubmissionTxHash)
 
@@ -1637,7 +1637,7 @@ func InsertVotes(db *sql.DB, dbTxns []*dbtypes.Tx, _ /*txDbIDs*/ []uint64,
 		}
 		spentTicketDbIDs = append(spentTicketDbIDs, uint64(ticketTxDbID.Int64))
 
-		voteReward := dcrutil.Amount(msgTx.TxIn[0].ValueIn).ToCoin()
+		voteReward := exccutil.Amount(msgTx.TxIn[0].ValueIn).ToCoin()
 
 		// delete spent ticket from missed list
 		for im := range misses {

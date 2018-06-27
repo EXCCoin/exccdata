@@ -1,7 +1,7 @@
 {{define "mempool"}}
 <!DOCTYPE html>
 <html lang="en">
-    {{template "html-head" printf "Decred Mempool"}}
+    {{template "html-head" printf "ExchangeCoin Mempool"}}
     <body>
         {{template "navbar" . }}
         {{with .Mempool}}
@@ -14,7 +14,7 @@
                 <table>
                     <tr class="h2rem">
                         <td class="pr-2 lh1rem vam text-right xs-w117 w120">TOTAL SENT</td>
-                        <td class="fs28 mono fs16-decimal d-flex align-items-center">{{template "decimalParts" (float64AsDecimalParts .TotalOut false)}}<span class="pl-1 unit">DCR</span></td>
+                        <td class="fs28 mono fs16-decimal d-flex align-items-center">{{template "decimalParts" (float64AsDecimalParts .TotalOut false)}}<span class="pl-1 unit">EXCC</span></td>
                     </tr>
                 </table>
             </div>
@@ -66,7 +66,7 @@
                             <th>Last Block Valid</th>
                             <th>Issue ID</th>
                             <th>Choice ID</th>
-                            <th class="text-right">Total DCR</th>
+                            <th class="text-right">Total EXCC</th>
                             <th>Size</th>
                             <th class="text-right">Time in Mempool</th>
                         </thead>
@@ -111,7 +111,7 @@
                     <table class="table table-sm striped" id="mempool_tickets">
                         <thead>
                             <th>Transaction ID</th>
-                            <th class="text-right">Total DCR</th>
+                            <th class="text-right">Total EXCC</th>
                             <th class="text-right">Size</th>
                             <th class="text-right">Time in Mempool</th>
                         </thead>
@@ -145,7 +145,7 @@
                     <table class="table table-sm striped" id="mempool_revocations">
                         <thead>
                             <th>Transaction ID</th>
-                            <th class="text-right">Total DCR</th>
+                            <th class="text-right">Total EXCC</th>
                             <th class="text-right">Size</th>
                             <th class="text-right">Time in Mempool</th>
                         </thead>
@@ -175,7 +175,7 @@
                     <table class="table table-sm striped" id="mempool_transactions">
                         <thead>
                             <th>Transaction ID</th>
-                            <th class="text-right">Total DCR</th>
+                            <th class="text-right">Total EXCC</th>
                             <th class="text-right">Size</th>
                             <th class="text-right">Time in Mempool</th>
                         </thead>

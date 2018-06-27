@@ -6,7 +6,7 @@ package types
 import (
 	"encoding/json"
 
-	"github.com/decred/dcrd/dcrutil"
+	"github.com/EXCCoin/exccd/exccutil"
 )
 
 // InsightAddress models an address transactions
@@ -21,18 +21,18 @@ type InsightAddress struct {
 // InsightAddressInfo models basic information
 // about an address
 type InsightAddressInfo struct {
-	Address          string         `json:"addrStr,omitempty"`
-	Limit            int64          `json:"limit,omitemtpy"`
-	Offset           int64          `json:"offset,omitempty"`
-	TransactionsID   []string       `json:"transactions,omitempty"`
-	NumFundingTxns   int64          `json:"numFundingTxns,omitempty"`
-	NumSpendingTxns  int64          `json:"numSpendingTxns,omitempty"`
-	KnownFundingTxns int64          `json:"knownFundingTxns,omitempty"`
-	NumUnconfirmed   int64          `json:"numUnconfirmed,omitempty"`
-	TotalReceived    dcrutil.Amount `json:"totalReceived"`
-	TotalSent        dcrutil.Amount `json:"totalSent"`
-	Unspent          dcrutil.Amount `json:"balance"`
-	Path             string         `json:"path,omitempty"`
+	Address          string          `json:"addrStr,omitempty"`
+	Limit            int64           `json:"limit,omitemtpy"`
+	Offset           int64           `json:"offset,omitempty"`
+	TransactionsID   []string        `json:"transactions,omitempty"`
+	NumFundingTxns   int64           `json:"numFundingTxns,omitempty"`
+	NumSpendingTxns  int64           `json:"numSpendingTxns,omitempty"`
+	KnownFundingTxns int64           `json:"knownFundingTxns,omitempty"`
+	NumUnconfirmed   int64           `json:"numUnconfirmed,omitempty"`
+	TotalReceived    exccutil.Amount `json:"totalReceived"`
+	TotalSent        exccutil.Amount `json:"totalSent"`
+	Unspent          exccutil.Amount `json:"balance"`
+	Path             string          `json:"path,omitempty"`
 }
 
 // InsightRawTx contains the raw transaction string

@@ -12,16 +12,16 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/txhelpers"
 	humanize "github.com/dustin/go-humanize"
 )
 
-// netName returns the name used when referring to a decred network.
+// netName returns the name used when referring to a excc network.
 func netName(chainParams *chaincfg.Params) string {
 	switch chainParams.Net {
 	case wire.TestNet2:
@@ -35,7 +35,12 @@ func netName(chainParams *chaincfg.Params) string {
 func (exp *explorerUI) Home(w http.ResponseWriter, r *http.Request) {
 	height := exp.blockData.GetHeight()
 
-	blocks := exp.blockData.GetExplorerBlocks(height, height-5)
+	end := height - 5
+	if end < 0 {
+		end = 0
+	}
+
+	blocks := exp.blockData.GetExplorerBlocks(height, end)
 
 	exp.NewBlockDataMtx.Lock()
 	exp.MempoolData.RLock()
@@ -507,7 +512,7 @@ func (exp *explorerUI) AddressPage(w http.ResponseWriter, r *http.Request) {
 				InOutID:       f.Index,
 				FormattedSize: humanize.Bytes(uint64(fundingTx.Tx.SerializeSize())),
 				Total:         txhelpers.TotalOutFromMsgTx(fundingTx.Tx).ToCoin(),
-				ReceivedTotal: dcrutil.Amount(fundingTx.Tx.TxOut[f.Index].Value).ToCoin(),
+				ReceivedTotal: exccutil.Amount(fundingTx.Tx.TxOut[f.Index].Value).ToCoin(),
 			}
 			uctxn.Transactions = append(uctxn.Transactions, addrTx)
 			uctxn.TxnsFunding = append(uctxn.TxnsFunding, addrTx)
@@ -529,7 +534,7 @@ func (exp *explorerUI) AddressPage(w http.ResponseWriter, r *http.Request) {
 				InOutID:       uint32(f.InputIndex),
 				FormattedSize: humanize.Bytes(uint64(spendingTx.Tx.SerializeSize())),
 				Total:         txhelpers.TotalOutFromMsgTx(spendingTx.Tx).ToCoin(),
-				SentTotal:     dcrutil.Amount(spendingTx.Tx.TxIn[f.InputIndex].ValueIn).ToCoin(),
+				SentTotal:     exccutil.Amount(spendingTx.Tx.TxIn[f.InputIndex].ValueIn).ToCoin(),
 			}
 			uctxn.Transactions = append(uctxn.Transactions, addrTx)
 			uctxn.TxnsSpending = append(uctxn.TxnsSpending, addrTx)

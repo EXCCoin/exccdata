@@ -12,9 +12,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	apitypes "github.com/decred/dcrdata/api/types"
-	m "github.com/decred/dcrdata/middleware"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	m "github.com/EXCCoin/exccdata/middleware"
 	"github.com/go-chi/chi"
 )
 

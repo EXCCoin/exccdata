@@ -17,18 +17,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrdata/db/dcrpg"
-	"github.com/decred/dcrdata/rpcutils"
-	"github.com/decred/dcrdata/stakedb"
-	"github.com/decred/slog"
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccdata/db/exccpg"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/stakedb"
+	"github.com/btcsuite/btclog"
 )
 
 var (
-	backendLog      *slog.Backend
-	rpcclientLogger slog.Logger
-	pgLogger        slog.Logger
-	stakedbLogger   slog.Logger
+	backendLog      *btclog.Backend
+	rpcclientLogger btclog.Logger
+	pgLogger        btclog.Logger
+	stakedbLogger   btclog.Logger
 )
 
 const (
@@ -41,11 +41,11 @@ func init() {
 		fmt.Printf("Unable to start logger: %v", err)
 		os.Exit(1)
 	}
-	backendLog = slog.NewBackend(log.Writer())
+	backendLog = btclog.NewBackend(log.Writer())
 	rpcclientLogger = backendLog.Logger("RPC")
 	rpcclient.UseLogger(rpcclientLogger)
 	pgLogger = backendLog.Logger("PSQL")
-	dcrpg.UseLogger(pgLogger)
+	exccpg.UseLogger(pgLogger)
 	stakedbLogger = backendLog.Logger("SKDB")
 	stakedb.UseLogger(stakedbLogger)
 }
@@ -54,7 +54,7 @@ func mainCore() error {
 	// Parse the configuration file, and setup logger.
 	cfg, err := loadConfig()
 	if err != nil {
-		fmt.Printf("Failed to load dcrdata config: %s\n", err.Error())
+		fmt.Printf("Failed to load exccdata config: %s\n", err.Error())
 		return err
 	}
 
@@ -91,8 +91,8 @@ func mainCore() error {
 	}
 
 	// Connect to node RPC server
-	client, _, err := rpcutils.ConnectNodeRPC(cfg.DcrdServ, cfg.DcrdUser,
-		cfg.DcrdPass, cfg.DcrdCert, cfg.DisableDaemonTLS)
+	client, _, err := rpcutils.ConnectNodeRPC(cfg.ExccdServ, cfg.ExccdUser,
+		cfg.ExccdPass, cfg.ExccdCert, cfg.DisableDaemonTLS)
 	if err != nil {
 		log.Fatalf("Unable to connect to RPC server: %v", err)
 		return err
@@ -115,7 +115,7 @@ func mainCore() error {
 	}
 
 	// Configure PostgreSQL ChainDB
-	dbi := dcrpg.DBInfo{
+	dbi := exccpg.DBInfo{
 		Host:   host,
 		Port:   port,
 		User:   cfg.DBUser,
@@ -123,7 +123,7 @@ func mainCore() error {
 		DBName: cfg.DBName,
 	}
 	// Construct a ChainDB without a stakeDB to allow quick dropping of tables.
-	db, err := dcrpg.NewChainDB(&dbi, activeChain, nil)
+	db, err := exccpg.NewChainDB(&dbi, activeChain, nil)
 	if db != nil {
 		defer db.Close()
 	}

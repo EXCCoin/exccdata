@@ -1,30 +1,29 @@
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
 
-package dcrpg
+package exccpg
 
 import (
 	"bytes"
 	"database/sql"
 	"errors"
 	"fmt"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/blockchain/stake"
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrd/wire"
-	apitypes "github.com/decred/dcrdata/api/types"
-	"github.com/decred/dcrdata/blockdata"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/explorer"
-	"github.com/decred/dcrdata/stakedb"
-	humanize "github.com/dustin/go-humanize"
+	"github.com/EXCCoin/exccd/blockchain/stake"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccd/wire"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/explorer"
+	"github.com/EXCCoin/exccdata/stakedb"
+	"github.com/dustin/go-humanize"
 )
 
 var (
@@ -67,7 +66,6 @@ func (d *DevFundBalance) Balance() *explorer.AddressBalance {
 type ChainDB struct {
 	db                 *sql.DB
 	chainParams        *chaincfg.Params
-	devAddress         string
 	dupChecks          bool
 	bestBlock          int64
 	lastBlock          map[chainhash.Hash]uint64
@@ -169,7 +167,7 @@ type DBInfo struct {
 	Host, Port, User, Pass, DBName string
 }
 
-// NewChainDB constructs a ChainDB for the given connection and Decred network
+// NewChainDB constructs a ChainDB for the given connection and EXCCoin network
 // parameters. By default, duplicate row checks on insertion are enabled.
 func NewChainDB(dbi *DBInfo, params *chaincfg.Params, stakeDB *stakedb.StakeDatabase) (*ChainDB, error) {
 	// Connect to the PostgreSQL daemon and return the *sql.DB
@@ -183,12 +181,6 @@ func NewChainDB(dbi *DBInfo, params *chaincfg.Params, stakeDB *stakedb.StakeData
 	if err != nil && !(err == sql.ErrNoRows ||
 		strings.HasSuffix(err.Error(), "does not exist")) {
 		return nil, err
-	}
-
-	// Development subsidy address of the current network
-	var devSubsidyAddress string
-	if devSubsidyAddress, err = dbtypes.DevSubsidyAddress(params); err != nil {
-		log.Warnf("ChainDB.NewChainDB: %v", err)
 	}
 
 	if err = setupTables(db); err != nil {
@@ -211,7 +203,6 @@ func NewChainDB(dbi *DBInfo, params *chaincfg.Params, stakeDB *stakedb.StakeData
 	return &ChainDB{
 		db:                 db,
 		chainParams:        params,
-		devAddress:         devSubsidyAddress,
 		dupChecks:          true,
 		bestBlock:          int64(bestHeight),
 		lastBlock:          make(map[chainhash.Hash]uint64),
@@ -271,7 +262,7 @@ func (pgb *ChainDB) VersionCheck() error {
 	return nil
 }
 
-// DropTables drops (deletes) all of the known dcrdata tables.
+// DropTables drops (deletes) all of the known exccdata tables.
 func (pgb *ChainDB) DropTables() {
 	DropTables(pgb.db)
 }
@@ -381,11 +372,7 @@ func (pgb *ChainDB) AddressTransactions(address string, N, offset int64,
 	case dbtypes.AddrTxnAll:
 		// The organization address occurs very frequently, so use the regular
 		// (non sub-query) select as it is much more efficient.
-		if address == pgb.devAddress {
-			addrFunc = RetrieveAddressTxnsAlt
-		} else {
-			addrFunc = RetrieveAddressTxns
-		}
+		addrFunc = RetrieveAddressTxns
 	case dbtypes.AddrTxnDebit:
 		addrFunc = RetrieveAddressDebitTxns
 	default:
@@ -400,80 +387,6 @@ func (pgb *ChainDB) AddressTransactions(address string, N, offset int64,
 // for the given address.
 func (pgb *ChainDB) AddressHistoryAll(address string, N, offset int64) ([]*dbtypes.AddressRow, *explorer.AddressBalance, error) {
 	return pgb.AddressHistory(address, N, offset, dbtypes.AddrTxnAll)
-}
-
-// retrieveDevBalance retrieves a new DevFundBalance without regard to the cache
-func (pgb *ChainDB) retrieveDevBalance() (*DevFundBalance, error) {
-	bb, hash, _, err := RetrieveBestBlockHeight(pgb.db)
-	if err != nil {
-		return nil, err
-	}
-	blockHeight := int64(bb)
-	blockHash, err := chainhash.NewHashFromStr(hash)
-	if err != nil {
-		return nil, err
-	}
-
-	_, devBalance, err := pgb.AddressHistoryAll(pgb.devAddress, 1, 0)
-	balance := &DevFundBalance{
-		AddressBalance: devBalance,
-		Height:         blockHeight,
-		Hash:           *blockHash,
-	}
-	return balance, err
-}
-
-// UpdateDevBalance forcibly updates the cached development/project fund balance
-// via DB queries. The bool output inidcates if the cached balance was updated
-// (if it was stale).
-func (pgb *ChainDB) UpdateDevBalance() (bool, error) {
-	pgb.DevFundBalance.Lock()
-	defer pgb.DevFundBalance.Unlock()
-	return pgb.updateDevBalance()
-}
-
-func (pgb *ChainDB) updateDevBalance() (bool, error) {
-	// Query for current balance.
-	balance, err := pgb.retrieveDevBalance()
-	if err != nil {
-		return false, err
-	}
-
-	// If cache is stale, update it's fields.
-	if balance.Hash != pgb.DevFundBalance.Hash || pgb.DevFundBalance.AddressBalance == nil {
-		pgb.DevFundBalance.AddressBalance = balance.AddressBalance
-		pgb.DevFundBalance.Height = balance.Height
-		pgb.DevFundBalance.Hash = balance.Hash
-		return true, nil
-	}
-
-	// Cache was not stale
-	return false, nil
-}
-
-// DevBalance returns the current development/project fund balance, updating the
-// cached balance if it is stale.
-func (pgb *ChainDB) DevBalance() (*explorer.AddressBalance, error) {
-	hash, err := pgb.HashDB()
-	if err != nil {
-		return nil, err
-	}
-
-	// Update cache if stale
-	if pgb.DevFundBalance.BlockHash().String() != hash || pgb.DevFundBalance.Balance() == nil {
-		if _, err = pgb.UpdateDevBalance(); err != nil {
-			return nil, err
-		}
-	}
-
-	bal := pgb.DevFundBalance.Balance()
-	if bal == nil {
-		return nil, fmt.Errorf("failed to update dev balance")
-	}
-
-	// return a copy of AddressBalance
-	balCopy := *bal
-	return &balCopy, nil
 }
 
 // addressBalance attempts to retrieve the explorer.AddressBalance from cache,
@@ -596,9 +509,9 @@ func (pgb *ChainDB) AddressHistory(address string, N, offset int64,
 		}
 	}
 
-	log.Infof("%s: %d spent totalling %f DCR, %d unspent totalling %f DCR",
-		address, balanceInfo.NumSpent, dcrutil.Amount(balanceInfo.TotalSpent).ToCoin(),
-		balanceInfo.NumUnspent, dcrutil.Amount(balanceInfo.TotalUnspent).ToCoin())
+	log.Infof("%s: %d spent totalling %f EXCC, %d unspent totalling %f EXCC",
+		address, balanceInfo.NumSpent, exccutil.Amount(balanceInfo.TotalSpent).ToCoin(),
+		balanceInfo.NumUnspent, exccutil.Amount(balanceInfo.TotalUnspent).ToCoin())
 	log.Infof("Caching address receive count for address %s: "+
 		"count = %d at block %d.", address,
 		balanceInfo.NumSpent+balanceInfo.NumUnspent, bestBlock)
@@ -625,7 +538,7 @@ func (pgb *ChainDB) FillAddressTransactions(addrInfo *explorer.AddressInfo) erro
 		}
 		txn.Size = dbTx.Size
 		txn.FormattedSize = humanize.Bytes(uint64(dbTx.Size))
-		txn.Total = dcrutil.Amount(dbTx.Sent).ToCoin()
+		txn.Total = exccutil.Amount(dbTx.Sent).ToCoin()
 		txn.Time = dbTx.BlockTime
 		if dbTx.BlockTime > 0 {
 			txn.Confirmations = pgb.Height() - uint64(dbTx.BlockHeight) + 1
@@ -647,11 +560,7 @@ func (pgb *ChainDB) AddressTotals(address string) (*apitypes.AddressTotals, erro
 	// Fetch address totals
 	var err error
 	var ab *explorer.AddressBalance
-	if address == pgb.devAddress {
-		ab, err = pgb.DevBalance()
-	} else {
-		ab, err = pgb.addressBalance(address)
-	}
+	ab, err = pgb.addressBalance(address)
 
 	if err != nil || ab == nil {
 		return nil, err
@@ -668,14 +577,14 @@ func (pgb *ChainDB) AddressTotals(address string) (*apitypes.AddressTotals, erro
 		BlockHash:    bestHash,
 		NumSpent:     ab.NumSpent,
 		NumUnspent:   ab.NumUnspent,
-		CoinsSpent:   dcrutil.Amount(ab.TotalSpent).ToCoin(),
-		CoinsUnspent: dcrutil.Amount(ab.TotalUnspent).ToCoin(),
+		CoinsSpent:   exccutil.Amount(ab.TotalSpent).ToCoin(),
+		CoinsUnspent: exccutil.Amount(ab.TotalUnspent).ToCoin(),
 	}, nil
 }
 
 func (pgb *ChainDB) addressInfo(addr string, count, skip int64,
 	txnType dbtypes.AddrTxnType) (*explorer.AddressInfo, *explorer.AddressBalance, error) {
-	address, err := dcrutil.DecodeAddress(addr)
+	address, err := exccutil.DecodeAddress(addr)
 	if err != nil {
 		log.Infof("Invalid address %s: %v", addr, err)
 		return nil, nil, err
@@ -798,7 +707,7 @@ func (pgb *ChainDB) DeleteDuplicates() error {
 	log.Info("Finding and removing duplicate vins entries...")
 	var numVinsRemoved int64
 	if numVinsRemoved, err = pgb.DeleteDuplicateVins(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateVins failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateVins failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate vins entries.", numVinsRemoved)
 
@@ -806,7 +715,7 @@ func (pgb *ChainDB) DeleteDuplicates() error {
 	log.Info("Finding and removing duplicate vouts entries before indexing...")
 	var numVoutsRemoved int64
 	if numVoutsRemoved, err = pgb.DeleteDuplicateVouts(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateVouts failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateVouts failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate vouts entries.", numVoutsRemoved)
 
@@ -814,7 +723,7 @@ func (pgb *ChainDB) DeleteDuplicates() error {
 	log.Info("Finding and removing duplicate transactions entries before indexing...")
 	var numTxnsRemoved int64
 	if numTxnsRemoved, err = pgb.DeleteDuplicateTxns(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateTxns failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateTxns failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate transactions entries.", numTxnsRemoved)
 
@@ -830,7 +739,7 @@ func (pgb *ChainDB) DeleteDuplicatesRecovery() error {
 	log.Info("Finding and removing duplicate vins entries...")
 	var numVinsRemoved int64
 	if numVinsRemoved, err = pgb.DeleteDuplicateVins(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateVins failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateVins failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate vins entries.", numVinsRemoved)
 
@@ -838,7 +747,7 @@ func (pgb *ChainDB) DeleteDuplicatesRecovery() error {
 	log.Info("Finding and removing duplicate vouts entries before indexing...")
 	var numVoutsRemoved int64
 	if numVoutsRemoved, err = pgb.DeleteDuplicateVouts(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateVouts failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateVouts failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate vouts entries.", numVoutsRemoved)
 
@@ -849,28 +758,28 @@ func (pgb *ChainDB) DeleteDuplicatesRecovery() error {
 	log.Info("Finding and removing duplicate transactions entries before indexing...")
 	var numTxnsRemoved int64
 	if numTxnsRemoved, err = pgb.DeleteDuplicateTxns(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateTxns failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateTxns failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate transactions entries.", numTxnsRemoved)
 
 	// Remove duplicate tickets
 	log.Info("Finding and removing duplicate tickets entries before indexing...")
 	if numTxnsRemoved, err = pgb.DeleteDuplicateTickets(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateTickets failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateTickets failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate tickets entries.", numTxnsRemoved)
 
 	// Remove duplicate votes
 	log.Info("Finding and removing duplicate votes entries before indexing...")
 	if numTxnsRemoved, err = pgb.DeleteDuplicateVotes(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateVotes failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateVotes failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate votes entries.", numTxnsRemoved)
 
 	// Remove duplicate misses
 	log.Info("Finding and removing duplicate misses entries before indexing...")
 	if numTxnsRemoved, err = pgb.DeleteDuplicateMisses(); err != nil {
-		return fmt.Errorf("dcrpg.DeleteDuplicateMisses failed: %v", err)
+		return fmt.Errorf("exccpg.DeleteDuplicateMisses failed: %v", err)
 	}
 	log.Infof("Removed %d duplicate misses entries.", numTxnsRemoved)
 
@@ -1202,14 +1111,6 @@ func (pgb *ChainDB) StoreBlock(msgBlock *wire.MsgBlock, winningTickets []string,
 		pgb.addressCounts.validHeight = int64(msgBlock.Header.Height)
 		pgb.addressCounts.balance = map[string]explorer.AddressBalance{}
 		pgb.addressCounts.Unlock()
-
-		// Lazy update of DevFundBalance
-		go func() {
-			runtime.Gosched()
-			if _, err = pgb.UpdateDevBalance(); err != nil {
-				log.Errorf("Failed to update development fund balance: %v", err)
-			}
-		}()
 	}
 
 	return

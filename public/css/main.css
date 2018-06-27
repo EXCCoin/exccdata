@@ -9,7 +9,7 @@
   font-weight: normal;
   font-style: normal;
 }
-[class^="dcricon-"], [class*=" dcricon-"] {
+[class^="exccicon-"], [class*=" exccicon-"] {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'icomoon' !important;
   speak: none;
@@ -23,17 +23,14 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.dcricon-qrcode:before {
+.exccicon-qrcode:before {
   content: "\e9f8";
 }
-.dcricon-sun-fill:before {
+.exccicon-sun-fill:before {
   content: "\e901";
 }
-.dcricon-sun-stroke:before {
+.exccicon-sun-stroke:before {
   content: "\e902";
-}
-.dcricon-decred:before {
-  content: "\e900";
 }
 
 /*fonts*/
@@ -265,11 +262,6 @@ body.darkBG .progress {
 }
 .top-nav a {
   color: #052f4b;
-}
-.top-nav .dcricon-decred {
-  font-size: 25px;
-  top: 1px;
-  position: relative;
 }
 .top-search {
   height: 30px;
@@ -511,16 +503,16 @@ body.darkBG .progress {
 }
 
 /*content*/
-.dcr-total .dcr {
+.excc-total .excc {
   font-size: 28px;
 }
-.dcr-total .total-text {
+.excc-total .total-text {
   line-height: 11px;
   opacity: 0.8;
   font-weight: bold;
   letter-spacing: 0px;
 }
-.dcr-total .total-text .d-block {
+.excc-total .total-text .d-block {
   letter-spacing: 1px;
   font-weight: bold;
   font-size: 13px;
@@ -563,7 +555,7 @@ body.darkBG .progress {
   white-space: nowrap;
 }
 
-/*resemble voting.decred.org*/
+/*resemble voting.excc.org*/
 .highlight-text {
   height: 20px;
   margin-top: 3px;

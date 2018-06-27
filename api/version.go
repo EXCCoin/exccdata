@@ -24,7 +24,7 @@ var ver = version{
 // go build -ldflags "-X main.CommitHash=`git rev-parse --short HEAD`"
 var CommitHash string
 
-const appName string = "dcrdata-api"
+const appName string = "exccdata-api"
 
 func (v *version) String() string {
 	var hashStr string

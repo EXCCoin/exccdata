@@ -9,12 +9,12 @@ import (
 
 	"github.com/googollee/go-socket.io"
 
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/blockdata"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 var isAlphaNumeric = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString
@@ -59,7 +59,7 @@ func NewSocketServer(newTxChan chan *NewTx, params *chaincfg.Params) (*SocketSer
 			if len(room) > 64 || !isAlphaNumeric(room) {
 				return
 			}
-			if addr, err := dcrutil.DecodeAddress(room); err == nil {
+			if addr, err := exccutil.DecodeAddress(room); err == nil {
 				if addr.IsForNet(params) {
 					so.Join(room)
 					apiLog.Debugf("socket.io client joining room: %s", room)
@@ -141,5 +141,5 @@ type WebSocketTx struct {
 // NewTx models data from the notification handler
 type NewTx struct {
 	Hex   string
-	Vouts []dcrjson.Vout
+	Vouts []exccjson.Vout
 }

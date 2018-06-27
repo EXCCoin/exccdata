@@ -1,21 +1,21 @@
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
 
-package dcrpg
+package exccpg
 
 import (
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	apitypes "github.com/decred/dcrdata/api/types"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/explorer"
-	"github.com/decred/dcrdata/rpcutils"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/explorer"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
-// GetRawTransaction gets a dcrjson.TxRawResult for the specified transaction
+// GetRawTransaction gets a exccjson.TxRawResult for the specified transaction
 // hash.
-func (pgb *ChainDBRPC) GetRawTransaction(txid string) (*dcrjson.TxRawResult, error) {
+func (pgb *ChainDBRPC) GetRawTransaction(txid string) (*exccjson.TxRawResult, error) {
 	txraw, err := rpcutils.GetTransactionVerboseByID(pgb.Client, txid)
 	if err != nil {
 		log.Errorf("GetRawTransactionVerbose failed for: %s", txid)
@@ -63,19 +63,19 @@ func (pgb *ChainDB) InsightPgGetAddressTransactions(addr []string,
 	return RetrieveAddressTxnsOrdered(pgb.db, addr, recentBlockHeight)
 }
 
-// Update Vin due to DCRD AMOUNTIN - START
+// Update Vin due to EXCCD AMOUNTIN - START
 func (pgb *ChainDB) RetrieveAddressIDsByOutpoint(txHash string,
 	voutIndex uint32) ([]uint64, []string, int64, error) {
 	return RetrieveAddressIDsByOutpoint(pgb.db, txHash, voutIndex)
-} // Update Vin due to DCRD AMOUNTIN - END
+} // Update Vin due to EXCCD AMOUNTIN - END
 
 // InsightGetAddressTransactions performs a searchrawtransactions for the
 // specfied address, max number of transactions, and offset into the transaction
 // list. The search results are in reverse temporal order.
 // TODO: Does this really need all the prev vout extra data?
 func (pgb *ChainDBRPC) InsightGetAddressTransactions(addr string, count,
-	skip int) []*dcrjson.SearchRawTransactionsResult {
-	address, err := dcrutil.DecodeAddress(addr)
+	skip int) []*exccjson.SearchRawTransactionsResult {
+	address, err := exccutil.DecodeAddress(addr)
 	if err != nil {
 		log.Infof("Invalid address %s: %v", addr, err)
 		return nil
@@ -104,9 +104,9 @@ func (pgb *ChainDBRPC) GetTransactionHex(txid string) string {
 	return txraw.Hex
 }
 
-// GetBlockVerboseByHash returns a *dcrjson.GetBlockVerboseResult for the
+// GetBlockVerboseByHash returns a *exccjson.GetBlockVerboseResult for the
 // specified block hash, optionally with transaction details.
-func (pgb *ChainDBRPC) GetBlockVerboseByHash(hash string, verboseTx bool) *dcrjson.GetBlockVerboseResult {
+func (pgb *ChainDBRPC) GetBlockVerboseByHash(hash string, verboseTx bool) *exccjson.GetBlockVerboseResult {
 	return rpcutils.GetBlockVerboseByHash(pgb.Client, pgb.ChainDB.chainParams,
 		hash, verboseTx)
 }
@@ -120,7 +120,7 @@ func (pgb *ChainDBRPC) GetTransactionsForBlockByHash(hash string) *apitypes.Bloc
 	return makeBlockTransactions(blockVerbose)
 }
 
-func makeBlockTransactions(blockVerbose *dcrjson.GetBlockVerboseResult) *apitypes.BlockTransactions {
+func makeBlockTransactions(blockVerbose *exccjson.GetBlockVerboseResult) *apitypes.BlockTransactions {
 	blockTransactions := new(apitypes.BlockTransactions)
 
 	blockTransactions.Tx = make([]string, len(blockVerbose.Tx))
@@ -161,10 +161,10 @@ func (pgb *ChainDB) GetAddressInfo(address string, N, offset int64) *apitypes.In
 		return nil
 	}
 
-	var totalReceived, totalSent, unSpent dcrutil.Amount
-	totalReceived, _ = dcrutil.NewAmount(float64(balance.TotalSpent + balance.TotalUnspent))
-	totalSent, _ = dcrutil.NewAmount(float64(balance.TotalSpent))
-	unSpent, _ = dcrutil.NewAmount(float64(balance.TotalUnspent))
+	var totalReceived, totalSent, unSpent exccutil.Amount
+	totalReceived, _ = exccutil.NewAmount(float64(balance.TotalSpent + balance.TotalUnspent))
+	totalSent, _ = exccutil.NewAmount(float64(balance.TotalSpent))
+	unSpent, _ = exccutil.NewAmount(float64(balance.TotalUnspent))
 
 	var transactionIdList []string
 	for _, row := range rows {

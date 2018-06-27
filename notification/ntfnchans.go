@@ -5,16 +5,16 @@
 package notification
 
 import (
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccutil"
 
-	"github.com/decred/dcrdata/api/insight"
-	"github.com/decred/dcrdata/blockdata"
-	"github.com/decred/dcrdata/db/dcrsqlite"
-	"github.com/decred/dcrdata/explorer"
-	"github.com/decred/dcrdata/mempool"
-	"github.com/decred/dcrdata/stakedb"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccdata/api/insight"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/db/exccsqlite"
+	"github.com/EXCCoin/exccdata/explorer"
+	"github.com/EXCCoin/exccdata/mempool"
+	"github.com/EXCCoin/exccdata/stakedb"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 const (
@@ -38,13 +38,13 @@ var NtfnChans struct {
 	ConnectChan                       chan *chainhash.Hash
 	ReorgChanBlockData                chan *blockdata.ReorgData
 	ConnectChanWiredDB                chan *chainhash.Hash
-	ReorgChanWiredDB                  chan *dcrsqlite.ReorgData
+	ReorgChanWiredDB                  chan *exccsqlite.ReorgData
 	ConnectChanStakeDB                chan *chainhash.Hash
 	ReorgChanStakeDB                  chan *stakedb.ReorgData
 	UpdateStatusNodeHeight            chan uint32
 	UpdateStatusDBHeight              chan uint32
 	SpendTxBlockChan, RecvTxBlockChan chan *txhelpers.BlockWatchedTx
-	RelevantTxMempoolChan             chan *dcrutil.Tx
+	RelevantTxMempoolChan             chan *exccutil.Tx
 	NewTxChan                         chan *mempool.NewTx
 	ExpNewTxChan                      chan *explorer.NewMempoolTx
 	InsightNewTxChan                  chan *insight.NewTx
@@ -67,7 +67,7 @@ func MakeNtfnChans(monitorMempool, postgresEnabled bool) {
 
 	// Reorg data channels
 	NtfnChans.ReorgChanBlockData = make(chan *blockdata.ReorgData)
-	NtfnChans.ReorgChanWiredDB = make(chan *dcrsqlite.ReorgData)
+	NtfnChans.ReorgChanWiredDB = make(chan *exccsqlite.ReorgData)
 	NtfnChans.ReorgChanStakeDB = make(chan *stakedb.ReorgData)
 
 	// To update app status
@@ -79,7 +79,7 @@ func MakeNtfnChans(monitorMempool, postgresEnabled bool) {
 	// // recv/SpendTxBlockChan come with connected blocks
 	// 	NtfnChans.RecvTxBlockChan = make(chan *txhelpers.BlockWatchedTx, blockConnChanBuffer)
 	// 	NtfnChans.SpendTxBlockChan = make(chan *txhelpers.BlockWatchedTx, blockConnChanBuffer)
-	// 	NtfnChans.RelevantTxMempoolChan = make(chan *dcrutil.Tx, relevantMempoolTxChanBuffer)
+	// 	NtfnChans.RelevantTxMempoolChan = make(chan *exccutil.Tx, relevantMempoolTxChanBuffer)
 	// }
 
 	if monitorMempool {
