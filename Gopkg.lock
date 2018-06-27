@@ -8,7 +8,7 @@
   revision = "56c501706f00d9e1cfacee19a27117e12da24734"
 
 [[projects]]
-  branch = "task/DEX-161_test_mainnet"
+  branch = "master"
   name = "github.com/EXCCoin/exccd"
   packages = [
     "blockchain",
@@ -37,10 +37,10 @@
     "txscript",
     "wire"
   ]
-  revision = "345d947f002ed7b4bbc59ed56089fbc74f5d48bb"
+  revision = "c579fd1a86a5546a063ca3c357d5a006d4711dad"
 
 [[projects]]
-  branch = "feature/DEX-152_mnemonic_compatibility"
+  branch = "master"
   name = "github.com/EXCCoin/exccwallet"
   packages = [
     "apperrors",
@@ -50,7 +50,7 @@
     "wallet/udb",
     "walletdb"
   ]
-  revision = "88e3d55f4a52cafac425cb7e66114df2b16654f5"
+  revision = "d644724eb857f401b8f5b28939f3a86e7c0b943c"
 
 [[projects]]
   branch = "master"
@@ -348,6 +348,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "420a6694189b400d691b117a50f142dd2dea095ab9652fa9b4f37a035a8056e8"
+  inputs-digest = "8ed9624053cb3e92705cd1b06ec1f489604aa90262d12c30a761d7810b0fe329"
   solver-name = "gps-cdcl"
   solver-version = 1
