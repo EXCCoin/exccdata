@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/EXCCoin/base58"
   packages = ["."]
-  revision = "56c501706f00d9e1cfacee19a27117e12da24734"
+  revision = "e1a805ee5d9f5e64352b9b509d18413991cceffb"
 
 [[projects]]
   branch = "master"
