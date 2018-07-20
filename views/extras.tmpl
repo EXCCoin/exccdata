@@ -4,18 +4,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="dcrdata web">
-    <meta name="author" content="dcrdata">
+    <meta name="description" content="exccdata web">
+    <meta name="author" content="exccdata">
     <!--  Custom favicon  -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon.png">
     <link rel="icon" href="/images/favicon/favicon.ico">
     <link rel="icon" type="image/png" href="/images/favicon/favicon-32x32.png" sizes="32x32">
     <link rel="icon" type="image/png" href="/images/favicon/favicon-16x16.png" sizes="16x16">
     <link rel="manifest" href="/images/favicon/manifest.json">
-    <link rel="mask-icon" href="/images/favicon/safari-pinned-tab.svg">
     <link rel="shortcut icon" href="/images/favicon/favicon.ico">
-    <meta name="apple-mobile-web-app-title" content="deCRED - decentralized credit">
-    <meta name="application-name" content="deCRED - decentralized credit">
+    <meta name="apple-mobile-web-app-title" content="ExchangeCoin">
+    <meta name="application-name" content="ExchangeCoin">
     <meta name="msapplication-TileColor" content="#2973ff">
     <meta name="msapplication-TileImage" content="/images/favicon/mstile-144x144.png">
     <meta name="msapplication-config" content="/images/favicon/browserconfig.xml">
@@ -41,8 +39,10 @@
     <div class="container">
         <div class="d-flex align-items-center flex-wrap">
             <div class="d-flex align-items-center">
-                <div class="col-sm-auto" style="padding: 0 2px">
-                    <a href="/" class="dcricon-decred no-underline"></a>
+                <div class="col-sm-auto" style="padding: 4px 2px;">
+                    <a href="/" title="Home">
+                        <img src="/images/favicon/favicon-32x32.png" />
+                    </a>
                 </div>
                 <div class="col-sm-auto"><a href="/blocks" title="Explorer">Explore</a></div>
             </div>
@@ -61,7 +61,7 @@
                 </form>
             </div>
             <div>
-                <a id="sun-toggle" href="javascript:toggleSun()" class="dcricon-sun-fill no-underline"></a>
+                <a id="sun-toggle" href="javascript:toggleSun()" class="exccicon-sun-fill no-underline"></a>
             </div>
         </div>
     </div>
@@ -78,7 +78,7 @@
         document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
     }
     var sunToggle = document.getElementById("sun-toggle")
-    var darkBGCookieName = 'dcrdataDarkBG';
+    var darkBGCookieName = 'exccdataDarkBG';
     function darkEnabled() {
         return document.cookie.includes(darkBGCookieName)
     }
@@ -88,14 +88,14 @@
         toggleToLightClasses(document.body)
     }
     function toggleToDarkClasses(body) {
-        $(sunToggle).removeClass('dcricon-sun-fill')
-        $(sunToggle).addClass('dcricon-sun-stroke')
+        $(sunToggle).removeClass('exccicon-sun-fill')
+        $(sunToggle).addClass('exccicon-sun-stroke')
         $(body).addClass('darkBG')
     }
     function toggleToLightClasses(body) {
         $(body).removeClass('darkBG');
-        $(sunToggle).removeClass('dcricon-sun-stroke')
-        $(sunToggle).addClass('dcricon-sun-fill')
+        $(sunToggle).removeClass('exccicon-sun-stroke')
+        $(sunToggle).addClass('exccicon-sun-fill')
     }
     function toggleSun() {
         if (darkEnabled()) {
@@ -208,7 +208,6 @@
                 $("#bsubsidy_dev").html(humanize.decimalParts(ex.subsidy.dev/100000000, false, 8))
                 $("#coin_supply").html(humanize.decimalParts(ex.coin_supply/100000000, true, 8))
                 $("#blocksdiff").html(humanize.decimalParts(ex.sdiff, false, 8))
-                $("#dev_fund").html(humanize.decimalParts(ex.dev_fund/100000000, true, 8))
                 $("#window_block_index").text(ex.window_idx)
                 $("#pos-window-progess-bar").css({ width: (ex.window_idx/ex.params.window_size)*100 + "%" })
                 $("#reward_block_index").text(ex.reward_idx)
@@ -254,11 +253,11 @@
     <div class="container wrapper text-center">
         <div style="float: left">
             <a class="nav-item" href="/decodetx" title="Decode or send a raw transaction">Decode/Broadcast Tx</a>
-            <a class="nav-item" href="https://github.com/decred/dcrdata#json-rest-api" title="API Endpoints" target="_blank">JSON-API Docs</a>
+            <a class="nav-item" href="https://github.com/EXCCoin/exccdata#json-rest-api" title="API Endpoints" target="_blank">JSON-API Docs</a>
         </div>
         <div style="text-align: left; margin:0 auto !important; display:inline-block">
-            <a class="nav-item" href="https://github.com/decred/dcrdata" title="dcrdata on GitHub" target="_blank">dcrdata v{{.Version}}</a>
-            <a class="nav-item" href="https://github.com/decred/dcrdata/blob/master/LICENSE" target="_blank">© 2017 (ISC)</a>
+            <a class="nav-item" href="https://github.com/EXCCoin/exccdata" title="exccdata on GitHub" target="_blank">exccdata v{{.Version}}</a>
+            <a class="nav-item" href="https://github.com/EXCCoin/exccdata/blob/master/LICENSE" target="_blank">© 2017 (ISC)</a>
         </div>
         <div style="float: right;">
             <span data-turbolinks-permanent class="nav-item hidden" id="connection">Connecting to WebSocket...<div></div></span>

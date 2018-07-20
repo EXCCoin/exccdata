@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/docgen"
 )

@@ -1,32 +1,32 @@
 # Command line app `rebuilddb2`
 
-The `rebuilddb2` app is used for maintenance of dcrdata's `dcrpg` database (a.k.a. DB v2) that uses PostgreSQL to store a nearly complete record of the Decred blockchain data.
+The `rebuilddb2` app is used for maintenance of exccdata's `exccpg` database (a.k.a. DB v2) that uses PostgreSQL to store a nearly complete record of the ExchangeCoin blockchain data.
 
-**IMPORTANT**: When performing a bulk data import (e.g. full chain scan from genesis block), be sure to configure PostgreSQL appropriately.  Please see [postgresql-tuning.conf](../../db/dcrpg/postgresql-tuning.conf) for tips.
+**IMPORTANT**: When performing a bulk data import (e.g. full chain scan from genesis block), be sure to configure PostgreSQL appropriately.  Please see [postgresql-tuning.conf](../../db/exccpg/postgresql-tuning.conf) for tips.
 
 ## Installation
 
-Be able to build dcrdata (see [../../README.md](../../README.md#build-from-source)). In short:
+Be able to build exccdata (see [../../README.md](../../README.md#build-from-source)). In short:
 
 * Install `dep`, the dependency management tool
 
       go get -u -v github.com/golang/dep/cmd/dep
 
-* Clone the dcrdata repository
+* Clone the exccdata repository
 
-      git clone https://github.com/decred/dcrdata $GOPATH/src/github.com/decred/dcrdata
+      git clone https://github.com/EXCCoin/exccdata $GOPATH/src/github.com/EXCCoin/exccdata
 
 * Populate vendor folder with `dep ensure`
 
-      cd $GOPATH/src/github.com/decred/dcrdata
+      cd $GOPATH/src/github.com/EXCCoin/exccdata
       dep ensure
 
 * Build `rebuilddb2`
 
       # build rebuilddb2 executable in workspace:
-      cd $GOPATH/src/github.com/decred/dcrdata/cmd/rebuilddb2
+      cd $GOPATH/src/github.com/EXCCoin/exccdata/cmd/rebuilddb2
       go build
-      # or to install dcrdata and other tools into $GOPATH/bin:
+      # or to install exccdata and other tools into $GOPATH/bin:
       go install ./cmd/rebuilddb2
 
 ## Usage
@@ -42,13 +42,13 @@ A fresh rebuild of the database is accomplished via:
 
 Running without `-u` is only appropriate when the tables are behind the network's current best block by **at most** a few thousand blocks.  Otherwise, run with `-u` to recreate the address table in a more efficient batch process.
 
-Remember to update your PostgreSQL config (postgresql.conf) before *and after* bulk data imports. Namely, before normal dcrdata operation, ensure that `fsync=true` and other setting are adjusted for efficient queries.
+Remember to update your PostgreSQL config (postgresql.conf) before *and after* bulk data imports. Namely, before normal exccdata operation, ensure that `fsync=true` and other setting are adjusted for efficient queries.
 
 Use the `--help` flag for more information.
 
 ## Details
 
-Rebuilding the dcrdata tables from scratch involves the following steps:
+Rebuilding the exccdata tables from scratch involves the following steps:
 
 * Connect to the PostgreSQL database using the settings in rebuilddb2.conf
 * Create tables: "blocks", "transactions", "vins", "vouts", and "addresses".
@@ -58,5 +58,5 @@ Rebuilding the dcrdata tables from scratch involves the following steps:
 
 ## License
 
-See [LICENSE](../../LICENSE) at the base of the dcrdata repository.
+See [LICENSE](../../LICENSE) at the base of the exccdata repository.
 

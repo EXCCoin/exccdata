@@ -1,16 +1,17 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
 
-package dcrsqlite
+package exccsqlite
 
 import (
 	"fmt"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil"
-	apitypes "github.com/decred/dcrdata/dcrdataapi"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccutil"
+	apitypes "github.com/EXCCoin/exccdata/exccdataapi"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 const (
@@ -90,7 +91,7 @@ func (db *wiredDB) resyncDB(quit chan struct{}) error {
 			Size:       header.Size,
 			Hash:       blockhash.String(),
 			Difficulty: diffRatio,
-			StakeDiff:  dcrutil.Amount(header.SBits).ToCoin(),
+			StakeDiff:  exccutil.Amount(header.SBits).ToCoin(),
 			Time:       header.Timestamp.Unix(),
 			PoolInfo: apitypes.TicketPoolInfo{
 				Size: header.PoolSize,
@@ -286,7 +287,7 @@ func (db *wiredDB) resyncDBWithPoolValue(quit chan struct{}) (int64, error) {
 			Size:       header.Size,
 			Hash:       blockhash.String(),
 			Difficulty: diffRatio,
-			StakeDiff:  dcrutil.Amount(header.SBits).ToCoin(),
+			StakeDiff:  exccutil.Amount(header.SBits).ToCoin(),
 			Time:       header.Timestamp.Unix(),
 			PoolInfo:   *tpi,
 		}
@@ -338,7 +339,7 @@ func (db *wiredDB) resyncDBWithPoolValue(quit chan struct{}) (int64, error) {
 	return height, nil
 }
 
-func (db *wiredDB) getBlock(ind int64) (*dcrutil.Block, *chainhash.Hash, error) {
+func (db *wiredDB) getBlock(ind int64) (*exccutil.Block, *chainhash.Hash, error) {
 	blockhash, err := db.client.GetBlockHash(ind)
 	if err != nil {
 		return nil, nil, fmt.Errorf("GetBlockHash(%d) failed: %v", ind, err)
@@ -349,7 +350,7 @@ func (db *wiredDB) getBlock(ind int64) (*dcrutil.Block, *chainhash.Hash, error) 
 		return nil, blockhash,
 			fmt.Errorf("GetBlock failed (%s): %v", blockhash, err)
 	}
-	block := dcrutil.NewBlock(msgBlock)
+	block := exccutil.NewBlock(msgBlock)
 
 	return block, blockhash, nil
 }

@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
@@ -15,10 +16,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccdata/db/exccpg"
+	"github.com/EXCCoin/exccdata/rpcutils"
 	"github.com/btcsuite/btclog"
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrdata/db/dcrpg"
-	"github.com/decred/dcrdata/rpcutils"
 )
 
 var (
@@ -41,14 +42,14 @@ func init() {
 	rpcclientLogger = backendLog.Logger("RPC")
 	rpcclient.UseLogger(rpcclientLogger)
 	sqliteLogger = backendLog.Logger("DSQL")
-	dcrpg.UseLogger(rpcclientLogger)
+	exccpg.UseLogger(rpcclientLogger)
 }
 
 func mainCore() error {
 	// Parse the configuration file, and setup logger.
 	cfg, err := loadConfig()
 	if err != nil {
-		fmt.Printf("Failed to load dcrdata config: %s\n", err.Error())
+		fmt.Printf("Failed to load exccdata config: %s\n", err.Error())
 		return err
 	}
 
@@ -64,8 +65,8 @@ func mainCore() error {
 	}
 
 	// Connect to node RPC server
-	client, _, err := rpcutils.ConnectNodeRPC(cfg.DcrdServ, cfg.DcrdUser,
-		cfg.DcrdPass, cfg.DcrdCert, cfg.DisableDaemonTLS)
+	client, _, err := rpcutils.ConnectNodeRPC(cfg.ExccdServ, cfg.ExccdUser,
+		cfg.ExccdPass, cfg.ExccdCert, cfg.DisableDaemonTLS)
 	if err != nil {
 		log.Fatalf("Unable to connect to RPC server: %v", err)
 		return err
@@ -87,14 +88,14 @@ func mainCore() error {
 		}
 	}
 
-	dbi := dcrpg.DBInfo{
+	dbi := exccpg.DBInfo{
 		Host:   host,
 		Port:   port,
 		User:   cfg.DBUser,
 		Pass:   cfg.DBPass,
 		DBName: cfg.DBName,
 	}
-	db, err := dcrpg.NewChainDB(&dbi, activeChain)
+	db, err := exccpg.NewChainDB(&dbi, activeChain)
 	if db != nil {
 		defer db.Close()
 	}

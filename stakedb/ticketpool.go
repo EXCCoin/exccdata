@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The dcrdata developers.
 // See LICENSE for details.
 
@@ -7,8 +8,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 	"github.com/asdine/storm"
-	"github.com/decred/dcrd/chaincfg/chainhash"
 )
 
 // TicketPool contains the live ticket pool diffs (tickets in/out) between

@@ -1,17 +1,18 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
 
-package dcrsqlite
+package exccsqlite
 
 import (
 	"database/sql"
 	"fmt"
 	"sync"
 
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/blockdata"
+	apitypes "github.com/EXCCoin/exccdata/exccdataapi"
 	"github.com/btcsuite/btclog"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/blockdata"
-	apitypes "github.com/decred/dcrdata/dcrdataapi"
 	_ "github.com/mattn/go-sqlite3" // register sqlite driver with database/sql
 )
 
@@ -34,9 +35,9 @@ type DBInfo struct {
 
 const (
 	// TableNameSummaries is name of the table used to store block summary data
-	TableNameSummaries = "dcrdata_block_summary"
+	TableNameSummaries = "exccdata_block_summary"
 	// TableNameStakeInfo is name of the table used to store extended stake info
-	TableNameStakeInfo = "dcrdata_stakeinfo_extended"
+	TableNameStakeInfo = "exccdata_stakeinfo_extended"
 )
 
 // DB is a wrapper around sql.DB that adds methods for storing and retrieving

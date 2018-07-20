@@ -1,6 +1,6 @@
-# `package dcrpg`
+# `package exccpg`
 
-The `dcrpg` package provides types and functions for manipulating PostgreSQL tables, and storing blocks, transactions, inputs, and outputs.
+The `exccpg` package provides types and functions for manipulating PostgreSQL tables, and storing blocks, transactions, inputs, and outputs.
 
 ## Performance and Bulk Loading
 

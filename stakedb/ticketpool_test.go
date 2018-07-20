@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 )
 
 func randomHash() chainhash.Hash {

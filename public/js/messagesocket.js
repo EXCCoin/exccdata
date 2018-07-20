@@ -11,6 +11,7 @@
 //     the given type
 // send(id, data) -- create a JSON message in the above format and send it
 //
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
 //

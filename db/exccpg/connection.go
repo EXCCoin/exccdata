@@ -1,7 +1,8 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
 
-package dcrpg
+package exccpg
 
 import (
 	"database/sql"

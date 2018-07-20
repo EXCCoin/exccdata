@@ -1,7 +1,8 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
 
-package dcrdataapi
+package exccdataapi
 
 import (
 	"container/heap"
@@ -10,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 )
 
 // constants from time

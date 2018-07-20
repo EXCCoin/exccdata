@@ -1,7 +1,8 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
 
-package dcrpg
+package exccpg
 
 import (
 	"bytes"
@@ -12,13 +13,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/blockdata"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/explorer"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/explorer"
 	humanize "github.com/dustin/go-humanize"
 )
 
@@ -31,7 +32,6 @@ var (
 type ChainDB struct {
 	db            *sql.DB
 	chainParams   *chaincfg.Params
-	devAddress    string
 	dupChecks     bool
 	bestBlock     int64
 	lastBlock     map[chainhash.Hash]uint64
@@ -56,7 +56,7 @@ type DBInfo struct {
 	Host, Port, User, Pass, DBName string
 }
 
-// NewChainDB constructs a ChainDB for the given connection and Decred network
+// NewChainDB constructs a ChainDB for the given connection and ExchangeCoin network
 // parameters. By default, duplicate row checks on insertion are enabled.
 func NewChainDB(dbi *DBInfo, params *chaincfg.Params) (*ChainDB, error) {
 	// Connect to the PostgreSQL daemon and return the *sql.DB
@@ -72,16 +72,9 @@ func NewChainDB(dbi *DBInfo, params *chaincfg.Params) (*ChainDB, error) {
 		return nil, err
 	}
 
-	// Development subsidy address of the current network
-	var devSubsidyAddress string
-	if devSubsidyAddress, err = dbtypes.DevSubsidyAddress(params); err != nil {
-		log.Warnf("ChainDB.NewChainDB: %v", err)
-	}
-
 	return &ChainDB{
 		db:            db,
 		chainParams:   params,
-		devAddress:    devSubsidyAddress,
 		dupChecks:     true,
 		bestBlock:     int64(bestHeight),
 		lastBlock:     make(map[chainhash.Hash]uint64),
@@ -118,7 +111,7 @@ func (pgb *ChainDB) SetupTables() error {
 	return nil
 }
 
-// DropTables drops (deletes) all of the known dcrdata tables.
+// DropTables drops (deletes) all of the known exccdata tables.
 func (pgb *ChainDB) DropTables() {
 	DropTables(pgb.db)
 }
@@ -222,14 +215,9 @@ func (pgb *ChainDB) AddressHistory(address string, N, offset int64) ([]*dbtypes.
 		pgb.addressCounts.validHeight = bestBlock
 	}
 
-	// The organization address occurs very frequently, so use the regular (non
-	// sub-query) select as it is much more efficient.
 	var addressRows []*dbtypes.AddressRow
-	if address == pgb.devAddress {
-		_, addressRows, err = RetrieveAddressTxnsAlt(pgb.db, address, N, offset)
-	} else {
-		_, addressRows, err = RetrieveAddressTxns(pgb.db, address, N, offset)
-	}
+	_, addressRows, err = RetrieveAddressTxns(pgb.db, address, N, offset)
+
 	if err != nil {
 		return nil, &balanceInfo, err
 	}
@@ -267,9 +255,9 @@ func (pgb *ChainDB) AddressHistory(address string, N, offset int64) ([]*dbtypes.
 			}
 		}
 
-		log.Infof("%s: %d spent totalling %f DCR, %d unspent totalling %f DCR",
-			address, balanceInfo.NumSpent, dcrutil.Amount(balanceInfo.TotalSpent).ToCoin(),
-			balanceInfo.NumUnspent, dcrutil.Amount(balanceInfo.TotalUnspent).ToCoin())
+		log.Infof("%s: %d spent totalling %f EXCC, %d unspent totalling %f EXCC",
+			address, balanceInfo.NumSpent, exccutil.Amount(balanceInfo.TotalSpent).ToCoin(),
+			balanceInfo.NumUnspent, exccutil.Amount(balanceInfo.TotalUnspent).ToCoin())
 		log.Infof("Caching address receive count for address %s: "+
 			"count = %d at block %d.", address,
 			balanceInfo.NumSpent+balanceInfo.NumUnspent, bestBlock)
@@ -297,7 +285,7 @@ func (pgb *ChainDB) FillAddressTransactions(addrInfo *explorer.AddressInfo) erro
 		}
 		txn.TxID = dbTx.TxID
 		txn.FormattedSize = humanize.Bytes(uint64(dbTx.Size))
-		txn.Total = dcrutil.Amount(dbTx.Sent).ToCoin()
+		txn.Total = exccutil.Amount(dbTx.Sent).ToCoin()
 		txn.Time = dbTx.BlockTime
 		if dbTx.BlockTime > 0 {
 			txn.Confirmations = pgb.Height() - uint64(dbTx.BlockHeight) + 1

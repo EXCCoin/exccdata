@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
 
@@ -8,7 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 )
 
 // Home is the page handler for the "/" path

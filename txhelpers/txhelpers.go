@@ -12,28 +12,28 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/decred/dcrd/blockchain"
-	"github.com/decred/dcrd/blockchain/stake"
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/txscript"
-	"github.com/decred/dcrd/wire"
+	"github.com/EXCCoin/exccd/blockchain"
+	"github.com/EXCCoin/exccd/blockchain/stake"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/txscript"
+	"github.com/EXCCoin/exccd/wire"
 )
 
 // RawTransactionGetter is an interface satisfied by rpcclient.Client, and
 // required by functions that would otherwise require a rpcclient.Client just
 // for GetRawTransaction.
 type RawTransactionGetter interface {
-	GetRawTransaction(txHash *chainhash.Hash) (*dcrutil.Tx, error)
+	GetRawTransaction(txHash *chainhash.Hash) (*exccutil.Tx, error)
 }
 
 // BlockWatchedTx contains, for a certain block, the transactions for certain
 // watched addresses
 type BlockWatchedTx struct {
 	BlockHeight   int64
-	TxsForAddress map[string][]*dcrutil.Tx
+	TxsForAddress map[string][]*exccutil.Tx
 }
 
 // TxAction is what is happening to the transaction (mined or inserted into
@@ -57,9 +57,9 @@ func HashInSlice(h chainhash.Hash, list []chainhash.Hash) bool {
 	return false
 }
 
-// TxhashInSlice searches a slice of *dcrutil.Tx for a transaction with the hash
+// TxhashInSlice searches a slice of *exccutil.Tx for a transaction with the hash
 // txHash. If found, it returns the corresponding *Tx, otherwise nil.
-func TxhashInSlice(txs []*dcrutil.Tx, txHash *chainhash.Hash) *dcrutil.Tx {
+func TxhashInSlice(txs []*exccutil.Tx, txHash *chainhash.Hash) *exccutil.Tx {
 	if len(txs) < 1 {
 		return nil
 	}
@@ -74,7 +74,7 @@ func TxhashInSlice(txs []*dcrutil.Tx, txHash *chainhash.Hash) *dcrutil.Tx {
 }
 
 // IncludesStakeTx checks if a block contains a stake transaction hash
-func IncludesStakeTx(txHash *chainhash.Hash, block *dcrutil.Block) (int, int8) {
+func IncludesStakeTx(txHash *chainhash.Hash, block *exccutil.Block) (int, int8) {
 	blockTxs := block.STransactions()
 
 	if tx := TxhashInSlice(blockTxs, txHash); tx != nil {
@@ -84,7 +84,7 @@ func IncludesStakeTx(txHash *chainhash.Hash, block *dcrutil.Block) (int, int8) {
 }
 
 // IncludesTx checks if a block contains a transaction hash
-func IncludesTx(txHash *chainhash.Hash, block *dcrutil.Block) (int, int8) {
+func IncludesTx(txHash *chainhash.Hash, block *exccutil.Block) (int, int8) {
 	blockTxs := block.Transactions()
 
 	if tx := TxhashInSlice(blockTxs, txHash); tx != nil {
@@ -100,11 +100,11 @@ func IncludesTx(txHash *chainhash.Hash, block *dcrutil.Block) (int, int8) {
 // The RPC client is used to get the PreviousOutPoint for each TxIn of each
 // transaction in the block, from which the address is obtained from the
 // PkScript of that output. chaincfg Params is required to decode the script.
-func BlockConsumesOutpointWithAddresses(block *dcrutil.Block, addrs map[string]TxAction,
-	c RawTransactionGetter, params *chaincfg.Params) map[string][]*dcrutil.Tx {
-	addrMap := make(map[string][]*dcrutil.Tx)
+func BlockConsumesOutpointWithAddresses(block *exccutil.Block, addrs map[string]TxAction,
+	c RawTransactionGetter, params *chaincfg.Params) map[string][]*exccutil.Tx {
+	addrMap := make(map[string][]*exccutil.Tx)
 
-	checkForOutpointAddr := func(blockTxs []*dcrutil.Tx) {
+	checkForOutpointAddr := func(blockTxs []*exccutil.Tx) {
 		for _, tx := range blockTxs {
 			for _, txIn := range tx.MsgTx().TxIn {
 				prevOut := &txIn.PreviousOutPoint
@@ -130,7 +130,7 @@ func BlockConsumesOutpointWithAddresses(block *dcrutil.Block, addrs map[string]T
 						addrstr := txAddr.EncodeAddress()
 						if _, ok := addrs[addrstr]; ok {
 							if addrMap[addrstr] == nil {
-								addrMap[addrstr] = make([]*dcrutil.Tx, 0)
+								addrMap[addrstr] = make([]*exccutil.Tx, 0)
 							}
 							addrMap[addrstr] = append(addrMap[addrstr], prevTx)
 						}
@@ -147,13 +147,13 @@ func BlockConsumesOutpointWithAddresses(block *dcrutil.Block, addrs map[string]T
 }
 
 // BlockReceivesToAddresses checks a block for transactions paying to the
-// specified addresses, and creates a map of addresses to a slice of dcrutil.Tx
+// specified addresses, and creates a map of addresses to a slice of exccutil.Tx
 // involving the address.
-func BlockReceivesToAddresses(block *dcrutil.Block, addrs map[string]TxAction,
-	params *chaincfg.Params) map[string][]*dcrutil.Tx {
-	addrMap := make(map[string][]*dcrutil.Tx)
+func BlockReceivesToAddresses(block *exccutil.Block, addrs map[string]TxAction,
+	params *chaincfg.Params) map[string][]*exccutil.Tx {
+	addrMap := make(map[string][]*exccutil.Tx)
 
-	checkForAddrOut := func(blockTxs []*dcrutil.Tx) {
+	checkForAddrOut := func(blockTxs []*exccutil.Tx) {
 		for _, tx := range blockTxs {
 			// Check the addresses associated with the PkScript of each TxOut
 			for _, txOut := range tx.MsgTx().TxOut {
@@ -169,7 +169,7 @@ func BlockReceivesToAddresses(block *dcrutil.Block, addrs map[string]TxAction,
 					addrstr := txAddr.EncodeAddress()
 					if _, ok := addrs[addrstr]; ok {
 						if _, gotSlice := addrMap[addrstr]; !gotSlice {
-							addrMap[addrstr] = make([]*dcrutil.Tx, 0) // nil
+							addrMap[addrstr] = make([]*exccutil.Tx, 0) // nil
 						}
 						addrMap[addrstr] = append(addrMap[addrstr], tx)
 					}
@@ -231,12 +231,12 @@ func OutPointAddressesFromString(txid string, index uint32, tree int8,
 }
 
 // MedianAmount gets the median Amount from a slice of Amounts
-func MedianAmount(s []dcrutil.Amount) dcrutil.Amount {
+func MedianAmount(s []exccutil.Amount) exccutil.Amount {
 	if len(s) == 0 {
 		return 0
 	}
 
-	sort.Sort(dcrutil.AmountSorter(s))
+	sort.Sort(exccutil.AmountSorter(s))
 
 	middle := len(s) / 2
 
@@ -248,7 +248,7 @@ func MedianAmount(s []dcrutil.Amount) dcrutil.Amount {
 	return (s[middle] + s[middle-1]) / 2
 }
 
-// MedianCoin gets the median DCR from a slice of float64s
+// MedianCoin gets the median EXCC from a slice of float64s
 func MedianCoin(s []float64) float64 {
 	if len(s) == 0 {
 		return 0
@@ -287,7 +287,7 @@ func GetDifficultyRatio(bits uint32, params *chaincfg.Params) float64 {
 }
 
 // SSTXInBlock gets a slice containing all of the SSTX mined in a block
-func SSTXInBlock(block *dcrutil.Block) []*dcrutil.Tx {
+func SSTXInBlock(block *exccutil.Block) []*exccutil.Tx {
 	_, txns := TicketTxnsInBlock(block)
 	return txns
 }
@@ -297,38 +297,18 @@ func SSTXInBlock(block *dcrutil.Block) []*dcrutil.Tx {
 // votes. The error return may be ignored if the input transaction is known to
 // be a valid ssgen (vote), otherwise it should be checked.
 func SSGenVoteBlockValid(msgTx *wire.MsgTx) (BlockValidation, uint16, error) {
-	if isVote, _ := stake.IsSSGen(msgTx); !isVote {
+	if isVote := stake.IsSSGen(msgTx); !isVote {
 		return BlockValidation{}, 0, fmt.Errorf("not a vote transaction")
 	}
 	ssGenVoteBits := stake.SSGenVoteBits(msgTx)
 
-	blockHash, blockHeight, err := stake.SSGenBlockVotedOn(msgTx)
-	if err != nil {
-		return BlockValidation{}, 0, err
-	}
+	blockHash, blockHeight := stake.SSGenBlockVotedOn(msgTx)
 	blockValid := BlockValidation{
 		Hash:     blockHash,
 		Height:   int64(blockHeight),
-		Validity: dcrutil.IsFlagSet16(ssGenVoteBits, dcrutil.BlockValid),
+		Validity: exccutil.IsFlagSet16(ssGenVoteBits, exccutil.BlockValid),
 	}
 	return blockValid, ssGenVoteBits, nil
-}
-
-// VoteBitsInBlock returns a list of vote bits for the votes in a block
-func VoteBitsInBlock(block *dcrutil.Block) []blockchain.VoteVersionTuple {
-	var voteBits []blockchain.VoteVersionTuple
-	for _, stx := range block.MsgBlock().STransactions {
-		if isVote, _ := stake.IsSSGen(stx); !isVote {
-			continue
-		}
-
-		voteBits = append(voteBits, blockchain.VoteVersionTuple{
-			Version: stake.SSGenVersion(stx),
-			Bits:    stake.SSGenVoteBits(stx),
-		})
-	}
-
-	return voteBits
 }
 
 // SSGenVoteBits returns the VoteBits of txOut[1] of a ssgen tx
@@ -434,8 +414,8 @@ func SSGenVoteChoices(tx *wire.MsgTx, params *chaincfg.Params) (BlockValidation,
 
 // FeeInfoBlock computes ticket fee statistics for the tickets included in the
 // specified block.
-func FeeInfoBlock(block *dcrutil.Block) *dcrjson.FeeInfoBlock {
-	feeInfo := new(dcrjson.FeeInfoBlock)
+func FeeInfoBlock(block *exccutil.Block) *exccjson.FeeInfoBlock {
+	feeInfo := new(exccjson.FeeInfoBlock)
 	_, sstxMsgTxns := TicketsInBlock(block)
 
 	feeInfo.Height = uint32(block.Height())
@@ -453,7 +433,7 @@ func FeeInfoBlock(block *dcrutil.Block) *dcrjson.FeeInfoBlock {
 		for iv := range msgTx.TxOut {
 			amtOut += msgTx.TxOut[iv].Value
 		}
-		fee := dcrutil.Amount(amtIn - amtOut).ToCoin()
+		fee := exccutil.Amount(amtIn - amtOut).ToCoin()
 		if fee < minFee {
 			minFee = fee
 		}
@@ -487,8 +467,8 @@ func FeeInfoBlock(block *dcrutil.Block) *dcrjson.FeeInfoBlock {
 
 // FeeRateInfoBlock computes ticket fee rate statistics for the tickets included
 // in the specified block.
-func FeeRateInfoBlock(block *dcrutil.Block) *dcrjson.FeeInfoBlock {
-	feeInfo := new(dcrjson.FeeInfoBlock)
+func FeeRateInfoBlock(block *exccutil.Block) *exccjson.FeeInfoBlock {
+	feeInfo := new(exccjson.FeeInfoBlock)
 	_, sstxMsgTxns := TicketsInBlock(block)
 
 	feeInfo.Height = uint32(block.Height())
@@ -505,7 +485,7 @@ func FeeRateInfoBlock(block *dcrutil.Block) *dcrjson.FeeInfoBlock {
 		for iv := range msgTx.TxOut {
 			amtOut += msgTx.TxOut[iv].Value
 		}
-		fee := dcrutil.Amount(1000*(amtIn-amtOut)).ToCoin() / float64(msgTx.SerializeSize())
+		fee := exccutil.Amount(1000*(amtIn-amtOut)).ToCoin() / float64(msgTx.SerializeSize())
 		if fee < minFee {
 			minFee = fee
 		}
@@ -580,7 +560,7 @@ func IsStakeTx(msgTx *wire.MsgTx) bool {
 }
 
 // TxFee computes and returns the fee for a given tx
-func TxFee(msgTx *wire.MsgTx) dcrutil.Amount {
+func TxFee(msgTx *wire.MsgTx) exccutil.Amount {
 	var amtIn int64
 	for iv := range msgTx.TxIn {
 		amtIn += msgTx.TxIn[iv].ValueIn
@@ -589,11 +569,11 @@ func TxFee(msgTx *wire.MsgTx) dcrutil.Amount {
 	for iv := range msgTx.TxOut {
 		amtOut += msgTx.TxOut[iv].Value
 	}
-	return dcrutil.Amount(amtIn - amtOut)
+	return exccutil.Amount(amtIn - amtOut)
 }
 
-// TxFeeRate computes and returns the fee rate in DCR/KB for a given tx
-func TxFeeRate(msgTx *wire.MsgTx) (dcrutil.Amount, dcrutil.Amount) {
+// TxFeeRate computes and returns the fee rate in EXCC/KB for a given tx
+func TxFeeRate(msgTx *wire.MsgTx) (exccutil.Amount, exccutil.Amount) {
 	var amtIn int64
 	for iv := range msgTx.TxIn {
 		amtIn += msgTx.TxIn[iv].ValueIn
@@ -602,14 +582,14 @@ func TxFeeRate(msgTx *wire.MsgTx) (dcrutil.Amount, dcrutil.Amount) {
 	for iv := range msgTx.TxOut {
 		amtOut += msgTx.TxOut[iv].Value
 	}
-	return dcrutil.Amount(amtIn - amtOut), dcrutil.Amount(1000 * (amtIn - amtOut) / int64(msgTx.SerializeSize()))
+	return exccutil.Amount(amtIn - amtOut), exccutil.Amount(1000 * (amtIn - amtOut) / int64(msgTx.SerializeSize()))
 }
 
-// TotalVout computes the total value of a slice of dcrjson.Vout
-func TotalVout(vouts []dcrjson.Vout) dcrutil.Amount {
-	var total dcrutil.Amount
+// TotalVout computes the total value of a slice of exccjson.Vout
+func TotalVout(vouts []exccjson.Vout) exccutil.Amount {
+	var total exccutil.Amount
 	for _, v := range vouts {
-		a, err := dcrutil.NewAmount(v.Value)
+		a, err := exccutil.NewAmount(v.Value)
 		if err != nil {
 			continue
 		}

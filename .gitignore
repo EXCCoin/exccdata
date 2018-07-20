@@ -6,8 +6,8 @@
 debug
 *.cert
 *.key
-dcrdata
-dcrdata*.conf
+exccdata
+exccdata*.conf
 vendor/
 *.orig
 *.db
@@ -26,3 +26,4 @@ MANIFEST-*
 ffldb_stake*/
 *.pprof
 testnet/
+.idea

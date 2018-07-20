@@ -1,5 +1,6 @@
 // Package explorer handles the block explorer subsystem for generating the
 // explorer pages.
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
 package explorer
@@ -13,20 +14,19 @@ import (
 	"os/signal"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/blockdata"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/mempool"
-	humanize "github.com/dustin/go-humanize"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/mempool"
+	"github.com/dustin/go-humanize"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/rs/cors"
@@ -59,7 +59,7 @@ type explorerDataSourceLite interface {
 	GetBlockHash(idx int64) (string, error)
 	GetExplorerTx(txid string) *TxInfo
 	GetExplorerAddress(address string, count, offset int64) *AddressInfo
-	DecodeRawTransaction(txhex string) (*dcrjson.TxRawResult, error)
+	DecodeRawTransaction(txhex string) (*exccjson.TxRawResult, error)
 	SendRawTransaction(txhex string) (string, error)
 	GetHeight() int
 	GetChainParams() *chaincfg.Params
@@ -208,15 +208,7 @@ func New(dataSource explorerDataSourceLite, primaryDataSource explorerDataSource
 	params := exp.blockData.GetChainParams()
 	exp.ChainParams = params
 
-	// Development subsidy address of the current network
-	devSubsidyAddress, err := dbtypes.DevSubsidyAddress(params)
-	if err != nil {
-		log.Warnf("explorer.New: %v", err)
-	}
-	log.Debugf("Organization address: %s", devSubsidyAddress)
-	exp.ExtraInfo = &HomeInfo{
-		DevAddress: devSubsidyAddress,
-	}
+	exp.ExtraInfo = &HomeInfo{}
 
 	exp.templateFiles = make(map[string]string)
 	exp.templateFiles["home"] = filepath.Join("views", "home.tmpl")
@@ -463,10 +455,8 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 		StakeDiff:         blockData.CurrentStakeDiff.CurrentStakeDifficulty,
 		IdxBlockInWindow:  blockData.IdxBlockInWindow,
 		IdxInRewardWindow: int(newBlockData.Height % exp.ChainParams.SubsidyReductionInterval),
-		DevAddress:        exp.ExtraInfo.DevAddress,
 		Difficulty:        blockData.Header.Difficulty,
 		NBlockSubsidy: BlockSubsidy{
-			Dev:   blockData.ExtraInfo.NextBlockSubsidy.Developer,
 			PoS:   blockData.ExtraInfo.NextBlockSubsidy.PoS,
 			PoW:   blockData.ExtraInfo.NextBlockSubsidy.PoW,
 			Total: blockData.ExtraInfo.NextBlockSubsidy.Total,
@@ -480,20 +470,15 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 			Size:       blockData.PoolInfo.Size,
 			Value:      blockData.PoolInfo.Value,
 			ValAvg:     blockData.PoolInfo.ValAvg,
-			Percentage: percentage(blockData.PoolInfo.Value, dcrutil.Amount(blockData.ExtraInfo.CoinSupply).ToCoin()),
+			Percentage: percentage(blockData.PoolInfo.Value, exccutil.Amount(blockData.ExtraInfo.CoinSupply).ToCoin()),
 			Target:     exp.ChainParams.TicketPoolSize * exp.ChainParams.TicketsPerBlock,
 			PercentTarget: func() float64 {
 				target := float64(exp.ChainParams.TicketPoolSize * exp.ChainParams.TicketsPerBlock)
 				return float64(blockData.PoolInfo.Size) / target * 100
 			}(),
 		},
-		TicketROI: percentage(dcrutil.Amount(blockData.ExtraInfo.NextBlockSubsidy.PoS).ToCoin()/5, blockData.CurrentStakeDiff.CurrentStakeDifficulty),
+		TicketROI: percentage(exccutil.Amount(blockData.ExtraInfo.NextBlockSubsidy.PoS).ToCoin()/5, blockData.CurrentStakeDiff.CurrentStakeDifficulty),
 		ROIPeriod: fmt.Sprintf("%.2f days", exp.ChainParams.TargetTimePerBlock.Seconds()*float64(exp.ChainParams.TicketPoolSize)/86400),
-	}
-
-	if !exp.liteMode {
-		exp.ExtraInfo.DevFund = 0
-		go exp.updateDevFundBalance()
 	}
 
 	exp.NewBlockDataMtx.Unlock()
@@ -503,20 +488,6 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, _ *wire.MsgBlock) e
 	log.Debugf("Got new block %d", newBlockData.Height)
 
 	return nil
-}
-
-func (exp *explorerUI) updateDevFundBalance() {
-	// yield processor to other goroutines
-	runtime.Gosched()
-	exp.NewBlockDataMtx.Lock()
-	defer exp.NewBlockDataMtx.Unlock()
-
-	_, devBalance, err := exp.explorerSource.AddressHistory(exp.ExtraInfo.DevAddress, 1, 0)
-	if err == nil && devBalance != nil {
-		exp.ExtraInfo.DevFund = devBalance.TotalUnspent
-	} else {
-		log.Warnf("explorerUI.updateDevFundBalance failed: %v", err)
-	}
 }
 
 func (exp *explorerUI) StoreMPData(data *mempool.MempoolData, timestamp time.Time) error {

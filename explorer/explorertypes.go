@@ -1,4 +1,5 @@
-// Copyright (c) 2017, The Dcrdata developers
+// Copyright (c) 2018 The ExchangeCoin team
+// Copyright (c) 2017, The Exccdata developers
 // See LICENSE for details.
 
 package explorer
@@ -6,10 +7,10 @@ package explorer
 import (
 	"sync"
 
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 // BlockBasic models data for the explorer's explorer page
@@ -31,8 +32,8 @@ type TxBasic struct {
 	TxID          string
 	FormattedSize string
 	Total         float64
-	Fee           dcrutil.Amount
-	FeeRate       dcrutil.Amount
+	Fee           exccutil.Amount
+	FeeRate       exccutil.Amount
 	VoteInfo      *VoteInfo
 	Coinbase      bool
 }
@@ -89,7 +90,7 @@ type BlockValidation struct {
 
 // Vin models basic data about a tx input for display
 type Vin struct {
-	*dcrjson.Vin
+	*exccjson.Vin
 	Addresses       []string
 	FormattedAmount string
 }
@@ -129,7 +130,7 @@ type BlockInfo struct {
 	PreviousHash          string
 	NextHash              string
 	TotalSent             float64
-	MiningFee             dcrutil.Amount
+	MiningFee             exccutil.Amount
 	StakeValidationHeight int64
 }
 
@@ -146,9 +147,9 @@ type AddressInfo struct {
 	KnownTransactions int64 // The number of transactions in the address unlimited
 	KnownFundingTxns  int64 // The number of transactions paying to the address unlimited
 	NumUnconfirmed    int64 // The number of unconfirmed transactions in the address
-	TotalReceived     dcrutil.Amount
-	TotalSent         dcrutil.Amount
-	Unspent           dcrutil.Amount
+	TotalReceived     exccutil.Amount
+	TotalSent         exccutil.Amount
+	Unspent           exccutil.Amount
 	Balance           *AddressBalance
 	Path              string
 	Fullmode          bool
@@ -171,8 +172,6 @@ type HomeInfo struct {
 	IdxBlockInWindow  int            `json:"window_idx"`
 	IdxInRewardWindow int            `json:"reward_idx"`
 	Difficulty        float64        `json:"difficulty"`
-	DevFund           int64          `json:"dev_fund"`
-	DevAddress        string         `json:"dev_address"`
 	TicketROI         float64        `json:"roi"`
 	ROIPeriod         string         `json:"roi_period"`
 	NBlockSubsidy     BlockSubsidy   `json:"subsidy"`
@@ -180,12 +179,11 @@ type HomeInfo struct {
 	PoolInfo          TicketPoolInfo `json:"pool_info"`
 }
 
-// BlockSubsidy is an implementation of dcrjson.GetBlockSubsidyResult
+// BlockSubsidy is an implementation of exccjson.GetBlockSubsidyResult
 type BlockSubsidy struct {
 	Total int64 `json:"total"`
 	PoW   int64 `json:"pow"`
 	PoS   int64 `json:"pos"`
-	Dev   int64 `json:"dev"`
 }
 
 // MempoolInfo models data to update mempool info on the home page
@@ -219,7 +217,7 @@ func ReduceAddressHistory(addrHist []*dbtypes.AddressRow) *AddressInfo {
 	var transactions []*AddressTx
 	for _, addrOut := range addrHist {
 		numFundingTxns++
-		coin := dcrutil.Amount(addrOut.Value).ToCoin()
+		coin := exccutil.Amount(addrOut.Value).ToCoin()
 
 		// Funding transaction
 		received += int64(addrOut.Value)
@@ -250,9 +248,9 @@ func ReduceAddressHistory(addrHist []*dbtypes.AddressRow) *AddressInfo {
 		Transactions:    transactions,
 		NumFundingTxns:  numFundingTxns,
 		NumSpendingTxns: numSpendingTxns,
-		TotalReceived:   dcrutil.Amount(received),
-		TotalSent:       dcrutil.Amount(sent),
-		Unspent:         dcrutil.Amount(received - sent),
+		TotalReceived:   exccutil.Amount(received),
+		TotalSent:       exccutil.Amount(sent),
+		Unspent:         exccutil.Amount(received - sent),
 	}
 }
 

@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
 

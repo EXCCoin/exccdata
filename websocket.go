@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
 
@@ -6,7 +7,7 @@ package main
 import (
 	"sync"
 
-	apitypes "github.com/decred/dcrdata/dcrdataapi"
+	apitypes "github.com/EXCCoin/exccdata/exccdataapi"
 )
 
 // WebSocketMessage represents the JSON object used to send and received typed

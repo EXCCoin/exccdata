@@ -1,4 +1,4 @@
-package dcrdataapi
+package exccdataapi
 
 import (
 	"container/heap"

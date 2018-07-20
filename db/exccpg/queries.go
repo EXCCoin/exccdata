@@ -1,15 +1,16 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
 
-package dcrpg
+package exccpg
 
 import (
 	"bytes"
 	"database/sql"
 	"fmt"
 
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/db/dcrpg/internal"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/db/exccpg/internal"
 	"github.com/lib/pq"
 )
 
@@ -287,11 +288,6 @@ func RetrieveAllAddressTxns(db *sql.DB, address string) ([]uint64, []*dbtypes.Ad
 func RetrieveAddressTxns(db *sql.DB, address string, N, offset int64) ([]uint64, []*dbtypes.AddressRow, error) {
 	return retrieveAddressTxns(db, address, N, offset,
 		internal.SelectAddressLimitNByAddressSubQry)
-}
-
-func RetrieveAddressTxnsAlt(db *sql.DB, address string, N, offset int64) ([]uint64, []*dbtypes.AddressRow, error) {
-	return retrieveAddressTxns(db, address, N, offset,
-		internal.SelectAddressLimitNByAddress)
 }
 
 func retrieveAddressTxns(db *sql.DB, address string, N, offset int64,

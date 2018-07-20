@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017 Jonathan Chappelow
 // Copyright (c) 2016 The Decred developers
 // Use of this source code is governed by an ISC
@@ -13,18 +14,18 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccwallet/netparams"
 	"github.com/btcsuite/btclog"
 	flags "github.com/btcsuite/go-flags"
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrwallet/netparams"
 )
 
 const (
-	defaultConfigFilename = "dcrdata.conf"
+	defaultConfigFilename = "exccdata.conf"
 	defaultLogLevel       = "info"
 	defaultLogDirname     = "logs"
-	defaultLogFilename    = "dcrdata.log"
+	defaultLogFilename    = "exccdata.log"
 )
 
 var curDir, _ = os.Getwd()
@@ -32,10 +33,10 @@ var activeNet = &netparams.MainNetParams
 var activeChain = &chaincfg.MainNetParams
 
 var (
-	dcrdHomeDir = dcrutil.AppDataDir("dcrd", false)
-	//dcrdataapiHomeDir            = dcrutil.AppDataDir("dcrdataapi", false)
-	//defaultDaemonRPCKeyFile  = filepath.Join(dcrdHomeDir, "rpc.key")
-	defaultDaemonRPCCertFile = filepath.Join(dcrdHomeDir, "rpc.cert")
+	exccdHomeDir = exccutil.AppDataDir("exccd", false)
+	//exccdataapiHomeDir            = exccutil.AppDataDir("exccdataapi", false)
+	//defaultDaemonRPCKeyFile  = filepath.Join(exccdHomeDir, "rpc.key")
+	defaultDaemonRPCCertFile = filepath.Join(exccdHomeDir, "rpc.cert")
 	defaultConfigFile        = filepath.Join(curDir, defaultConfigFilename)
 	defaultLogDir            = filepath.Join(curDir, defaultLogDirname)
 	defaultHost              = "localhost"
@@ -51,12 +52,12 @@ var (
 	defaultMempoolMaxInterval = 120
 	defaultMPTriggerTickets   = 1
 
-	defaultDBFileName = "dcrdata.sqlt.db"
+	defaultDBFileName = "exccdata.sqlt.db"
 
 	defaultPGHost   = "127.0.0.1:5432"
-	defaultPGUser   = "dcrdata"
+	defaultPGUser   = "exccdata"
 	defaultPGPass   = ""
-	defaultPGDBName = "dcrdata"
+	defaultPGDBName = "exccdata"
 )
 
 type config struct {
@@ -89,7 +90,7 @@ type config struct {
 	MempoolMaxInterval int    `long:"mp-max-interval" description:"The maximum time in seconds between mempool reports (within a couple seconds), regarless of number of new tickets seen."`
 	MPTriggerTickets   int    `long:"mp-ticket-trigger" description:"The number minimum number of new tickets that must be seen to trigger a new mempool report."`
 	DumpAllMPTix       bool   `long:"dumpallmptix" description:"Dump to file the fees of all the tickets in mempool."`
-	DBFileName         string `long:"dbfile" description:"SQLite DB file name (default is dcrdata.sqlt.db)."`
+	DBFileName         string `long:"dbfile" description:"SQLite DB file name (default is exccdata.sqlt.db)."`
 
 	LiteMode bool   `short:"l" long:"lite" description:"Run in \"lite\" mode, using only SQLite."`
 	PGDBName string `long:"pgdbname" description:"PostgreSQL DB name."`
@@ -104,15 +105,15 @@ type config struct {
 	// SMTPPass     string `long:"smtppass" description:"SMTP password"`
 	// SMTPServer   string `long:"smtpserver" description:"SMTP host name"`
 	// EmailAddr    string `long:"emailaddr" description:"Destination email address for alerts"`
-	// EmailSubject string `long:"emailsubj" description:"Email subject. (default \"dcrdataapi transaction notification\")"`
+	// EmailSubject string `long:"emailsubj" description:"Email subject. (default \"exccdataapi transaction notification\")"`
 
 	OutFolder string `short:"f" long:"outfolder" description:"Folder for file outputs"`
 
 	// RPC client options
-	DcrdUser         string `long:"dcrduser" description:"Daemon RPC user name"`
-	DcrdPass         string `long:"dcrdpass" description:"Daemon RPC password"`
-	DcrdServ         string `long:"dcrdserv" description:"Hostname/IP and port of dcrd RPC server to connect to (default localhost:9109, testnet: localhost:19109, simnet: localhost:19556)"`
-	DcrdCert         string `long:"dcrdcert" description:"File containing the dcrd certificate file"`
+	ExccdUser        string `long:"exccduser" description:"Daemon RPC user name"`
+	ExccdPass        string `long:"exccdpass" description:"Daemon RPC password"`
+	ExccdServ        string `long:"exccdserv" description:"Hostname/IP and port of exccd RPC server to connect to (default localhost:9109, testnet: localhost:19109, simnet: localhost:19556)"`
+	ExccdCert        string `long:"exccdcert" description:"File containing the exccd certificate file"`
 	DisableDaemonTLS bool   `long:"nodaemontls" description:"Disable TLS for the daemon RPC client -- NOTE: This is only allowed if the RPC client is connecting to localhost"`
 }
 
@@ -126,7 +127,7 @@ var (
 		APIListen:          defaultAPIListen,
 		IndentJSON:         defaultIndentJSON,
 		CacheControlMaxAge: defaultCacheControlMaxAge,
-		DcrdCert:           defaultDaemonRPCCertFile,
+		ExccdCert:          defaultDaemonRPCCertFile,
 		MonitorMempool:     defaultMonitorMempool,
 		MempoolMinInterval: defaultMempoolMinInterval,
 		MempoolMaxInterval: defaultMempoolMaxInterval,
@@ -144,7 +145,7 @@ var (
 func cleanAndExpandPath(path string) string {
 	// Expand initial ~ to OS specific home directory.
 	if strings.HasPrefix(path, "~") {
-		homeDir := filepath.Dir(dcrdHomeDir)
+		homeDir := filepath.Dir(exccdHomeDir)
 		path = strings.Replace(path, "~", homeDir, 1)
 	}
 
@@ -324,8 +325,8 @@ func loadConfig() (*config, error) {
 
 	// Set the host names and ports to the default if the
 	// user does not specify them.
-	if cfg.DcrdServ == "" {
-		cfg.DcrdServ = defaultHost + ":" + activeNet.JSONRPCClientPort
+	if cfg.ExccdServ == "" {
+		cfg.ExccdServ = defaultHost + ":" + activeNet.JSONRPCClientPort
 	}
 
 	// Put comma-separated command line arguments into slice of strings

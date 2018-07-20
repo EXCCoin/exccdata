@@ -1,16 +1,17 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
 
 package main
 
 import (
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrdata/blockdata"
-	"github.com/decred/dcrdata/db/dcrsqlite"
-	"github.com/decred/dcrdata/mempool"
-	"github.com/decred/dcrdata/stakedb"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/db/exccsqlite"
+	"github.com/EXCCoin/exccdata/mempool"
+	"github.com/EXCCoin/exccdata/stakedb"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 const (
@@ -33,13 +34,13 @@ var ntfnChans struct {
 	connectChan                       chan *chainhash.Hash
 	reorgChanBlockData                chan *blockdata.ReorgData
 	connectChanWiredDB                chan *chainhash.Hash
-	reorgChanWiredDB                  chan *dcrsqlite.ReorgData
+	reorgChanWiredDB                  chan *exccsqlite.ReorgData
 	connectChanStakeDB                chan *chainhash.Hash
 	reorgChanStakeDB                  chan *stakedb.ReorgData
 	updateStatusNodeHeight            chan uint32
 	updateStatusDBHeight              chan uint32
 	spendTxBlockChan, recvTxBlockChan chan *txhelpers.BlockWatchedTx
-	relevantTxMempoolChan             chan *dcrutil.Tx
+	relevantTxMempoolChan             chan *exccutil.Tx
 	newTxChan                         chan *mempool.NewTx
 }
 
@@ -59,7 +60,7 @@ func makeNtfnChans(cfg *config) {
 
 	// Reorg data channels
 	ntfnChans.reorgChanBlockData = make(chan *blockdata.ReorgData, reorgBuffer)
-	ntfnChans.reorgChanWiredDB = make(chan *dcrsqlite.ReorgData, reorgBuffer)
+	ntfnChans.reorgChanWiredDB = make(chan *exccsqlite.ReorgData, reorgBuffer)
 	ntfnChans.reorgChanStakeDB = make(chan *stakedb.ReorgData, reorgBuffer)
 
 	// To update app status
@@ -71,7 +72,7 @@ func makeNtfnChans(cfg *config) {
 	// // recv/spendTxBlockChan come with connected blocks
 	// 	ntfnChans.recvTxBlockChan = make(chan *txhelpers.BlockWatchedTx, blockConnChanBuffer)
 	// 	ntfnChans.spendTxBlockChan = make(chan *txhelpers.BlockWatchedTx, blockConnChanBuffer)
-	// 	ntfnChans.relevantTxMempoolChan = make(chan *dcrutil.Tx, relevantMempoolTxChanBuffer)
+	// 	ntfnChans.relevantTxMempoolChan = make(chan *exccutil.Tx, relevantMempoolTxChanBuffer)
 	// }
 
 	if cfg.MonitorMempool {

@@ -1,7 +1,8 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
 
-package dcrsqlite
+package exccsqlite
 
 import (
 	"database/sql"
@@ -13,21 +14,21 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/blockchain/stake"
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrd/txscript"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/db/dbtypes"
-	apitypes "github.com/decred/dcrdata/dcrdataapi"
-	"github.com/decred/dcrdata/explorer"
-	"github.com/decred/dcrdata/mempool"
-	"github.com/decred/dcrdata/rpcutils"
-	"github.com/decred/dcrdata/stakedb"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/blockchain/stake"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccd/txscript"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	apitypes "github.com/EXCCoin/exccdata/exccdataapi"
+	"github.com/EXCCoin/exccdata/explorer"
+	"github.com/EXCCoin/exccdata/mempool"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/stakedb"
+	"github.com/EXCCoin/exccdata/txhelpers"
 	"github.com/dustin/go-humanize"
 )
 
@@ -60,7 +61,7 @@ func newWiredDB(DB *DB, statusC chan uint32, cl *rpcclient.Client, p *chaincfg.P
 }
 
 // NewWiredDB creates a new wiredDB from a *sql.DB, a node client, network
-// parameters, and a status update channel. It calls dcrsqlite.NewDB to create a
+// parameters, and a status update channel. It calls exccsqlite.NewDB to create a
 // new DB that wrapps the sql.DB.
 func NewWiredDB(db *sql.DB, statusC chan uint32, cl *rpcclient.Client, p *chaincfg.Params) (wiredDB, func() error, error) {
 	// Create the sqlite.DB
@@ -175,27 +176,27 @@ func (db *wiredDB) GetBlockHeight(hash string) (int64, error) {
 	return height, nil
 }
 
-func (db *wiredDB) GetHeader(idx int) *dcrjson.GetBlockHeaderVerboseResult {
+func (db *wiredDB) GetHeader(idx int) *exccjson.GetBlockHeaderVerboseResult {
 	return rpcutils.GetBlockHeaderVerbose(db.client, db.params, int64(idx))
 }
 
-func (db *wiredDB) GetBlockVerbose(idx int, verboseTx bool) *dcrjson.GetBlockVerboseResult {
+func (db *wiredDB) GetBlockVerbose(idx int, verboseTx bool) *exccjson.GetBlockVerboseResult {
 	return rpcutils.GetBlockVerbose(db.client, db.params, int64(idx), verboseTx)
 }
 
-func (db *wiredDB) GetBlockVerboseByHash(hash string, verboseTx bool) *dcrjson.GetBlockVerboseResult {
+func (db *wiredDB) GetBlockVerboseByHash(hash string, verboseTx bool) *exccjson.GetBlockVerboseResult {
 	return rpcutils.GetBlockVerboseByHash(db.client, db.params, hash, verboseTx)
 }
 
-func (db *wiredDB) GetCoinSupply() dcrutil.Amount {
+func (db *wiredDB) GetCoinSupply() exccutil.Amount {
 	coinSupply, err := db.client.GetCoinSupply()
 	if err != nil {
-		return dcrutil.Amount(-1)
+		return exccutil.Amount(-1)
 	}
 	return coinSupply
 }
 
-func (db *wiredDB) GetBlockSubsidy(height int64, voters uint16) *dcrjson.GetBlockSubsidyResult {
+func (db *wiredDB) GetBlockSubsidy(height int64, voters uint16) *exccjson.GetBlockSubsidyResult {
 	blockSubsidy, err := db.client.GetBlockSubsidy(height, voters)
 	if err != nil {
 		return nil
@@ -215,7 +216,7 @@ func (db *wiredDB) GetTransactionsForBlockByHash(hash string) *apitypes.BlockTra
 	return makeBlockTransactions(blockVerbose)
 }
 
-func makeBlockTransactions(blockVerbose *dcrjson.GetBlockVerboseResult) *apitypes.BlockTransactions {
+func makeBlockTransactions(blockVerbose *exccjson.GetBlockVerboseResult) *apitypes.BlockTransactions {
 	blockTransactions := new(apitypes.BlockTransactions)
 
 	blockTransactions.Tx = make([]string, len(blockVerbose.Tx))
@@ -251,7 +252,7 @@ func (db *wiredDB) GetAllTxIn(txid string) []*apitypes.TxIn {
 				Tree:  allTxIn0[i].PreviousOutPoint.Tree,
 			},
 			Sequence:        allTxIn0[i].Sequence,
-			ValueIn:         dcrutil.Amount(allTxIn0[i].ValueIn).ToCoin(),
+			ValueIn:         exccutil.Amount(allTxIn0[i].ValueIn).ToCoin(),
 			BlockHeight:     allTxIn0[i].BlockHeight,
 			BlockIndex:      allTxIn0[i].BlockIndex,
 			SignatureScript: hex.EncodeToString(allTxIn0[i].SignatureScript),
@@ -292,7 +293,7 @@ func (db *wiredDB) GetAllTxOut(txid string) []*apitypes.TxOut {
 		}
 
 		txOut := &apitypes.TxOut{
-			Value:     dcrutil.Amount(allTxOut0[i].Value).ToCoin(),
+			Value:     exccutil.Amount(allTxOut0[i].Value).ToCoin(),
 			Version:   allTxOut0[i].Version,
 			PkScript:  hex.EncodeToString(allTxOut0[i].PkScript),
 			Addresses: addresses,
@@ -343,7 +344,7 @@ func (db *wiredDB) GetTransactionHex(txid string) string {
 	return hex
 }
 
-func (db *wiredDB) DecodeRawTransaction(txhex string) (*dcrjson.TxRawResult, error) {
+func (db *wiredDB) DecodeRawTransaction(txhex string) (*exccjson.TxRawResult, error) {
 	bytes, err := hex.DecodeString(txhex)
 	if err != nil {
 		log.Errorf("DecodeRawTransaction failed: %v", err)
@@ -407,7 +408,7 @@ func (db *wiredDB) getRawTransaction(txid string) (*apitypes.Tx, string) {
 	tx.Version = txraw.Version
 	tx.Locktime = txraw.LockTime
 	tx.Expiry = txraw.Expiry
-	tx.Vin = make([]dcrjson.Vin, len(txraw.Vin))
+	tx.Vin = make([]exccjson.Vin, len(txraw.Vin))
 	copy(tx.Vin, txraw.Vin)
 	tx.Vout = make([]apitypes.Vout, len(txraw.Vout))
 	for i := range txraw.Vout {
@@ -442,21 +443,21 @@ func (db *wiredDB) getRawTransaction(txid string) (*apitypes.Tx, string) {
 	return tx, txraw.Hex
 }
 
-// GetVoteVersionInfo requests stake version info from the dcrd RPC server
-func (db *wiredDB) GetVoteVersionInfo(ver uint32) (*dcrjson.GetVoteInfoResult, error) {
+// GetVoteVersionInfo requests stake version info from the exccd RPC server
+func (db *wiredDB) GetVoteVersionInfo(ver uint32) (*exccjson.GetVoteInfoResult, error) {
 	return db.client.GetVoteInfo(ver)
 }
 
 // GetStakeVersions requests the output of the getstakeversions RPC, which gets
 // stake version information and individual vote version information starting at the
 // given block and for count-1 blocks prior.
-func (db *wiredDB) GetStakeVersions(txHash string, count int32) (*dcrjson.GetStakeVersionsResult, error) {
+func (db *wiredDB) GetStakeVersions(txHash string, count int32) (*exccjson.GetStakeVersionsResult, error) {
 	return db.client.GetStakeVersions(txHash, count)
 }
 
 // GetStakeVersionsLatest requests the output of the getstakeversions RPC for
 // just the current best block.
-func (db *wiredDB) GetStakeVersionsLatest() (*dcrjson.StakeVersions, error) {
+func (db *wiredDB) GetStakeVersionsLatest() (*exccjson.StakeVersions, error) {
 	txHash, err := db.GetBestBlockHash()
 	if err != nil {
 		return nil, err
@@ -471,7 +472,7 @@ func (db *wiredDB) GetStakeVersionsLatest() (*dcrjson.StakeVersions, error) {
 
 // GetVoteInfo attempts to decode the vote bits of a SSGen transaction. If the
 // transaction is not a valid SSGen, the VoteInfo output will be nil. Depending
-// on the stake version with which dcrdata is compiled with (chaincfg.Params),
+// on the stake version with which exccdata is compiled with (chaincfg.Params),
 // the Choices field of VoteInfo may be a nil slice even if the votebits were
 // set for a previously-valid agenda.
 func (db *wiredDB) GetVoteInfo(txid string) (*apitypes.VoteInfo, error) {
@@ -515,7 +516,7 @@ func (db *wiredDB) GetStakeDiffEstimates() *apitypes.StakeDiff {
 	return sd
 }
 
-func (db *wiredDB) GetFeeInfo(idx int) *dcrjson.FeeInfoBlock {
+func (db *wiredDB) GetFeeInfo(idx int) *exccjson.FeeInfoBlock {
 	stakeInfo, err := db.RetrieveStakeInfoExtended(int64(idx))
 	if err != nil {
 		log.Errorf("Unable to retrieve stake info: %v", err)
@@ -709,7 +710,7 @@ func (db *wiredDB) GetMempoolSSTxDetails(N int) *apitypes.MempoolTicketDetails {
 // GetAddressTransactions returns an apitypes.Address Object with at most the
 // last count transactions the address was in
 func (db *wiredDB) GetAddressTransactions(addr string, count int) *apitypes.Address {
-	address, err := dcrutil.DecodeAddress(addr)
+	address, err := exccutil.DecodeAddress(addr)
 	if err != nil {
 		log.Infof("Invalid address %s: %v", addr, err)
 		return nil
@@ -739,7 +740,7 @@ func (db *wiredDB) GetAddressTransactions(addr string, count int) *apitypes.Addr
 // GetAddressTransactions returns an array of apitypes.AddressTxRaw objects
 // representing the raw result of SearchRawTransactionsverbose
 func (db *wiredDB) GetAddressTransactionsRaw(addr string, count int) []*apitypes.AddressTxRaw {
-	address, err := dcrutil.DecodeAddress(addr)
+	address, err := exccutil.DecodeAddress(addr)
 	if err != nil {
 		log.Infof("Invalid address %s: %v", addr, err)
 		return nil
@@ -756,7 +757,7 @@ func (db *wiredDB) GetAddressTransactionsRaw(addr string, count int) []*apitypes
 		tx.TxID = txs[i].Txid
 		tx.Version = txs[i].Version
 		tx.Locktime = txs[i].LockTime
-		tx.Vin = make([]dcrjson.VinPrevOut, len(txs[i].Vin))
+		tx.Vin = make([]exccjson.VinPrevOut, len(txs[i].Vin))
 		copy(tx.Vin, txs[i].Vin)
 		tx.Confirmations = int64(txs[i].Confirmations)
 		tx.BlockHash = txs[i].BlockHash
@@ -787,7 +788,7 @@ func (db *wiredDB) GetAddressTransactionsRaw(addr string, count int) []*apitypes
 	return txarray
 }
 
-func makeExplorerBlockBasic(data *dcrjson.GetBlockVerboseResult) *explorer.BlockBasic {
+func makeExplorerBlockBasic(data *exccjson.GetBlockVerboseResult) *explorer.BlockBasic {
 	block := &explorer.BlockBasic{
 		Height:         data.Height,
 		Size:           data.Size,
@@ -807,14 +808,14 @@ func makeExplorerBlockBasic(data *dcrjson.GetBlockVerboseResult) *explorer.Block
 			log.Errorf("Unknown transaction %s", data.RawSTx[i].Txid)
 			continue
 		}
-		if isRev, _ := stake.IsSSRtx(msgTx); isRev {
+		if isRev := stake.IsSSRtx(msgTx); isRev {
 			block.Revocations++
 		}
 	}
 	return block
 }
 
-func makeExplorerTxBasic(data dcrjson.TxRawResult, msgTx *wire.MsgTx, params *chaincfg.Params) *explorer.TxBasic {
+func makeExplorerTxBasic(data exccjson.TxRawResult, msgTx *wire.MsgTx, params *chaincfg.Params) *explorer.TxBasic {
 	tx := new(explorer.TxBasic)
 	tx.TxID = data.Txid
 	tx.FormattedSize = humanize.Bytes(uint64(len(data.Hex) / 2))
@@ -825,7 +826,7 @@ func makeExplorerTxBasic(data dcrjson.TxRawResult, msgTx *wire.MsgTx, params *ch
 			tx.Coinbase = true
 		}
 	}
-	if ok, _ := stake.IsSSGen(msgTx); ok {
+	if ok := stake.IsSSGen(msgTx); ok {
 		validation, version, bits, choices, err := txhelpers.SSGenVoteChoices(msgTx, params)
 		if err != nil {
 			log.Debugf("Cannot get vote choices for %s", tx.TxID)
@@ -845,7 +846,7 @@ func makeExplorerTxBasic(data dcrjson.TxRawResult, msgTx *wire.MsgTx, params *ch
 	return tx
 }
 
-func makeExplorerAddressTx(data *dcrjson.SearchRawTransactionsResult, address string) *explorer.AddressTx {
+func makeExplorerAddressTx(data *exccjson.SearchRawTransactionsResult, address string) *explorer.AddressTx {
 	tx := new(explorer.AddressTx)
 	tx.TxID = data.Txid
 	tx.FormattedSize = humanize.Bytes(uint64(len(data.Hex) / 2))
@@ -967,15 +968,15 @@ func (db *wiredDB) GetExplorerBlock(hash string) *explorer.BlockInfo {
 	sortTx(block.Revs)
 	sortTx(block.Tickets)
 
-	getTotalFee := func(txs []*explorer.TxBasic) (total dcrutil.Amount) {
+	getTotalFee := func(txs []*explorer.TxBasic) (total exccutil.Amount) {
 		for _, tx := range txs {
 			total += tx.Fee
 		}
 		return
 	}
-	getTotalSent := func(txs []*explorer.TxBasic) (total dcrutil.Amount) {
+	getTotalSent := func(txs []*explorer.TxBasic) (total exccutil.Amount) {
 		for _, tx := range txs {
-			amt, err := dcrutil.NewAmount(tx.Total)
+			amt, err := exccutil.NewAmount(tx.Total)
 			if err != nil {
 				continue
 			}
@@ -1031,7 +1032,7 @@ func (db *wiredDB) GetExplorerTx(txid string) *explorer.TxInfo {
 			addresses = addrs
 		}
 		inputs = append(inputs, explorer.Vin{
-			Vin: &dcrjson.Vin{
+			Vin: &exccjson.Vin{
 				Txid:        vin.Txid,
 				Coinbase:    vin.Coinbase,
 				Stakebase:   vin.Stakebase,
@@ -1087,7 +1088,7 @@ func (db *wiredDB) GetExplorerTx(txid string) *explorer.TxInfo {
 }
 
 func (db *wiredDB) GetExplorerAddress(address string, count, offset int64) *explorer.AddressInfo {
-	addr, err := dcrutil.DecodeAddress(address)
+	addr, err := exccutil.DecodeAddress(address)
 	if err != nil {
 		log.Infof("Invalid address %s: %v", address, err)
 		return nil
@@ -1121,7 +1122,7 @@ func (db *wiredDB) GetExplorerAddress(address string, count, offset int64) *expl
 	}
 
 	var numUnconfirmed, numReceiving, numSpending int64
-	var totalreceived, totalsent dcrutil.Amount
+	var totalreceived, totalsent exccutil.Amount
 
 	for _, tx := range txs {
 		if tx.Confirmations == 0 {
@@ -1130,7 +1131,7 @@ func (db *wiredDB) GetExplorerAddress(address string, count, offset int64) *expl
 		for _, y := range tx.Vout {
 			if len(y.ScriptPubKey.Addresses) != 0 {
 				if address == y.ScriptPubKey.Addresses[0] {
-					t, _ := dcrutil.NewAmount(y.Value)
+					t, _ := exccutil.NewAmount(y.Value)
 					if t > 0 {
 						totalreceived += t
 					}
@@ -1141,7 +1142,7 @@ func (db *wiredDB) GetExplorerAddress(address string, count, offset int64) *expl
 		for _, u := range tx.Vin {
 			if u.PrevOut != nil && len(u.PrevOut.Addresses) != 0 {
 				if address == u.PrevOut.Addresses[0] {
-					t, _ := dcrutil.NewAmount(*u.AmountIn)
+					t, _ := exccutil.NewAmount(*u.AmountIn)
 					if t > 0 {
 						totalsent += t
 					}
@@ -1180,14 +1181,14 @@ func (db *wiredDB) GetExplorerAddress(address string, count, offset int64) *expl
 	}
 }
 
-func ValidateNetworkAddress(address dcrutil.Address, p *chaincfg.Params) bool {
+func ValidateNetworkAddress(address exccutil.Address, p *chaincfg.Params) bool {
 	return address.IsForNet(p)
 }
 
 // CountUnconfirmedTransactions returns the number of unconfirmed transactions involving the specified address,
 // given a maximum possible unconfirmed
 func (db *wiredDB) CountUnconfirmedTransactions(address string, maxUnconfirmedPossible int64) (numUnconfirmed int64, err error) {
-	addr, err := dcrutil.DecodeAddress(address)
+	addr, err := exccutil.DecodeAddress(address)
 	if err != nil {
 		log.Infof("Invalid address %s: %v", address, err)
 		return

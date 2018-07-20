@@ -8,10 +8,10 @@ package main
 import (
 	"sync"
 
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/blockdata"
-	apitypes "github.com/decred/dcrdata/dcrdataapi"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/blockdata"
+	apitypes "github.com/EXCCoin/exccdata/exccdataapi"
 )
 
 // BlockDataToMemdb models the block data and block data basic as maps
@@ -74,7 +74,7 @@ func (s *BlockDataToMemdb) Get(idx int) *blockdata.BlockData {
 }
 
 // GetHeader returns the block header for block idx
-func (s *BlockDataToMemdb) GetHeader(idx int) *dcrjson.GetBlockHeaderVerboseResult {
+func (s *BlockDataToMemdb) GetHeader(idx int) *exccjson.GetBlockHeaderVerboseResult {
 	if idx < 0 {
 		return nil
 	}
@@ -90,7 +90,7 @@ func (s *BlockDataToMemdb) GetHeader(idx int) *dcrjson.GetBlockHeaderVerboseResu
 }
 
 // GetFeeInfo returns the fee info for block idx
-func (s *BlockDataToMemdb) GetFeeInfo(idx int) *dcrjson.FeeInfoBlock {
+func (s *BlockDataToMemdb) GetFeeInfo(idx int) *exccjson.FeeInfoBlock {
 	if idx < 0 {
 		return nil
 	}
@@ -106,7 +106,7 @@ func (s *BlockDataToMemdb) GetFeeInfo(idx int) *dcrjson.FeeInfoBlock {
 }
 
 // GetStakeDiffEstimate returns the stake difficulty estimates for block idx
-func (s *BlockDataToMemdb) GetStakeDiffEstimate(idx int) *dcrjson.EstimateStakeDiffResult {
+func (s *BlockDataToMemdb) GetStakeDiffEstimate(idx int) *exccjson.EstimateStakeDiffResult {
 	if idx < 0 {
 		return nil
 	}

@@ -7,11 +7,11 @@ import (
 	"runtime/pprof"
 	"sync"
 
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccdata/db/exccsqlite"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/stakedb"
 	"github.com/btcsuite/btclog"
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrdata/db/dcrsqlite"
-	"github.com/decred/dcrdata/rpcutils"
-	"github.com/decred/dcrdata/stakedb"
 )
 
 var (
@@ -31,7 +31,7 @@ func init() {
 	rpcclientLogger = backendLog.Logger("RPC")
 	rpcclient.UseLogger(rpcclientLogger)
 	sqliteLogger = backendLog.Logger("DSQL")
-	dcrsqlite.UseLogger(rpcclientLogger)
+	exccsqlite.UseLogger(rpcclientLogger)
 	stakedbLogger = backendLog.Logger("SKDB")
 	stakedb.UseLogger(stakedbLogger)
 }
@@ -40,7 +40,7 @@ func mainCore() int {
 	// Parse the configuration file, and setup logger.
 	cfg, err := loadConfig()
 	if err != nil {
-		fmt.Printf("Failed to load dcrdata config: %s\n", err.Error())
+		fmt.Printf("Failed to load exccdata config: %s\n", err.Error())
 		return 1
 	}
 
@@ -55,8 +55,8 @@ func mainCore() int {
 	}
 
 	// Connect to node RPC server
-	client, _, err := rpcutils.ConnectNodeRPC(cfg.DcrdServ, cfg.DcrdUser,
-		cfg.DcrdPass, cfg.DcrdCert, cfg.DisableDaemonTLS)
+	client, _, err := rpcutils.ConnectNodeRPC(cfg.ExccdServ, cfg.ExccdUser,
+		cfg.ExccdPass, cfg.ExccdCert, cfg.DisableDaemonTLS)
 	if err != nil {
 		log.Fatalf("Unable to connect to RPC server: %v", err)
 		return 1
@@ -76,9 +76,9 @@ func mainCore() int {
 	}
 
 	// Sqlite output
-	dbInfo := dcrsqlite.DBInfo{FileName: cfg.DBFileName}
-	//sqliteDB, err := dcrsqlite.InitDB(&dbInfo)
-	sqliteDB, cleanupDB, err := dcrsqlite.InitWiredDB(&dbInfo, nil, client, activeChain)
+	dbInfo := exccsqlite.DBInfo{FileName: cfg.DBFileName}
+	//sqliteDB, err := exccsqlite.InitDB(&dbInfo)
+	sqliteDB, cleanupDB, err := exccsqlite.InitWiredDB(&dbInfo, nil, client, activeChain)
 	defer cleanupDB()
 	if err != nil {
 		log.Errorf("Unable to initialize SQLite database: %v", err)

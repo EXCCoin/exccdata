@@ -1,7 +1,8 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
 
-package dcrpg
+package exccpg
 
 import (
 	"database/sql"
@@ -10,9 +11,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/rpcutils"
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/rpcutils"
 )
 
 const (

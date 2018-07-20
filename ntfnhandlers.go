@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
 
@@ -8,42 +9,42 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/blockdata"
-	"github.com/decred/dcrdata/db/dcrsqlite"
-	"github.com/decred/dcrdata/mempool"
-	"github.com/decred/dcrdata/stakedb"
-	"github.com/decred/dcrwallet/wallet/udb"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/db/exccsqlite"
+	"github.com/EXCCoin/exccdata/mempool"
+	"github.com/EXCCoin/exccdata/stakedb"
+	"github.com/EXCCoin/exccwallet/wallet/udb"
 )
 
-func registerNodeNtfnHandlers(dcrdClient *rpcclient.Client) *ContextualError {
+func registerNodeNtfnHandlers(exccdClient *rpcclient.Client) *ContextualError {
 	var err error
 	// Register for block connection and chain reorg notifications.
-	if err = dcrdClient.NotifyBlocks(); err != nil {
+	if err = exccdClient.NotifyBlocks(); err != nil {
 		return newContextualError("block notification "+
 			"registration failed", err)
 	}
 
 	// Register for stake difficulty change notifications.
-	// if err = dcrdClient.NotifyStakeDifficulty(); err != nil {
+	// if err = exccdClient.NotifyStakeDifficulty(); err != nil {
 	// 	return newContextualError("stake difficulty change "+
 	// 		"notification registration failed", err)
 	// }
 
 	// Register for tx accepted into mempool ntfns
-	if err = dcrdClient.NotifyNewTransactions(false); err != nil {
+	if err = exccdClient.NotifyNewTransactions(false); err != nil {
 		return newContextualError("new transaction "+
 			"notification registration failed", err)
 	}
 
 	// For OnNewTickets
 	//  Commented since there is a bug in rpcclient/notify.go
-	// dcrdClient.NotifyNewTickets()
+	// exccdClient.NotifyNewTickets()
 
-	if err = dcrdClient.NotifyWinningTickets(); err != nil {
+	if err = exccdClient.NotifyWinningTickets(); err != nil {
 		return newContextualError("winning ticket "+
 			"notification registration failed", err)
 	}
@@ -52,7 +53,7 @@ func registerNodeNtfnHandlers(dcrdClient *rpcclient.Client) *ContextualError {
 	// OnRelevantTxAccepted.
 	// TODO: register outpoints (third argument).
 	// if len(addresses) > 0 {
-	// 	if err = dcrdClient.LoadTxFilter(true, addresses, nil); err != nil {
+	// 	if err = exccdClient.LoadTxFilter(true, addresses, nil); err != nil {
 	// 		return newContextualError("load tx filter failed", err)
 	// 	}
 	// }
@@ -150,9 +151,9 @@ func makeNodeNtfnHandlers(cfg *config) (*rpcclient.NotificationHandlers, *collec
 		},
 		OnReorganization: func(oldHash *chainhash.Hash, oldHeight int32,
 			newHash *chainhash.Hash, newHeight int32) {
-			// Send reorg data to dcrsqlite's monitor
+			// Send reorg data to exccsqlite's monitor
 			select {
-			case ntfnChans.reorgChanWiredDB <- &dcrsqlite.ReorgData{
+			case ntfnChans.reorgChanWiredDB <- &exccsqlite.ReorgData{
 				OldChainHead:   *oldHash,
 				OldChainHeight: oldHeight,
 				NewChainHead:   *newHash,
@@ -212,7 +213,7 @@ func makeNodeNtfnHandlers(cfg *config) (*rpcclient.NotificationHandlers, *collec
 			if err != nil {
 				return
 			}
-			tx := dcrutil.NewTx(&rec.MsgTx)
+			tx := exccutil.NewTx(&rec.MsgTx)
 			txHash := rec.Hash
 			select {
 			case ntfnChans.relevantTxMempoolChan <- tx:
@@ -225,7 +226,7 @@ func makeNodeNtfnHandlers(cfg *config) (*rpcclient.NotificationHandlers, *collec
 		// memory pool.  It will only be invoked if a preceding call to
 		// NotifyNewTransactions with the verbose flag set to false has been
 		// made to register for the notification and the function is non-nil.
-		OnTxAccepted: func(hash *chainhash.Hash, amount dcrutil.Amount) {
+		OnTxAccepted: func(hash *chainhash.Hash, amount exccutil.Amount) {
 			// Just send the tx hash and let the goroutine handle everything.
 			select {
 			case ntfnChans.newTxChan <- &mempool.NewTx{
@@ -237,8 +238,8 @@ func makeNodeNtfnHandlers(cfg *config) (*rpcclient.NotificationHandlers, *collec
 			}
 			//log.Trace("Transaction accepted to mempool: ", hash, amount)
 		},
-		// Note: dcrjson.TxRawResult is from getrawtransaction
-		//OnTxAcceptedVerbose: func(txDetails *dcrjson.TxRawResult) {
+		// Note: exccjson.TxRawResult is from getrawtransaction
+		//OnTxAcceptedVerbose: func(txDetails *exccjson.TxRawResult) {
 		//txDetails.Hex
 		//log.Info("Transaction accepted to mempool: ", txDetails.Txid)
 		//},

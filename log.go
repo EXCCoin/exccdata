@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2016 The Decred developers
 // Use of this source code is governed by an ISC
 // license that can be found in the LICENSE file.
@@ -9,15 +10,15 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/db/exccpg"
+	"github.com/EXCCoin/exccdata/db/exccsqlite"
+	"github.com/EXCCoin/exccdata/explorer"
+	"github.com/EXCCoin/exccdata/mempool"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/stakedb"
 	"github.com/btcsuite/btclog"
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrdata/blockdata"
-	"github.com/decred/dcrdata/db/dcrpg"
-	"github.com/decred/dcrdata/db/dcrsqlite"
-	"github.com/decred/dcrdata/explorer"
-	"github.com/decred/dcrdata/mempool"
-	"github.com/decred/dcrdata/rpcutils"
-	"github.com/decred/dcrdata/stakedb"
 	"github.com/jrick/logrotate/rotator"
 )
 
@@ -62,8 +63,8 @@ var (
 
 // Initialize package-global logger variables.
 func init() {
-	dcrsqlite.UseLogger(sqliteLog)
-	dcrpg.UseLogger(postgresqlLog)
+	exccsqlite.UseLogger(sqliteLog)
+	exccpg.UseLogger(postgresqlLog)
 	stakedb.UseLogger(stakedbLog)
 	blockdata.UseLogger(blockdataLog)
 	rpcclient.UseLogger(clientLog)

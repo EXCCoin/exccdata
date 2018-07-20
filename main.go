@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
 
@@ -17,17 +18,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrdata/blockdata"
-	"github.com/decred/dcrdata/db/dbtypes"
-	"github.com/decred/dcrdata/db/dcrpg"
-	"github.com/decred/dcrdata/db/dcrsqlite"
-	"github.com/decred/dcrdata/explorer"
-	"github.com/decred/dcrdata/mempool"
-	"github.com/decred/dcrdata/rpcutils"
-	"github.com/decred/dcrdata/semver"
-	"github.com/decred/dcrdata/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/db/exccpg"
+	"github.com/EXCCoin/exccdata/db/exccsqlite"
+	"github.com/EXCCoin/exccdata/explorer"
+	"github.com/EXCCoin/exccdata/mempool"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/semver"
+	"github.com/EXCCoin/exccdata/txhelpers"
 	"github.com/go-chi/chi"
 )
 
@@ -37,7 +38,7 @@ func mainCore() error {
 	// Parse the configuration file, and setup logger.
 	cfg, err := loadConfig()
 	if err != nil {
-		fmt.Printf("Failed to load dcrdata config: %s\n", err.Error())
+		fmt.Printf("Failed to load exccdata config: %s\n", err.Error())
 		return err
 	}
 	defer func() {
@@ -48,7 +49,7 @@ func mainCore() error {
 
 	// PostgreSQL
 	usePG := !cfg.LiteMode
-	var db *dcrpg.ChainDB
+	var db *exccpg.ChainDB
 	if usePG {
 		pgHost, pgPort := cfg.PGHost, ""
 		if !strings.HasPrefix(pgHost, "/") {
@@ -57,14 +58,14 @@ func mainCore() error {
 				return fmt.Errorf("SplitHostPort failed: %v", err)
 			}
 		}
-		dbi := dcrpg.DBInfo{
+		dbi := exccpg.DBInfo{
 			Host:   pgHost,
 			Port:   pgPort,
 			User:   cfg.PGUser,
 			Pass:   cfg.PGPass,
 			DBName: cfg.PGDBName,
 		}
-		db, err = dcrpg.NewChainDB(&dbi, activeChain)
+		db, err = exccpg.NewChainDB(&dbi, activeChain)
 		if db != nil {
 			defer db.Close()
 		}
@@ -106,25 +107,25 @@ func mainCore() error {
 	// 	return 2
 	// }
 
-	// Connect to dcrd RPC server using websockets
+	// Connect to exccd RPC server using websockets
 
 	// Set up the notification handler to deliver blocks through a channel.
 	makeNtfnChans(cfg)
 
 	// Daemon client connection
 	ntfnHandlers, collectionQueue := makeNodeNtfnHandlers(cfg)
-	dcrdClient, nodeVer, err := connectNodeRPC(cfg, ntfnHandlers)
-	if err != nil || dcrdClient == nil {
-		return fmt.Errorf("Connection to dcrd failed: %v", err)
+	exccdClient, nodeVer, err := connectNodeRPC(cfg, ntfnHandlers)
+	if err != nil || exccdClient == nil {
+		return fmt.Errorf("Connection to exccd failed: %v", err)
 	}
 
 	defer func() {
 		// Closing these channels should be unnecessary if quit was handled right
 		closeNtfnChans()
 
-		if dcrdClient != nil {
-			log.Infof("Closing connection to dcrd.")
-			dcrdClient.Shutdown()
+		if exccdClient != nil {
+			log.Infof("Closing connection to exccd.")
+			exccdClient.Shutdown()
 		}
 
 		log.Infof("Bye!")
@@ -132,11 +133,11 @@ func mainCore() error {
 	}()
 
 	// Display connected network
-	curnet, err := dcrdClient.GetCurrentNet()
+	curnet, err := exccdClient.GetCurrentNet()
 	if err != nil {
-		return fmt.Errorf("Unable to get current network from dcrd: %v", err)
+		return fmt.Errorf("Unable to get current network from exccd: %v", err)
 	}
-	log.Infof("Connected to dcrd (JSON-RPC API v%s) on %v",
+	log.Infof("Connected to exccd (JSON-RPC API v%s) on %v",
 		nodeVer.String(), curnet.String())
 
 	// Another (horrible) example of saving to a map in memory
@@ -144,10 +145,10 @@ func mainCore() error {
 	// blockDataSavers = append(blockDataSavers, blockDataMapSaver)
 
 	// Sqlite output
-	dbInfo := dcrsqlite.DBInfo{FileName: cfg.DBFileName}
-	//sqliteDB, err := dcrsqlite.InitDB(&dbInfo)
-	sqliteDB, cleanupDB, err := dcrsqlite.InitWiredDB(&dbInfo,
-		ntfnChans.updateStatusDBHeight, dcrdClient, activeChain)
+	dbInfo := exccsqlite.DBInfo{FileName: cfg.DBFileName}
+	//sqliteDB, err := exccsqlite.InitDB(&dbInfo)
+	sqliteDB, cleanupDB, err := exccsqlite.InitWiredDB(&dbInfo,
+		ntfnChans.updateStatusDBHeight, exccdClient, activeChain)
 	defer cleanupDB()
 	if err != nil {
 		return fmt.Errorf("Unable to initialize SQLite database: %v", err)
@@ -171,7 +172,7 @@ func mainCore() error {
 		close(quit)
 	}()
 
-	_, height, err := dcrdClient.GetBestBlock()
+	_, height, err := exccdClient.GetBestBlock()
 	if err != nil {
 		return fmt.Errorf("Unable to get block from node: %v", err)
 	}
@@ -211,7 +212,7 @@ func mainCore() error {
 	for {
 		// Launch the sync functions for both DBs
 		go sqliteDB.SyncDBAsync(sqliteSyncRes, quit)
-		go db.SyncChainDBAsync(pgSyncRes, dcrdClient, quit,
+		go db.SyncChainDBAsync(pgSyncRes, exccdClient, quit,
 			newPGIndexes, updateAllAddresses)
 
 		// Wait for the results
@@ -236,20 +237,20 @@ func mainCore() error {
 		// Check for errors and combine if necessary
 		if sqliteRes.Error != nil {
 			if usePG && pgRes.Error != nil {
-				log.Error("dcrsqlite.SyncDBAsync AND dcrpg.SyncChainDBAsync "+
+				log.Error("exccsqlite.SyncDBAsync AND exccpg.SyncChainDBAsync "+
 					"failed at heights %d and %d, respectively.",
 					sqliteRes.Height, pgRes.Height)
 				errCombined := fmt.Sprintln(sqliteRes.Error, ", ", pgRes.Error)
 				return errors.New(errCombined)
 			}
-			log.Errorf("dcrsqlite.SyncDBAsync failed at height %d.", sqliteRes.Height)
+			log.Errorf("exccsqlite.SyncDBAsync failed at height %d.", sqliteRes.Height)
 			return sqliteRes.Error
 		} else if usePG && pgRes.Error != nil {
-			log.Errorf("dcrpg.SyncChainDBAsync failed at height %d.", pgRes.Height)
+			log.Errorf("exccpg.SyncChainDBAsync failed at height %d.", pgRes.Height)
 			return pgRes.Error
 		}
 
-		// Break loop to continue starting dcrdata.
+		// Break loop to continue starting exccdata.
 		if !usePG || pgHeight == sqliteHeight {
 			break
 		}
@@ -259,7 +260,7 @@ func mainCore() error {
 	}
 
 	// Block data collector
-	collector := blockdata.NewCollector(dcrdClient, activeChain, sqliteDB.GetStakeDB())
+	collector := blockdata.NewCollector(exccdClient, activeChain, sqliteDB.GetStakeDB())
 	if collector == nil {
 		return fmt.Errorf("Failed to create block data collector")
 	}
@@ -302,7 +303,7 @@ func mainCore() error {
 
 	// Blockchain monitor for the collector
 	addrMap := make(map[string]txhelpers.TxAction) // for support of watched addresses
-	// On reorg, only update web UI since dcrsqlite's own reorg handler will
+	// On reorg, only update web UI since exccsqlite's own reorg handler will
 	// deal with patching up the block info database.
 	reorgBlockDataSavers := []blockdata.BlockDataSaver{explore}
 	wsChainMonitor := blockdata.NewChainMonitor(collector, blockDataSavers,
@@ -312,7 +313,7 @@ func mainCore() error {
 	wg.Add(2)
 	go wsChainMonitor.BlockConnectedHandler()
 	// The blockdata reorg handler disables collection during reorg, leaving
-	// dcrsqlite to do the switch, except for the last block which gets
+	// exccsqlite to do the switch, except for the last block which gets
 	// collected and stored via reorgBlockDataSavers.
 	go wsChainMonitor.ReorgHandler()
 
@@ -327,7 +328,7 @@ func mainCore() error {
 	wiredDBChainMonitor := sqliteDB.NewChainMonitor(collector, quit, &wg,
 		ntfnChans.connectChanWiredDB, ntfnChans.reorgChanWiredDB)
 	wg.Add(2)
-	// dcrsqlite does not handle new blocks except during reorg
+	// exccsqlite does not handle new blocks except during reorg
 	go wiredDBChainMonitor.BlockConnectedHandler()
 	go wiredDBChainMonitor.ReorgHandler()
 
@@ -336,11 +337,11 @@ func mainCore() error {
 	collectionQueue.SetSynchronousHandlers([]func(*chainhash.Hash){
 		sdbChainMonitor.BlockConnectedSync,     // 1. Stake DB for pool info
 		wsChainMonitor.BlockConnectedSync,      // 2. blockdata for regular block data collection and storage
-		wiredDBChainMonitor.BlockConnectedSync, // 3. dcrsqlite for sqlite DB reorg handling
+		wiredDBChainMonitor.BlockConnectedSync, // 3. exccsqlite for sqlite DB reorg handling
 	})
 
 	if cfg.MonitorMempool {
-		mpoolCollector := mempool.NewMempoolDataCollector(dcrdClient, activeChain)
+		mpoolCollector := mempool.NewMempoolDataCollector(exccdClient, activeChain)
 		if mpoolCollector == nil {
 			return fmt.Errorf("Failed to create mempool data collector")
 		}
@@ -378,7 +379,7 @@ func mainCore() error {
 		mpm := mempool.NewMempoolMonitor(mpoolCollector, mempoolSavers,
 			ntfnChans.newTxChan, quit, &wg, newTicketLimit, mini, maxi, mpi)
 		wg.Add(1)
-		go mpm.TxHandler(dcrdClient)
+		go mpm.TxHandler(exccdClient)
 	}
 
 	select {
@@ -388,13 +389,13 @@ func mainCore() error {
 	}
 
 	// Register for notifications now that the monitors are listening
-	cerr := registerNodeNtfnHandlers(dcrdClient)
+	cerr := registerNodeNtfnHandlers(exccdClient)
 	if cerr != nil {
 		return fmt.Errorf("RPC client error: %v (%v)", cerr.Error(), cerr.Cause())
 	}
 
 	// Start web API
-	app := newContext(dcrdClient, &sqliteDB, cfg.IndentJSON)
+	app := newContext(exccdClient, &sqliteDB, cfg.IndentJSON)
 	// Start notification hander to keep /status up-to-date
 	wg.Add(1)
 	go app.StatusNtfnHandler(&wg, quit)
@@ -456,8 +457,8 @@ func main() {
 }
 
 func connectNodeRPC(cfg *config, ntfnHandlers *rpcclient.NotificationHandlers) (*rpcclient.Client, semver.Semver, error) {
-	return rpcutils.ConnectNodeRPC(cfg.DcrdServ, cfg.DcrdUser, cfg.DcrdPass,
-		cfg.DcrdCert, cfg.DisableDaemonTLS, ntfnHandlers)
+	return rpcutils.ConnectNodeRPC(cfg.ExccdServ, cfg.ExccdUser, cfg.ExccdPass,
+		cfg.ExccdCert, cfg.DisableDaemonTLS, ntfnHandlers)
 }
 
 func listenAndServeProto(listen, proto string, mux http.Handler) error {
@@ -465,7 +466,7 @@ func listenAndServeProto(listen, proto string, mux http.Handler) error {
 	errChan := make(chan error)
 	if proto == "https" {
 		go func() {
-			errChan <- http.ListenAndServeTLS(listen, "dcrdata.cert", "dcrdata.key", mux)
+			errChan <- http.ListenAndServeTLS(listen, "exccdata.cert", "exccdata.key", mux)
 		}()
 	} else {
 		go func() {
