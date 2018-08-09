@@ -76,13 +76,22 @@ html {
 body {
   font-family: 'source-sans-pro-v9-latin-regular';
   padding-bottom: 2.1rem;
-  background: #F3F5F6;
+  color: #d2d7ff !important;
+  background: #000038 url('../images/xbg.png');
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 a {
   color: #2e75ff;
 }
 h4 {
   margin-top: 10px;
+}
+.container.main {
+  margin-top: 30px;
+}
+h1, h2, h3, h4, h5, h6 {
+  color: #fff;
 }
 
 /**testnet theme**/
@@ -311,18 +320,20 @@ body.darkBG .progress {
 .top-nav,
 .navbar-fixed-bottom {
   position: fixed;
-  background: #3B3F45;
   z-index: 1000;
+  background: url('../images/header.jpg');
+  background-repeat: no-repeat;
+  background-position: center center;
 }
 .top-nav {
   width: 100%;
   top: 0;
-  background: #fff;
+  padding: 10px;
 }
 .navbar-fixed-bottom {
   bottom: 0;
   width: 100%;
-  background: #fff;
+  background: #000;
   font-size: 14px;
   line-height: 22px;
 }
@@ -342,6 +353,19 @@ body.darkBG .progress {
   border-right: 0px;
   border-radius: 0px;
   background: transparent !important;
+  color: #d2d7ff !important;
+}
+::-webkit-input-placeholder {
+  color: #d2d7ff;
+}
+::-moz-placeholder {
+  color: #d2d7ff;
+}
+:-ms-input-placeholder {
+  color: #d2d7ff;
+}
+:-moz-placeholder {
+  color: #d2d7ff;
 }
 
 #hamburger-menu {
@@ -356,7 +380,7 @@ body.darkBG .progress {
   display: block;
   padding: 0 20px;
   text-decoration: none;
-  color: #232323;
+  color: #d2d7ff;
   transition: color 0.3s ease;
 }
 #hamburger-menu a:hover {
@@ -389,7 +413,7 @@ body.darkBG .progress {
   top: 2px;
   margin-bottom: 4px;
   position: relative;
-  background: #052f4b;
+  background: rgba(210,215,255,0.5);
   border-radius: 3px;
   z-index: 1;
   transform-origin: top right;
@@ -409,7 +433,7 @@ body.darkBG .progress {
 }
 #menuToggle input:checked ~ .patty  {
   opacity: 1;
-  background: #232323;
+  background: rgba(210,215,255,0.5);
   transform: rotate(-45deg) translate(0px, -2px)  scale(1.1, 1.1);
 }
 #menuToggle input:checked ~ .patty.short {
@@ -424,16 +448,16 @@ body.darkBG .progress {
 #menu {
   position: absolute;
   width: 273px;
-  margin: -34px 0 0 -243px;
+  margin: -44px 0 0 -243px;
   padding: 20px 0px;
   padding-top: 42px;
-  background: #fff;
+  background: #000038;
   list-style-type: none;
   -webkit-font-smoothing: antialiased;
   transform-origin: 0% 0%;
   transform: translate(0, -100%);
   transition: transform 0.33s cubic-bezier(0.77,0.2,0.05,1.0);
-  box-shadow: 0px 0px 0px 1px #0000001a;
+  box-shadow: 0px 0px 0px 1px rgba(210,215,255,0.1);
 }
 #menu a {
   display: block;
@@ -467,7 +491,7 @@ body.darkBG .progress {
   width: 100%;
 }
 .navbar-fixed-bottom .nav-item {
-  color: #3c4044;
+  color: #ffffff;
   padding: 0 6px;
   position: relative;
 }
@@ -504,7 +528,7 @@ body.darkBG .progress {
   vertical-align: middle;
 }
 .table tr {
-  border-bottom: 1px solid #e4e4e4;
+  border-bottom: 1px solid rgba(210,215,255,0.1);
 }
 .table thead th {
   border-bottom: none;
@@ -515,8 +539,7 @@ body.darkBG .progress {
   padding: 0.36rem .5rem;
 }
 .table thead tr {
-  background: #fff !important;
-  border-bottom: 1px solid #e2e2e2;
+  border-bottom: 1px solid rgba(210,215,255,0.1);
 }
 .table td, .table th {
   border: none;
@@ -546,15 +569,14 @@ body.darkBG .progress {
 /*flexboxtable*/
 .flex-table .header {
   padding: 0.36rem .5rem;
-  background: #fff;
-  border-bottom: 1px solid #e2e2e2;
+  border-bottom: 1px solid rgba(210,215,255,0.1);
   font-size: 13px;
   font-weight: 500;
 }
 .flex-table-row {
   padding: .4rem;
   font-size: 13px;
-  border-bottom: 1px solid #e4e4e4;
+  border-bottom: 1px solid rgba(210,215,255,0.1);
 }
 
 .addressAndScriptData {
@@ -789,7 +811,6 @@ body.darkBG .keynav-target {
 }
 
 .progress-bar {
-  background: #41BF53;
   color: #fff;
   height: 20px;
   line-height: 20px;
@@ -798,7 +819,7 @@ body.darkBG .keynav-target {
 
 /*bootstrap overrides*/
 .progress {
-  background-color: #c5c4c4;
+  background-color: #3F0049;
   border-radius: 2px;
 }
 .btn-primary {
@@ -823,6 +844,15 @@ body.darkBG .keynav-target {
 .nav-pills .nav-link.active {
   background-color: #2970FF;
   color: #f4f6f6;
+}
+.form-control:focus {
+  border-color: #d2d7ff;
+}
+.table tr {
+  border-bottom: 1px solid rgba(210,215,255,0.1);
+}
+.table .white {
+  color: #fff;
 }
 
 /*animation*/

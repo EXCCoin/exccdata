@@ -109,7 +109,7 @@ var toInt64 = func(v interface{}) int64 {
 }
 
 func makeTemplateFuncMap(params *chaincfg.Params) template.FuncMap {
-	netTheme := "theme-" + strings.ToLower(netName(params))
+	netTheme := "theme-" + "mainnet" //strings.ToLower(netName(params))
 
 	return template.FuncMap{
 		"add": func(a int64, b int64) int64 {
