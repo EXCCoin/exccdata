@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
 	"github.com/lib/pq"
 )
 

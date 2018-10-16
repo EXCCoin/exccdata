@@ -22,13 +22,13 @@ import (
 	"github.com/EXCCoin/exccd/rpcclient"
 	"github.com/EXCCoin/exccd/txscript"
 	"github.com/EXCCoin/exccd/wire"
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
-	"github.com/EXCCoin/exccdata/v3/explorer"
-	"github.com/EXCCoin/exccdata/v3/mempool"
-	"github.com/EXCCoin/exccdata/v3/rpcutils"
-	"github.com/EXCCoin/exccdata/v3/stakedb"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/explorer"
+	"github.com/EXCCoin/exccdata/mempool"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/stakedb"
+	"github.com/EXCCoin/exccdata/txhelpers"
 	humanize "github.com/dustin/go-humanize"
 )
 
@@ -1356,7 +1356,7 @@ func (db *wiredDB) GetExplorerAddress(address string, count, offset int64) *expl
 }
 
 // IsZeroHashP2PHKAddress checks if the given address is the dummy (zero pubkey
-// hash) address. See https://github.com/EXCCoin/exccdata/v3/issues/358 for details.
+// hash) address. See https://github.com/EXCCoin/exccdata/issues/358 for details.
 func IsZeroHashP2PHKAddress(checkAddressString string, params *chaincfg.Params) bool {
 	zeroed := [20]byte{}
 	// expecting DsQxuVRvS4eaJ42dhQEsCXauMWjvopWgrVg address for mainnet

@@ -11,18 +11,18 @@ import (
 	"path/filepath"
 
 	"github.com/EXCCoin/exccd/rpcclient"
-	"github.com/EXCCoin/exccdata/v3/api"
-	"github.com/EXCCoin/exccdata/v3/api/insight"
-	"github.com/EXCCoin/exccdata/v3/blockdata"
-	"github.com/EXCCoin/exccdata/v3/db/exccpg"
-	"github.com/EXCCoin/exccdata/v3/db/exccsqlite"
-	"github.com/EXCCoin/exccdata/v3/explorer"
-	"github.com/EXCCoin/exccdata/v3/mempool"
-	"github.com/EXCCoin/exccdata/v3/middleware"
-	notify "github.com/EXCCoin/exccdata/v3/notification"
-	"github.com/EXCCoin/exccdata/v3/rpcutils"
-	"github.com/EXCCoin/exccdata/v3/stakedb"
-	"github.com/EXCCoin/slog"
+	"github.com/EXCCoin/exccdata/api"
+	"github.com/EXCCoin/exccdata/api/insight"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/db/exccpg"
+	"github.com/EXCCoin/exccdata/db/exccsqlite"
+	"github.com/EXCCoin/exccdata/explorer"
+	"github.com/EXCCoin/exccdata/mempool"
+	"github.com/EXCCoin/exccdata/middleware"
+	notify "github.com/EXCCoin/exccdata/notification"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/stakedb"
+	"github.com/btcsuite/btclog"
 	"github.com/jrick/logrotate/rotator"
 )
 
@@ -48,7 +48,7 @@ var (
 	// backendLog is the logging backend used to create all subsystem loggers.
 	// The backend must not be used before the log rotator has been initialized,
 	// or data races and/or nil pointer dereferences will occur.
-	backendLog = slog.NewBackend(logWriter{})
+	backendLog = btclog.NewBackend(logWriter{})
 
 	// logRotator is one of the logging outputs.  It should be closed on
 	// application shutdown.
@@ -84,7 +84,7 @@ func init() {
 }
 
 // subsystemLoggers maps each subsystem identifier to its associated logger.
-var subsystemLoggers = map[string]slog.Logger{
+var subsystemLoggers = map[string]btclog.Logger{
 	"NTFN": notifyLog,
 	"SQLT": sqliteLog,
 	"PSQL": postgresqlLog,
@@ -128,7 +128,7 @@ func setLogLevel(subsystemID string, logLevel string) {
 	}
 
 	// Defaults to info if the log level is invalid.
-	level, _ := slog.LevelFromString(logLevel)
+	level, _ := btclog.LevelFromString(logLevel)
 	logger.SetLevel(level)
 }
 

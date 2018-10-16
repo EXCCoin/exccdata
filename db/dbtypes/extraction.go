@@ -1,7 +1,6 @@
 package dbtypes
 
 import (
-	"bytes"
 	"encoding/hex"
 	"fmt"
 

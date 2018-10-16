@@ -6,7 +6,7 @@ package types
 
 import (
 	"github.com/EXCCoin/exccd/exccjson"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 // much of the time, exccdata will be using the types in exccjson, but others are
@@ -323,7 +323,6 @@ type BlockSubsidies struct {
 	Stake      int64  `json:"stake_reward"`
 	NumVotes   int16  `json:"num_votes,omitempty"`
 	TotalStake int64  `json:"stake_reward_total,omitempty"`
-	Tax        int64  `json:"project_subsidy"`
 	Total      int64  `json:"total,omitempty"`
 }
 

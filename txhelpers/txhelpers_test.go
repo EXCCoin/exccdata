@@ -13,7 +13,7 @@ import (
 	"github.com/EXCCoin/exccd/exccjson"
 	"github.com/EXCCoin/exccd/exccutil"
 	"github.com/EXCCoin/exccd/rpcclient"
-	"github.com/EXCCoin/exccdata/v3/semver"
+	"github.com/EXCCoin/exccdata/semver"
 )
 
 type TxGetter struct {

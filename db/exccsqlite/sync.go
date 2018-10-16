@@ -10,9 +10,9 @@ import (
 
 	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 	"github.com/EXCCoin/exccd/exccutil"
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
-	"github.com/EXCCoin/exccdata/v3/rpcutils"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 const (

@@ -24,21 +24,21 @@ import (
 
 	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 	"github.com/EXCCoin/exccd/rpcclient"
-	"github.com/EXCCoin/exccdata/v3/api"
-	"github.com/EXCCoin/exccdata/v3/api/insight"
-	"github.com/EXCCoin/exccdata/v3/blockdata"
-	"github.com/EXCCoin/exccdata/v3/db/agendadb"
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
-	"github.com/EXCCoin/exccdata/v3/db/exccpg"
-	"github.com/EXCCoin/exccdata/v3/db/exccsqlite"
-	"github.com/EXCCoin/exccdata/v3/explorer"
-	"github.com/EXCCoin/exccdata/v3/mempool"
-	m "github.com/EXCCoin/exccdata/v3/middleware"
-	notify "github.com/EXCCoin/exccdata/v3/notification"
-	"github.com/EXCCoin/exccdata/v3/rpcutils"
-	"github.com/EXCCoin/exccdata/v3/semver"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
-	"github.com/EXCCoin/exccdata/v3/version"
+	"github.com/EXCCoin/exccdata/api"
+	"github.com/EXCCoin/exccdata/api/insight"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/db/agendadb"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/db/exccpg"
+	"github.com/EXCCoin/exccdata/db/exccsqlite"
+	"github.com/EXCCoin/exccdata/explorer"
+	"github.com/EXCCoin/exccdata/mempool"
+	m "github.com/EXCCoin/exccdata/middleware"
+	notify "github.com/EXCCoin/exccdata/notification"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/semver"
+	"github.com/EXCCoin/exccdata/txhelpers"
+	"github.com/EXCCoin/exccdata/version"
 	"github.com/go-chi/chi"
 	"github.com/google/gops/agent"
 )
@@ -157,7 +157,7 @@ func mainCore() error {
 			Pass:   cfg.PGPass,
 			DBName: cfg.PGDBName,
 		}
-		chainDB, err := exccpg.NewChainDB(&dbi, activeChain, baseDB.GetStakeDB(), !cfg.NoDevPrefetch)
+		chainDB, err := exccpg.NewChainDB(&dbi, activeChain, baseDB.GetStakeDB())
 		if chainDB != nil {
 			defer chainDB.Close()
 		}
@@ -310,7 +310,7 @@ func mainCore() error {
 	mempoolSavers = append(mempoolSavers, baseDB.MPC)
 
 	// Create the explorer system
-	explore := explorer.New(&baseDB, auxDB, cfg.UseRealIP, version.Version(), !cfg.NoDevPrefetch)
+	explore := explorer.New(&baseDB, auxDB, cfg.UseRealIP, version.Version())
 	if explore == nil {
 		return fmt.Errorf("failed to create new explorer (templates missing?)")
 	}

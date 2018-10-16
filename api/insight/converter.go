@@ -9,7 +9,7 @@ import (
 	"github.com/EXCCoin/exccd/blockchain"
 	"github.com/EXCCoin/exccd/exccjson"
 	"github.com/EXCCoin/exccd/exccutil"
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
 )
 
 // TxConverter converts exccd-tx to insight tx
@@ -142,8 +142,7 @@ func (c *insightApiContext) ExccToInsightBlock(inBlocks []*exccjson.GetBlockVerb
 		subsidyCache := blockchain.NewSubsidyCache(0, c.params)
 		work := blockchain.CalcBlockWorkSubsidy(subsidyCache, blocknum, voters, c.params)
 		stake := blockchain.CalcStakeVoteSubsidy(subsidyCache, blocknum, c.params) * int64(voters)
-		tax := blockchain.CalcBlockTaxSubsidy(subsidyCache, blocknum, voters, c.params)
-		return exccutil.Amount(work + stake + tax).ToCoin()
+		return exccutil.Amount(work + stake).ToCoin()
 	}
 
 	outBlocks := make([]*apitypes.InsightBlockResult, 0, len(inBlocks))

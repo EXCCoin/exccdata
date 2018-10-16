@@ -7,7 +7,7 @@ package types
 import (
 	"encoding/json"
 
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
 )
 
 // InsightAddress models an address transactions

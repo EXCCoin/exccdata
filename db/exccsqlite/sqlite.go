@@ -13,10 +13,10 @@ import (
 	"sync"
 
 	"github.com/EXCCoin/exccd/wire"
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
-	"github.com/EXCCoin/exccdata/v3/blockdata"
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
-	"github.com/EXCCoin/slog"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/btcsuite/btclog"
 	_ "github.com/mattn/go-sqlite3" // register sqlite driver with database/sql
 )
 
@@ -887,7 +887,7 @@ func (db *DB) RetrieveStakeInfoExtended(ind int64) (*apitypes.StakeInfoExtended,
 }
 
 func logDBResult(res sql.Result) error {
-	if log.Level() > slog.LevelTrace {
+	if log.Level() > btclog.LevelTrace {
 		return nil
 	}
 

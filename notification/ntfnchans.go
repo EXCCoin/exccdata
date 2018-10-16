@@ -9,14 +9,14 @@ import (
 	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 	"github.com/EXCCoin/exccd/exccutil"
 
-	"github.com/EXCCoin/exccdata/v3/api/insight"
-	"github.com/EXCCoin/exccdata/v3/blockdata"
-	"github.com/EXCCoin/exccdata/v3/db/exccpg"
-	"github.com/EXCCoin/exccdata/v3/db/exccsqlite"
-	"github.com/EXCCoin/exccdata/v3/explorer"
-	"github.com/EXCCoin/exccdata/v3/mempool"
-	"github.com/EXCCoin/exccdata/v3/stakedb"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
+	"github.com/EXCCoin/exccdata/api/insight"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/db/exccpg"
+	"github.com/EXCCoin/exccdata/db/exccsqlite"
+	"github.com/EXCCoin/exccdata/explorer"
+	"github.com/EXCCoin/exccdata/mempool"
+	"github.com/EXCCoin/exccdata/stakedb"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 const (

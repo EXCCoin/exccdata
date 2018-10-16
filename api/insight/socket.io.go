@@ -15,8 +15,8 @@ import (
 	"github.com/EXCCoin/exccd/exccjson"
 	"github.com/EXCCoin/exccd/exccutil"
 	"github.com/EXCCoin/exccd/wire"
-	"github.com/EXCCoin/exccdata/v3/blockdata"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 var isAlphaNumeric = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString

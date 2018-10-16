@@ -19,17 +19,17 @@ import (
 	"time"
 
 	"github.com/EXCCoin/exccd/rpcclient"
-	"github.com/EXCCoin/exccdata/v3/db/exccpg"
-	"github.com/EXCCoin/exccdata/v3/rpcutils"
-	"github.com/EXCCoin/exccdata/v3/stakedb"
-	"github.com/EXCCoin/slog"
+	"github.com/EXCCoin/exccdata/db/exccpg"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/stakedb"
+	"github.com/btcsuite/btclog"
 )
 
 var (
-	backendLog      *slog.Backend
-	rpcclientLogger slog.Logger
-	pgLogger        slog.Logger
-	stakedbLogger   slog.Logger
+	backendLog      *btclog.Backend
+	rpcclientLogger btclog.Logger
+	pgLogger        btclog.Logger
+	stakedbLogger   btclog.Logger
 )
 
 const (
@@ -42,7 +42,7 @@ func init() {
 		fmt.Printf("Unable to start logger: %v", err)
 		os.Exit(1)
 	}
-	backendLog = slog.NewBackend(log.Writer())
+	backendLog = btclog.NewBackend(log.Writer())
 	rpcclientLogger = backendLog.Logger("RPC")
 	rpcclient.UseLogger(rpcclientLogger)
 	pgLogger = backendLog.Logger("PSQL")
@@ -124,7 +124,7 @@ func mainCore() error {
 		DBName: cfg.DBName,
 	}
 	// Construct a ChainDB without a stakeDB to allow quick dropping of tables.
-	db, err := exccpg.NewChainDB(&dbi, activeChain, nil, false)
+	db, err := exccpg.NewChainDB(&dbi, activeChain, nil)
 	if db != nil {
 		defer db.Close()
 	}

@@ -18,13 +18,13 @@ import (
 	"github.com/EXCCoin/exccd/chaincfg"
 	"github.com/EXCCoin/exccd/exccjson"
 	"github.com/EXCCoin/exccd/rpcclient"
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
-	"github.com/EXCCoin/exccdata/v3/explorer"
-	m "github.com/EXCCoin/exccdata/v3/middleware"
-	notify "github.com/EXCCoin/exccdata/v3/notification"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
-	appver "github.com/EXCCoin/exccdata/v3/version"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/explorer"
+	m "github.com/EXCCoin/exccdata/middleware"
+	notify "github.com/EXCCoin/exccdata/notification"
+	"github.com/EXCCoin/exccdata/txhelpers"
+	appver "github.com/EXCCoin/exccdata/version"
 )
 
 // DataSourceLite specifies an interface for collecting data from the built-in
@@ -764,7 +764,7 @@ func (c *appContext) blockSubsidies(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	work, stake, tax := txhelpers.RewardsAtBlock(idx, uint16(numVotes), c.Params)
+	work, stake := txhelpers.RewardsAtBlock(idx, uint16(numVotes), c.Params)
 	rewards := apitypes.BlockSubsidies{
 		BlockNum:   idx,
 		BlockHash:  hash,
@@ -772,8 +772,7 @@ func (c *appContext) blockSubsidies(w http.ResponseWriter, r *http.Request) {
 		Stake:      stake,
 		NumVotes:   numVotes,
 		TotalStake: stake * int64(numVotes),
-		Tax:        tax,
-		Total:      work + stake*int64(numVotes) + tax,
+		Total:      work + stake*int64(numVotes),
 	}
 
 	writeJSON(w, rewards, c.getIndentQuery(r))

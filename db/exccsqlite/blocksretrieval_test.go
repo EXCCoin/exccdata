@@ -3,8 +3,8 @@ package exccsqlite
 import (
 	"testing"
 
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
-	"github.com/EXCCoin/exccdata/v3/testutil"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/testutil"
 	"github.com/google/go-cmp/cmp"
 )
 

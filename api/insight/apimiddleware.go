@@ -14,8 +14,8 @@ import (
 	"strconv"
 
 	"github.com/EXCCoin/exccd/chaincfg/chainhash"
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
-	m "github.com/EXCCoin/exccdata/v3/middleware"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	m "github.com/EXCCoin/exccdata/middleware"
 	"github.com/go-chi/chi"
 )
 

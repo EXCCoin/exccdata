@@ -12,10 +12,10 @@ import (
 	"github.com/EXCCoin/exccd/chaincfg"
 	"github.com/EXCCoin/exccd/exccutil"
 	"github.com/EXCCoin/exccd/rpcclient"
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
-	"github.com/EXCCoin/exccdata/v3/rpcutils"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
-	"github.com/EXCCoin/slog"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/txhelpers"
+	"github.com/btcsuite/btclog"
 )
 
 var host = flag.String("host", "127.0.0.1:9109", "node RPC host:port")
@@ -27,8 +27,8 @@ var notls = flag.Bool("notls", true, "Disable use of TLS for node connection")
 var (
 	activeNetParams = &chaincfg.MainNetParams
 
-	backendLog      *slog.Backend
-	rpcclientLogger slog.Logger
+	backendLog      *btclog.Backend
+	rpcclientLogger btclog.Logger
 )
 
 func mainCore() int {
@@ -151,7 +151,7 @@ func init() {
 		os.Exit(1)
 	}
 
-	backendLog = slog.NewBackend(log.Writer())
+	backendLog = btclog.NewBackend(log.Writer())
 	rpcclientLogger = backendLog.Logger("RPC")
 	rpcclient.UseLogger(rpcclientLogger)
 	rpcutils.UseLogger(rpcclientLogger)

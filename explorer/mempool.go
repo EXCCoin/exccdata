@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/EXCCoin/exccd/blockchain/stake"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
+	"github.com/EXCCoin/exccdata/txhelpers"
 	humanize "github.com/dustin/go-humanize"
 )
 

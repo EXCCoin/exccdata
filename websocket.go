@@ -7,7 +7,7 @@ package main
 import (
 	"sync"
 
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
 )
 
 // WebSocketMessage represents the JSON object used to send and received typed

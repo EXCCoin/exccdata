@@ -13,10 +13,10 @@ import (
 	"github.com/EXCCoin/exccd/blockchain/stake"
 	"github.com/EXCCoin/exccd/rpcclient"
 	"github.com/EXCCoin/exccd/wire"
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
-	"github.com/EXCCoin/exccdata/v3/db/exccpg/internal"
-	"github.com/EXCCoin/exccdata/v3/rpcutils"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/db/exccpg/internal"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 // tableUpgradeType defines the types of upgrades that currently exists and

@@ -11,7 +11,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/EXCCoin/exccdata/v3/db/exccpg/internal"
+	"github.com/EXCCoin/exccdata/db/exccpg/internal"
 )
 
 var createTableStatements = map[string]string{

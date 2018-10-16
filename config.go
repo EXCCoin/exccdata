@@ -17,12 +17,10 @@ import (
 
 	"github.com/EXCCoin/exccd/chaincfg"
 	"github.com/EXCCoin/exccd/exccutil"
-	"github.com/EXCCoin/exccd/wire"
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
-	"github.com/EXCCoin/exccdata/v3/netparams"
-	"github.com/EXCCoin/exccdata/v3/version"
-	"github.com/EXCCoin/slog"
-	flags "github.com/btcsuite/go-flags"
+	"github.com/EXCCoin/exccdata/netparams"
+	"github.com/EXCCoin/exccdata/version"
+	"github.com/btcsuite/btclog"
+	"github.com/btcsuite/go-flags"
 )
 
 const (
@@ -96,13 +94,12 @@ type config struct {
 	DumpAllMPTix       bool   `long:"dumpallmptix" description:"Dump to file the fees of all the tickets in mempool."`
 	DBFileName         string `long:"dbfile" description:"SQLite DB file name (default is exccdata.sqlt.db)."`
 
-	FullMode      bool   `long:"pg" description:"Run in \"Full Mode\" mode,  enables postgresql support"`
-	PGDBName      string `long:"pgdbname" description:"PostgreSQL DB name."`
-	PGUser        string `long:"pguser" description:"PostgreSQL DB user."`
-	PGPass        string `long:"pgpass" description:"PostgreSQL DB password."`
-	PGHost        string `long:"pghost" description:"PostgreSQL server host:port or UNIX socket (e.g. /run/postgresql)."`
-	NoDevPrefetch bool   `long:"no-dev-prefetch" description:"Disable automatic dev fund balance query on new blocks. When true, the query will still be run on demand, but not automatically after new blocks are connected."`
-	SyncAndQuit   bool   `long:"sync-and-quit" description:"Sync to the best block and exit. Do not start the explorer or API."`
+	FullMode    bool   `long:"pg" description:"Run in \"Full Mode\" mode,  enables postgresql support"`
+	PGDBName    string `long:"pgdbname" description:"PostgreSQL DB name."`
+	PGUser      string `long:"pguser" description:"PostgreSQL DB user."`
+	PGPass      string `long:"pgpass" description:"PostgreSQL DB password."`
+	PGHost      string `long:"pghost" description:"PostgreSQL server host:port or UNIX socket (e.g. /run/postgresql)."`
+	SyncAndQuit bool   `long:"sync-and-quit" description:"Sync to the best block and exit. Do not start the explorer or API."`
 
 	// WatchAddresses []string `short:"w" long:"watchaddress" description:"Watched address (receiving). One per line."`
 	// SMTPUser     string `long:"smtpuser" description:"SMTP user name"`
@@ -195,7 +192,7 @@ func cleanAndExpandPath(path string) string {
 
 // validLogLevel returns whether or not logLevel is a valid debug log level.
 func validLogLevel(logLevel string) bool {
-	_, ok := slog.LevelFromString(logLevel)
+	_, ok := btclog.LevelFromString(logLevel)
 	return ok
 }
 
@@ -370,8 +367,8 @@ func loadConfig() (*config, error) {
 	activeNet = &netparams.MainNetParams
 	activeChain = &chaincfg.MainNetParams
 	if cfg.TestNet {
-		activeNet = &netparams.TestNet3Params
-		activeChain = &chaincfg.TestNet3Params
+		activeNet = &netparams.TestNetParams
+		activeChain = &chaincfg.TestNetParams
 		numNets++
 	}
 	if cfg.SimNet {
@@ -418,13 +415,6 @@ func loadConfig() (*config, error) {
 	log.Infof("Log folder:  %s", cfg.LogDir)
 	log.Infof("Config file: %s", configFile)
 
-	// Disable dev balance prefetch if network has invalid script.
-	_, err = dbtypes.DevSubsidyAddress(activeChain)
-	if !cfg.NoDevPrefetch && err != nil {
-		cfg.NoDevPrefetch = true
-		log.Warnf("%v. Disabling balance prefetch (--no-dev-prefetch).", err)
-	}
-
 	// Set the host names and ports to the default if the user does not specify
 	// them.
 	if cfg.ExccdServ == "" {
@@ -460,18 +450,4 @@ func loadConfig() (*config, error) {
 	}
 
 	return &cfg, nil
-}
-
-// netName returns the name used when referring to a excc network. TestNet3
-// correctly returns "testnet3", but not TestNet2. This function may be removed
-// after testnet2 is ancient history.
-func netName(chainParams *netparams.Params) string {
-	// The following switch is to ensure this code is not built for testnet2, as
-	// TestNet2 was removed entirely for exccd 1.3.0. Compile check!
-	switch chainParams.Net {
-	case wire.TestNet3, wire.MainNet, wire.SimNet:
-	default:
-		log.Warnf("Unknown network: %s", chainParams.Name)
-	}
-	return chainParams.Name
 }

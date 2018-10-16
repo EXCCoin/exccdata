@@ -7,11 +7,11 @@ package exccpg
 import (
 	"github.com/EXCCoin/exccd/exccjson"
 	"github.com/EXCCoin/exccd/exccutil"
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
-	"github.com/EXCCoin/exccdata/v3/explorer"
-	"github.com/EXCCoin/exccdata/v3/rpcutils"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/explorer"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 // GetRawTransaction gets a exccjson.TxRawResult for the specified transaction

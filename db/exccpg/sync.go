@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/EXCCoin/exccd/chaincfg/chainhash"
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
-	"github.com/EXCCoin/exccdata/v3/rpcutils"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/rpcutils"
 )
 
 const (

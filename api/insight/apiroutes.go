@@ -22,12 +22,12 @@ import (
 	"github.com/EXCCoin/exccd/exccjson"
 	"github.com/EXCCoin/exccd/exccutil"
 	"github.com/EXCCoin/exccd/rpcclient"
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
-	"github.com/EXCCoin/exccdata/v3/db/exccpg"
-	m "github.com/EXCCoin/exccdata/v3/middleware"
-	"github.com/EXCCoin/exccdata/v3/semver"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/db/exccpg"
+	m "github.com/EXCCoin/exccdata/middleware"
+	"github.com/EXCCoin/exccdata/semver"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 // DataSourceLite specifies an interface for collecting data from the built-in

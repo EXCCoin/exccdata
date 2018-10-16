@@ -51,12 +51,11 @@ func UltimateSubsidy(params *chaincfg.Params) int64 {
 	return totalSubsidy
 }
 
-// RewardsAtBlock computes the PoW, PoS (per vote), and project fund subsidies
+// RewardsAtBlock computes the PoW and PoS (per vote) subsidies
 // at for the specified block index, assuming a certain number of votes.
-func RewardsAtBlock(blockIdx int64, votes uint16, p *chaincfg.Params) (work, stake, tax int64) {
+func RewardsAtBlock(blockIdx int64, votes uint16, p *chaincfg.Params) (work, stake int64) {
 	subsidyCache := blockchain.NewSubsidyCache(0, p)
 	work = blockchain.CalcBlockWorkSubsidy(subsidyCache, blockIdx, votes, p)
 	stake = blockchain.CalcStakeVoteSubsidy(subsidyCache, blockIdx, p)
-	tax = blockchain.CalcBlockTaxSubsidy(subsidyCache, blockIdx, votes, p)
 	return
 }

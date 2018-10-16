@@ -15,9 +15,9 @@ import (
 	"github.com/EXCCoin/exccd/exccutil"
 	"github.com/EXCCoin/exccd/rpcclient"
 	"github.com/EXCCoin/exccd/wire"
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
-	"github.com/EXCCoin/exccdata/v3/stakedb"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/stakedb"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 // BlockData contains all the data collected by a Collector and stored

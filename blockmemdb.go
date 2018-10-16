@@ -10,8 +10,8 @@ import (
 
 	"github.com/EXCCoin/exccd/exccjson"
 	"github.com/EXCCoin/exccd/wire"
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
-	"github.com/EXCCoin/exccdata/v3/blockdata"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/blockdata"
 )
 
 // BlockDataToMemdb models the block data and block data basic as maps

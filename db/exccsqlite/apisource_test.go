@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/EXCCoin/exccd/chaincfg"
-	"github.com/EXCCoin/exccdata/v3/testutil"
+	"github.com/EXCCoin/exccdata/testutil"
 )
 
 func TestIsZeroHashP2PHKAddress(t *testing.T) {
@@ -18,18 +18,18 @@ func TestIsZeroHashP2PHKAddress(t *testing.T) {
 	negativeTest := !positiveTest
 
 	testIsZeroHashP2PHKAddress(mainnetDummy, &chaincfg.MainNetParams, positiveTest)
-	testIsZeroHashP2PHKAddress(testnetDummy, &chaincfg.TestNet3Params, positiveTest)
+	testIsZeroHashP2PHKAddress(testnetDummy, &chaincfg.TestNetParams, positiveTest)
 	testIsZeroHashP2PHKAddress(simnetDummy, &chaincfg.SimNetParams, positiveTest)
 
 	// wrong network
 	testIsZeroHashP2PHKAddress(mainnetDummy, &chaincfg.SimNetParams, negativeTest)
 	testIsZeroHashP2PHKAddress(testnetDummy, &chaincfg.MainNetParams, negativeTest)
-	testIsZeroHashP2PHKAddress(simnetDummy, &chaincfg.TestNet3Params, negativeTest)
+	testIsZeroHashP2PHKAddress(simnetDummy, &chaincfg.TestNetParams, negativeTest)
 
 	// wrong address
 	testIsZeroHashP2PHKAddress("", &chaincfg.SimNetParams, negativeTest)
 	testIsZeroHashP2PHKAddress("", &chaincfg.MainNetParams, negativeTest)
-	testIsZeroHashP2PHKAddress("", &chaincfg.TestNet3Params, negativeTest)
+	testIsZeroHashP2PHKAddress("", &chaincfg.TestNetParams, negativeTest)
 
 }
 func testIsZeroHashP2PHKAddress(expectedAddress string, params *chaincfg.Params, expectedTestResult bool) {

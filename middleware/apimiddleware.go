@@ -17,7 +17,7 @@ import (
 
 	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 	"github.com/EXCCoin/exccd/exccjson"
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/docgen"
 )

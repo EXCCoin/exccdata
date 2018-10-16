@@ -8,17 +8,17 @@ import (
 	"sync"
 
 	"github.com/EXCCoin/exccd/rpcclient"
-	"github.com/EXCCoin/exccdata/v3/db/exccsqlite"
-	"github.com/EXCCoin/exccdata/v3/rpcutils"
-	"github.com/EXCCoin/exccdata/v3/stakedb"
-	"github.com/EXCCoin/slog"
+	"github.com/EXCCoin/exccdata/db/exccsqlite"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/stakedb"
+	"github.com/btcsuite/btclog"
 )
 
 var (
-	backendLog      *slog.Backend
-	rpcclientLogger slog.Logger
-	sqliteLogger    slog.Logger
-	stakedbLogger   slog.Logger
+	backendLog      *btclog.Backend
+	rpcclientLogger btclog.Logger
+	sqliteLogger    btclog.Logger
+	stakedbLogger   btclog.Logger
 )
 
 func init() {
@@ -27,7 +27,7 @@ func init() {
 		fmt.Printf("Unable to start logger: %v", err)
 		os.Exit(1)
 	}
-	backendLog = slog.NewBackend(log.Writer())
+	backendLog = btclog.NewBackend(log.Writer())
 	rpcclientLogger = backendLog.Logger("RPC")
 	rpcclient.UseLogger(rpcclientLogger)
 	sqliteLogger = backendLog.Logger("DSQL")

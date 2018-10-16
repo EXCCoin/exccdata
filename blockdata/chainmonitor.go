@@ -11,7 +11,7 @@ import (
 
 	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 	"github.com/EXCCoin/exccd/exccutil"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 // ReorgData contains the information from a reoranization notification

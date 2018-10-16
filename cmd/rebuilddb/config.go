@@ -9,7 +9,7 @@ import (
 
 	"github.com/EXCCoin/exccd/chaincfg"
 	"github.com/EXCCoin/exccd/exccutil"
-	"github.com/EXCCoin/exccdata/v3/netparams"
+	"github.com/EXCCoin/exccdata/netparams"
 	flags "github.com/btcsuite/go-flags"
 )
 
@@ -179,8 +179,8 @@ func loadConfig() (*config, error) {
 	activeNet = &netparams.MainNetParams
 	activeChain = &chaincfg.MainNetParams
 	if cfg.TestNet {
-		activeNet = &netparams.TestNet3Params
-		activeChain = &chaincfg.TestNet3Params
+		activeNet = &netparams.TestNetParams
+		activeChain = &chaincfg.TestNetParams
 		numNets++
 	}
 	if cfg.SimNet {

@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	"github.com/EXCCoin/exccd/chaincfg/chainhash"
-	"github.com/EXCCoin/exccdata/v3/blockdata"
+	"github.com/EXCCoin/exccdata/blockdata"
 )
 
 // ReorgData contains the information from a reoranization notification

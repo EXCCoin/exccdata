@@ -6,8 +6,8 @@ import (
 	"github.com/EXCCoin/exccd/chaincfg"
 )
 
-func TestTestNet3Name(t *testing.T) {
-	netName := netName(&chaincfg.TestNet3Params)
+func TestTestNetName(t *testing.T) {
+	netName := netName(&chaincfg.TestNetParams)
 	if netName != "Testnet" {
 		t.Errorf(`Net name not "Testnet": %s`, netName)
 	}

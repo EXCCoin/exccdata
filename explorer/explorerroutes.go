@@ -17,9 +17,9 @@ import (
 	"github.com/EXCCoin/exccd/chaincfg"
 	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 	"github.com/EXCCoin/exccd/exccutil"
-	"github.com/EXCCoin/exccdata/v3/db/agendadb"
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
+	"github.com/EXCCoin/exccdata/db/agendadb"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/txhelpers"
 	humanize "github.com/dustin/go-humanize"
 )
 

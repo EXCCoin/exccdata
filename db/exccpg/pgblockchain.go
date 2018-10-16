@@ -9,7 +9,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -20,14 +19,13 @@ import (
 	"github.com/EXCCoin/exccd/exccutil"
 	"github.com/EXCCoin/exccd/rpcclient"
 	"github.com/EXCCoin/exccd/wire"
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
-	"github.com/EXCCoin/exccdata/v3/blockdata"
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
-	"github.com/EXCCoin/exccdata/v3/db/exccpg/internal"
-	"github.com/EXCCoin/exccdata/v3/explorer"
-	"github.com/EXCCoin/exccdata/v3/rpcutils"
-	"github.com/EXCCoin/exccdata/v3/stakedb"
-	"github.com/chappjc/trylock"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/db/exccpg/internal"
+	"github.com/EXCCoin/exccdata/explorer"
+	"github.com/EXCCoin/exccdata/rpcutils"
+	"github.com/EXCCoin/exccdata/stakedb"
 	humanize "github.com/dustin/go-humanize"
 )
 
@@ -36,43 +34,11 @@ var (
 	zeroHashStringBytes = []byte(chainhash.Hash{}.String())
 )
 
-// DevFundBalance is a block-stamped wrapper for explorer.AddressBalance. It is
-// intended to be used for the project address.
-type DevFundBalance struct {
-	sync.RWMutex
-	*explorer.AddressBalance
-	updating trylock.Mutex
-	Height   int64
-	Hash     chainhash.Hash
-}
-
-// BlockHash is a thread-safe accessor for the block hash.
-func (d *DevFundBalance) BlockHash() chainhash.Hash {
-	d.RLock()
-	defer d.RUnlock()
-	return d.Hash
-}
-
-// BlockHeight is a thread-safe accessor for the block height.
-func (d *DevFundBalance) BlockHeight() int64 {
-	d.RLock()
-	defer d.RUnlock()
-	return d.Height
-}
-
-// Balance is a thread-safe accessor for the explorer.AddressBalance.
-func (d *DevFundBalance) Balance() *explorer.AddressBalance {
-	d.RLock()
-	defer d.RUnlock()
-	return d.AddressBalance
-}
-
 // ChainDB provides an interface for storing and manipulating extracted
 // blockchain data in a PostgreSQL database.
 type ChainDB struct {
 	db                 *sql.DB
 	chainParams        *chaincfg.Params
-	devAddress         string
 	dupChecks          bool
 	bestBlock          int64
 	bestBlockHash      string
@@ -80,8 +46,6 @@ type ChainDB struct {
 	addressCounts      *addressCounter
 	stakeDB            *stakedb.StakeDatabase
 	unspentTicketCache *TicketTxnIDGetter
-	DevFundBalance     *DevFundBalance
-	devPrefetch        bool
 	InBatchSync        bool
 	InReorg            bool
 }
@@ -207,8 +171,7 @@ type DBInfo struct {
 
 // NewChainDB constructs a ChainDB for the given connection and Decred network
 // parameters. By default, duplicate row checks on insertion are enabled.
-func NewChainDB(dbi *DBInfo, params *chaincfg.Params, stakeDB *stakedb.StakeDatabase,
-	devPrefetch bool) (*ChainDB, error) {
+func NewChainDB(dbi *DBInfo, params *chaincfg.Params, stakeDB *stakedb.StakeDatabase) (*ChainDB, error) {
 	// Connect to the PostgreSQL daemon and return the *sql.DB
 	db, err := Connect(dbi.Host, dbi.Port, dbi.User, dbi.Pass, dbi.DBName)
 	if err != nil {
@@ -220,12 +183,6 @@ func NewChainDB(dbi *DBInfo, params *chaincfg.Params, stakeDB *stakedb.StakeData
 	if err != nil && !(err == sql.ErrNoRows ||
 		strings.HasSuffix(err.Error(), "does not exist")) {
 		return nil, err
-	}
-
-	// Development subsidy address of the current network
-	var devSubsidyAddress string
-	if devSubsidyAddress, err = dbtypes.DevSubsidyAddress(params); err != nil {
-		log.Warnf("ChainDB.NewChainDB: %v", err)
 	}
 
 	if err = setupTables(db); err != nil {
@@ -248,7 +205,6 @@ func NewChainDB(dbi *DBInfo, params *chaincfg.Params, stakeDB *stakedb.StakeData
 	return &ChainDB{
 		db:                 db,
 		chainParams:        params,
-		devAddress:         devSubsidyAddress,
 		dupChecks:          true,
 		bestBlock:          int64(bestHeight),
 		bestBlockHash:      bestHash,
@@ -256,8 +212,6 @@ func NewChainDB(dbi *DBInfo, params *chaincfg.Params, stakeDB *stakedb.StakeData
 		addressCounts:      makeAddressCounter(),
 		stakeDB:            stakeDB,
 		unspentTicketCache: unspentTicketCache,
-		DevFundBalance:     new(DevFundBalance),
-		devPrefetch:        devPrefetch,
 	}, nil
 }
 
@@ -488,13 +442,7 @@ func (pgb *ChainDB) AddressTransactions(address string, N, offset int64,
 	case dbtypes.AddrTxnCredit:
 		addrFunc = RetrieveAddressCreditTxns
 	case dbtypes.AddrTxnAll:
-		// The organization address occurs very frequently, so use the regular
-		// (non sub-query) select as it is much more efficient.
-		if address == pgb.devAddress {
-			addrFunc = RetrieveAddressTxnsAlt
-		} else {
-			addrFunc = RetrieveAddressTxns
-		}
+		addrFunc = RetrieveAddressTxns
 	case dbtypes.AddrTxnDebit:
 		addrFunc = RetrieveAddressDebitTxns
 
@@ -512,93 +460,6 @@ func (pgb *ChainDB) AddressTransactions(address string, N, offset int64,
 // for the given address.
 func (pgb *ChainDB) AddressHistoryAll(address string, N, offset int64) ([]*dbtypes.AddressRow, *explorer.AddressBalance, error) {
 	return pgb.AddressHistory(address, N, offset, dbtypes.AddrTxnAll)
-}
-
-// retrieveDevBalance retrieves a new DevFundBalance without regard to the cache
-func (pgb *ChainDB) retrieveDevBalance() (*DevFundBalance, error) {
-	bb, hash, _, err := RetrieveBestBlockHeight(pgb.db)
-	if err != nil {
-		return nil, err
-	}
-	blockHeight := int64(bb)
-	blockHash, err := chainhash.NewHashFromStr(hash)
-	if err != nil {
-		return nil, err
-	}
-
-	_, devBalance, err := pgb.AddressHistoryAll(pgb.devAddress, 1, 0)
-	balance := &DevFundBalance{
-		AddressBalance: devBalance,
-		Height:         blockHeight,
-		Hash:           *blockHash,
-	}
-	return balance, err
-}
-
-// UpdateDevBalance forcibly updates the cached development/project fund balance
-// via DB queries. The bool output inidcates if the cached balance was updated
-// (if it was stale).
-func (pgb *ChainDB) UpdateDevBalance() (bool, error) {
-	// See if a DB query is already running
-	okToUpdate := pgb.DevFundBalance.updating.TryLock()
-	// Wait on readers and possibly a writer regardless so the response will not
-	// be stale even when this call doesn't call updateDevBalance.
-	pgb.DevFundBalance.Lock()
-	defer pgb.DevFundBalance.Unlock()
-	// If we got the trylock, do an actual query for the balance
-	if okToUpdate {
-		defer pgb.DevFundBalance.updating.Unlock()
-		return pgb.updateDevBalance()
-	}
-	// Otherwise the other call will have just updated the balance, and we
-	// should not waste the cycles doing it again.
-	return false, nil
-}
-
-func (pgb *ChainDB) updateDevBalance() (bool, error) {
-	// Query for current balance.
-	balance, err := pgb.retrieveDevBalance()
-	if err != nil {
-		return false, err
-	}
-
-	// If cache is stale, update it's fields.
-	if balance.Hash != pgb.DevFundBalance.Hash || pgb.DevFundBalance.AddressBalance == nil {
-		pgb.DevFundBalance.AddressBalance = balance.AddressBalance
-		pgb.DevFundBalance.Height = balance.Height
-		pgb.DevFundBalance.Hash = balance.Hash
-		return true, nil
-	}
-
-	// Cache was not stale
-	return false, nil
-}
-
-// DevBalance returns the current development/project fund balance, updating the
-// cached balance if it is stale.
-func (pgb *ChainDB) DevBalance() (*explorer.AddressBalance, error) {
-	if !pgb.InReorg {
-		hash, err := pgb.HashDB()
-		if err != nil {
-			return nil, err
-		}
-
-		// Update cache if stale
-		if pgb.DevFundBalance.BlockHash().String() != hash || pgb.DevFundBalance.Balance() == nil {
-			if _, err = pgb.UpdateDevBalance(); err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	bal := pgb.DevFundBalance.Balance()
-	if bal == nil {
-		return nil, fmt.Errorf("failed to update dev balance")
-	}
-
-	// return a copy of AddressBalance
-	balCopy := *bal
-	return &balCopy, nil
 }
 
 // addressBalance attempts to retrieve the explorer.AddressBalance from cache,
@@ -779,11 +640,7 @@ func (pgb *ChainDB) AddressTotals(address string) (*apitypes.AddressTotals, erro
 	// Fetch address totals
 	var err error
 	var ab *explorer.AddressBalance
-	if address == pgb.devAddress {
-		ab, err = pgb.DevBalance()
-	} else {
-		ab, err = pgb.addressBalance(address)
-	}
+	ab, err = pgb.addressBalance(address)
 
 	if err != nil || ab == nil {
 		return nil, err
@@ -1680,16 +1537,6 @@ func (pgb *ChainDB) StoreBlock(msgBlock *wire.MsgBlock, winningTickets []string,
 		pgb.addressCounts.validHeight = int64(msgBlock.Header.Height)
 		pgb.addressCounts.balance = map[string]explorer.AddressBalance{}
 		pgb.addressCounts.Unlock()
-
-		// Lazy update of DevFundBalance
-		if pgb.devPrefetch && !pgb.InReorg {
-			go func() {
-				runtime.Gosched()
-				if _, err = pgb.UpdateDevBalance(); err != nil {
-					log.Errorf("Failed to update development fund balance: %v", err)
-				}
-			}()
-		}
 	}
 
 	return

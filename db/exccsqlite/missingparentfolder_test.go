@@ -4,12 +4,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/EXCCoin/exccdata/v3/testutil"
+	"github.com/EXCCoin/exccdata/testutil"
 )
 
 // TestMissingParentFolder ensures InitDB() is able to create
 // a new DB-file parent directory if necessary
-// See https://github.com/EXCCoin/exccdata/v3/issues/515
+// See https://github.com/EXCCoin/exccdata/issues/515
 func TestMissingParentFolder(t *testing.T) {
 	testutil.BindCurrentTestSetup(t)
 	testMissingParentFolder()

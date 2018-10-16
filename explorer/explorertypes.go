@@ -13,9 +13,9 @@ import (
 	"github.com/EXCCoin/exccd/chaincfg"
 	"github.com/EXCCoin/exccd/exccjson"
 	"github.com/EXCCoin/exccd/exccutil"
-	"github.com/EXCCoin/exccdata/v3/db/agendadb"
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
+	"github.com/EXCCoin/exccdata/db/agendadb"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/txhelpers"
 )
 
 // statusType defines the various status types supported by the system.
@@ -262,7 +262,7 @@ type AddressInfo struct {
 
 	// IsDummyAddress is true when the address is the dummy address typically
 	// used for unspendable ticket change outputs. See
-	// https://github.com/EXCCoin/exccdata/v3/issues/358 for details.
+	// https://github.com/EXCCoin/exccdata/issues/358 for details.
 	IsDummyAddress bool
 }
 

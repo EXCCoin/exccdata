@@ -21,7 +21,7 @@ import (
 	"github.com/EXCCoin/exccd/exccjson"
 	"github.com/EXCCoin/exccd/exccutil"
 	"github.com/EXCCoin/exccd/rpcclient"
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
 )
 
 // NewTx models data for a new transaction

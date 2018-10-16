@@ -14,7 +14,6 @@ import (
 	"os"
 	"os/signal"
 	"reflect"
-	"runtime"
 	"sync"
 	"time"
 
@@ -22,10 +21,10 @@ import (
 	"github.com/EXCCoin/exccd/exccjson"
 	"github.com/EXCCoin/exccd/exccutil"
 	"github.com/EXCCoin/exccd/wire"
-	"github.com/EXCCoin/exccdata/v3/blockdata"
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
-	humanize "github.com/dustin/go-humanize"
+	"github.com/EXCCoin/exccdata/blockdata"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/txhelpers"
+	"github.com/dustin/go-humanize"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/rs/cors"
@@ -66,7 +65,6 @@ type explorerDataSource interface {
 	SpendingTransactions(fundingTxID string) ([]string, []uint32, []uint32, error)
 	PoolStatusForTicket(txid string) (dbtypes.TicketSpendType, dbtypes.TicketPoolStatus, error)
 	AddressHistory(address string, N, offset int64, txnType dbtypes.AddrTxnType) ([]*dbtypes.AddressRow, *AddressBalance, error)
-	DevBalance() (*AddressBalance, error)
 	FillAddressTransactions(addrInfo *AddressInfo) error
 	BlockMissedVotes(blockHash string) ([]string, error)
 	AgendaVotes(agendaID string, chartType int) (*dbtypes.AgendaVoteChoices, error)
@@ -123,7 +121,6 @@ type explorerUI struct {
 	blockData       explorerDataSourceLite
 	explorerSource  explorerDataSource
 	liteMode        bool
-	devPrefetch     bool
 	templates       templates
 	wsHub           *WebsocketHub
 	NewBlockDataMtx sync.RWMutex
@@ -170,14 +167,13 @@ func (exp *explorerUI) StopWebsocketHub() {
 
 // New returns an initialized instance of explorerUI
 func New(dataSource explorerDataSourceLite, primaryDataSource explorerDataSource,
-	useRealIP bool, appVersion string, devPrefetch bool) *explorerUI {
+	useRealIP bool, appVersion string) *explorerUI {
 	exp := new(explorerUI)
 	exp.Mux = chi.NewRouter()
 	exp.blockData = dataSource
 	exp.explorerSource = primaryDataSource
 	exp.MempoolData = new(MempoolInfo)
 	exp.Version = appVersion
-	exp.devPrefetch = devPrefetch
 	// explorerDataSource is an interface that could have a value of pointer
 	// type, and if either is nil this means lite mode.
 	if exp.explorerSource == nil || reflect.ValueOf(exp.explorerSource).IsNil() {

@@ -22,7 +22,7 @@ var networkRewardPeriods = []networkRewardPeriod{
 		2511600000000000,
 	},
 	{
-		&chaincfg.TestNet3Params,
+		&chaincfg.TestNetParams,
 		1006,
 		1038,
 		124560000000000,

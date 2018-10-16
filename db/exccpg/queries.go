@@ -17,10 +17,10 @@ import (
 	"github.com/EXCCoin/exccd/exccutil"
 	"github.com/EXCCoin/exccd/txscript"
 	"github.com/EXCCoin/exccd/wire"
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
-	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
-	"github.com/EXCCoin/exccdata/v3/db/exccpg/internal"
-	"github.com/EXCCoin/exccdata/v3/txhelpers"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
+	"github.com/EXCCoin/exccdata/db/dbtypes"
+	"github.com/EXCCoin/exccdata/db/exccpg/internal"
+	"github.com/EXCCoin/exccdata/txhelpers"
 	"github.com/lib/pq"
 )
 

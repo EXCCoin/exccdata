@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/EXCCoin/exccd/exccjson"
-	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
+	apitypes "github.com/EXCCoin/exccdata/api/types"
 )
 
 // MempoolDataCache models the basic data for the mempool cache
