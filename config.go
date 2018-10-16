@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2016-2018 The Decred developers
 // Copyright (c) 2017 Jonathan Chappelow
 // Use of this source code is governed by an ISC
@@ -14,19 +15,19 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
+	"github.com/EXCCoin/exccdata/v3/netparams"
+	"github.com/EXCCoin/exccdata/v3/version"
+	"github.com/EXCCoin/slog"
 	flags "github.com/btcsuite/go-flags"
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/v3/db/dbtypes"
-	"github.com/decred/dcrdata/v3/netparams"
-	"github.com/decred/dcrdata/v3/version"
-	"github.com/decred/slog"
 )
 
 const (
-	defaultConfigFilename = "dcrdata.conf"
-	defaultLogFilename    = "dcrdata.log"
+	defaultConfigFilename = "exccdata.conf"
+	defaultLogFilename    = "exccdata.log"
 	defaultDataDirname    = "data"
 	defaultLogLevel       = "info"
 	defaultLogDirname     = "logs"
@@ -36,12 +37,12 @@ var activeNet = &netparams.MainNetParams
 var activeChain = &chaincfg.MainNetParams
 
 var (
-	defaultHomeDir           = dcrutil.AppDataDir("dcrdata", false)
+	defaultHomeDir           = exccutil.AppDataDir("exccdata", false)
 	defaultConfigFile        = filepath.Join(defaultHomeDir, defaultConfigFilename)
 	defaultLogDir            = filepath.Join(defaultHomeDir, defaultLogDirname)
 	defaultDataDir           = filepath.Join(defaultHomeDir, defaultDataDirname)
-	dcrdHomeDir              = dcrutil.AppDataDir("dcrd", false)
-	defaultDaemonRPCCertFile = filepath.Join(dcrdHomeDir, "rpc.cert")
+	exccdHomeDir             = exccutil.AppDataDir("exccd", false)
+	defaultDaemonRPCCertFile = filepath.Join(exccdHomeDir, "rpc.cert")
 
 	defaultHost               = "localhost"
 	defaultHTTPProfPath       = "/p"
@@ -55,12 +56,12 @@ var (
 	defaultMempoolMaxInterval = 120
 	defaultMPTriggerTickets   = 1
 
-	defaultDBFileName = "dcrdata.sqlt.db"
+	defaultDBFileName = "exccdata.sqlt.db"
 
 	defaultPGHost   = "127.0.0.1:5432"
-	defaultPGUser   = "dcrdata"
+	defaultPGUser   = "exccdata"
 	defaultPGPass   = ""
-	defaultPGDBName = "dcrdata"
+	defaultPGDBName = "exccdata"
 )
 
 type config struct {
@@ -93,7 +94,7 @@ type config struct {
 	MempoolMaxInterval int    `long:"mp-max-interval" description:"The maximum time in seconds between mempool reports (within a couple seconds), regarless of number of new tickets seen."`
 	MPTriggerTickets   int    `long:"mp-ticket-trigger" description:"The number minimum number of new tickets that must be seen to trigger a new mempool report."`
 	DumpAllMPTix       bool   `long:"dumpallmptix" description:"Dump to file the fees of all the tickets in mempool."`
-	DBFileName         string `long:"dbfile" description:"SQLite DB file name (default is dcrdata.sqlt.db)."`
+	DBFileName         string `long:"dbfile" description:"SQLite DB file name (default is exccdata.sqlt.db)."`
 
 	FullMode      bool   `long:"pg" description:"Run in \"Full Mode\" mode,  enables postgresql support"`
 	PGDBName      string `long:"pgdbname" description:"PostgreSQL DB name."`
@@ -108,13 +109,13 @@ type config struct {
 	// SMTPPass     string `long:"smtppass" description:"SMTP password"`
 	// SMTPServer   string `long:"smtpserver" description:"SMTP host name"`
 	// EmailAddr    string `long:"emailaddr" description:"Destination email address for alerts"`
-	// EmailSubject string `long:"emailsubj" description:"Email subject. (default \"dcrdataapi transaction notification\")"`
+	// EmailSubject string `long:"emailsubj" description:"Email subject. (default \"exccdataapi transaction notification\")"`
 
 	// RPC client options
-	DcrdUser         string `long:"dcrduser" description:"Daemon RPC user name"`
-	DcrdPass         string `long:"dcrdpass" description:"Daemon RPC password"`
-	DcrdServ         string `long:"dcrdserv" description:"Hostname/IP and port of dcrd RPC server to connect to (default localhost:9109, testnet: localhost:19109, simnet: localhost:19556)"`
-	DcrdCert         string `long:"dcrdcert" description:"File containing the dcrd certificate file"`
+	ExccdUser        string `long:"exccduser" description:"Daemon RPC user name"`
+	ExccdPass        string `long:"exccdpass" description:"Daemon RPC password"`
+	ExccdServ        string `long:"exccdserv" description:"Hostname/IP and port of exccd RPC server to connect to (default localhost:9109, testnet: localhost:19109, simnet: localhost:19556)"`
+	ExccdCert        string `long:"exccdcert" description:"File containing the exccd certificate file"`
 	DisableDaemonTLS bool   `long:"nodaemontls" description:"Disable TLS for the daemon RPC client -- NOTE: This is only allowed if the RPC client is connecting to localhost"`
 }
 
@@ -131,7 +132,7 @@ var (
 		APIListen:          defaultAPIListen,
 		IndentJSON:         defaultIndentJSON,
 		CacheControlMaxAge: defaultCacheControlMaxAge,
-		DcrdCert:           defaultDaemonRPCCertFile,
+		ExccdCert:          defaultDaemonRPCCertFile,
 		MonitorMempool:     defaultMonitorMempool,
 		MempoolMinInterval: defaultMempoolMinInterval,
 		MempoolMaxInterval: defaultMempoolMaxInterval,
@@ -426,8 +427,8 @@ func loadConfig() (*config, error) {
 
 	// Set the host names and ports to the default if the user does not specify
 	// them.
-	if cfg.DcrdServ == "" {
-		cfg.DcrdServ = defaultHost + ":" + activeNet.JSONRPCClientPort
+	if cfg.ExccdServ == "" {
+		cfg.ExccdServ = defaultHost + ":" + activeNet.JSONRPCClientPort
 	}
 
 	// Output folder
@@ -461,12 +462,12 @@ func loadConfig() (*config, error) {
 	return &cfg, nil
 }
 
-// netName returns the name used when referring to a decred network. TestNet3
+// netName returns the name used when referring to a excc network. TestNet3
 // correctly returns "testnet3", but not TestNet2. This function may be removed
 // after testnet2 is ancient history.
 func netName(chainParams *netparams.Params) string {
 	// The following switch is to ensure this code is not built for testnet2, as
-	// TestNet2 was removed entirely for dcrd 1.3.0. Compile check!
+	// TestNet2 was removed entirely for exccd 1.3.0. Compile check!
 	switch chainParams.Net {
 	case wire.TestNet3, wire.MainNet, wire.SimNet:
 	default:

@@ -7,10 +7,10 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccdata/v3/netparams"
 	flags "github.com/btcsuite/go-flags"
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrdata/v3/netparams"
 )
 
 const (
@@ -25,18 +25,18 @@ var activeNet = &netparams.MainNetParams
 var activeChain = &chaincfg.MainNetParams
 
 var (
-	dcrdHomeDir = dcrutil.AppDataDir("dcrd", false)
-	//rebuilddbHomeDir            = dcrutil.AppDataDir("rebuilddb", false)
-	defaultDaemonRPCCertFile = filepath.Join(dcrdHomeDir, "rpc.cert")
+	exccdHomeDir = exccutil.AppDataDir("exccd", false)
+	//rebuilddbHomeDir            = exccutil.AppDataDir("rebuilddb", false)
+	defaultDaemonRPCCertFile = filepath.Join(exccdHomeDir, "rpc.cert")
 	defaultConfigFile        = filepath.Join(curDir, defaultConfigFilename)
 	defaultLogDir            = filepath.Join(curDir, defaultLogDirname)
 	defaultHost              = "localhost"
 
 	defaultDBHostPort  = "127.0.0.1:3600"
-	defaultDBUser      = "dcrdata"
+	defaultDBUser      = "exccdata"
 	defaultDBPass      = "bananas"
-	defaultDBTableName = "dcrdata"
-	defaultDBFileName  = "dcrdata.sqlt.db"
+	defaultDBTableName = "exccdata"
+	defaultDBFileName  = "exccdata.sqlt.db"
 )
 
 type config struct {
@@ -58,10 +58,10 @@ type config struct {
 	DBTable    string `long:"dbtable" description:"DB table name"`
 
 	// RPC client options
-	DcrdUser         string `long:"dcrduser" description:"Daemon RPC user name"`
-	DcrdPass         string `long:"dcrdpass" description:"Daemon RPC password"`
-	DcrdServ         string `long:"dcrdserv" description:"Hostname/IP and port of dcrd RPC server to connect to (default localhost:9109, testnet: localhost:19109, simnet: localhost:19556)"`
-	DcrdCert         string `long:"dcrdcert" description:"File containing the dcrd certificate file"`
+	ExccdUser        string `long:"exccduser" description:"Daemon RPC user name"`
+	ExccdPass        string `long:"exccdpass" description:"Daemon RPC password"`
+	ExccdServ        string `long:"exccdserv" description:"Hostname/IP and port of exccd RPC server to connect to (default localhost:9109, testnet: localhost:19109, simnet: localhost:19556)"`
+	ExccdCert        string `long:"exccdcert" description:"File containing the exccd certificate file"`
 	DisableDaemonTLS bool   `long:"nodaemontls" description:"Disable TLS for the daemon RPC client -- NOTE: This is only allowed if the RPC client is connecting to localhost"`
 
 	// TODO
@@ -80,7 +80,7 @@ var (
 		DBUser:     defaultDBUser,
 		DBPass:     defaultDBPass,
 		DBTable:    defaultDBTableName,
-		DcrdCert:   defaultDaemonRPCCertFile,
+		ExccdCert:  defaultDaemonRPCCertFile,
 	}
 )
 
@@ -89,7 +89,7 @@ var (
 func cleanAndExpandPath(path string) string {
 	// Expand initial ~ to OS specific home directory.
 	if strings.HasPrefix(path, "~") {
-		homeDir := filepath.Dir(dcrdHomeDir)
+		homeDir := filepath.Dir(exccdHomeDir)
 		path = strings.Replace(path, "~", homeDir, 1)
 	}
 
@@ -199,8 +199,8 @@ func loadConfig() (*config, error) {
 
 	// Set the host names and ports to the default if the
 	// user does not specify them.
-	if cfg.DcrdServ == "" {
-		cfg.DcrdServ = defaultHost + ":" + activeNet.JSONRPCClientPort
+	if cfg.ExccdServ == "" {
+		cfg.ExccdServ = defaultHost + ":" + activeNet.JSONRPCClientPort
 	}
 
 	// Append the network type to the log directory so it is "namespaced"
@@ -233,17 +233,17 @@ func loadConfig() (*config, error) {
 }
 
 // const (
-//     defaultDBTableName = "dcrdata"
-//     defaultDBUserName = "dcrdata"
-//     defaultDBPass = "dcrpassword"
-//     defaultDBFileName = "dcrdata.sqlt.dat"
+//     defaultDBTableName = "exccdata"
+//     defaultDBUserName = "exccdata"
+//     defaultDBPass = "exccpassword"
+//     defaultDBFileName = "exccdata.sqlt.dat"
 //     defaultDBHostPort = "127.0.0.1:3660"
 // )
 
 // type configuration struct {
-//     DaemonHostPort string `json:"dcrdhost"`
-//     DaemonUser string `json:"dcrduser"`
-//     DaemonPass string `json:"dcrdpass"`
+//     DaemonHostPort string `json:"exccdhost"`
+//     DaemonUser string `json:"exccduser"`
+//     DaemonPass string `json:"exccdpass"`
 // 	DBHostPort     string `json:"dbhost"`
 //     DBUser     string `json:"dbuser"`
 //     DBPass     string `json:"dbpass"`

@@ -254,7 +254,7 @@
 
                 case 'fee-per-block': // block fee graph
                     d = blockFeeFunc(data)
-                    _.assign(gOptions, mapDygraphOptions(d, ['Block Height', 'Total Fee'], false, 'Total Fee (DCR)', 'Block Height',
+                    _.assign(gOptions, mapDygraphOptions(d, ['Block Height', 'Total Fee'], false, 'Total Fee (EXCC)', 'Block Height',
                     undefined, true, false))
                 break;
 

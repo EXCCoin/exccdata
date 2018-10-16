@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
@@ -17,11 +18,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrdata/v3/db/dcrpg"
-	"github.com/decred/dcrdata/v3/rpcutils"
-	"github.com/decred/dcrdata/v3/stakedb"
-	"github.com/decred/slog"
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccdata/v3/db/exccpg"
+	"github.com/EXCCoin/exccdata/v3/rpcutils"
+	"github.com/EXCCoin/exccdata/v3/stakedb"
+	"github.com/EXCCoin/slog"
 )
 
 var (
@@ -45,7 +46,7 @@ func init() {
 	rpcclientLogger = backendLog.Logger("RPC")
 	rpcclient.UseLogger(rpcclientLogger)
 	pgLogger = backendLog.Logger("PSQL")
-	dcrpg.UseLogger(pgLogger)
+	exccpg.UseLogger(pgLogger)
 	stakedbLogger = backendLog.Logger("SKDB")
 	stakedb.UseLogger(stakedbLogger)
 }
@@ -54,7 +55,7 @@ func mainCore() error {
 	// Parse the configuration file, and setup logger.
 	cfg, err := loadConfig()
 	if err != nil {
-		fmt.Printf("Failed to load dcrdata config: %s\n", err.Error())
+		fmt.Printf("Failed to load exccdata config: %s\n", err.Error())
 		return err
 	}
 
@@ -91,8 +92,8 @@ func mainCore() error {
 	}
 
 	// Connect to node RPC server
-	client, _, err := rpcutils.ConnectNodeRPC(cfg.DcrdServ, cfg.DcrdUser,
-		cfg.DcrdPass, cfg.DcrdCert, cfg.DisableDaemonTLS)
+	client, _, err := rpcutils.ConnectNodeRPC(cfg.ExccdServ, cfg.ExccdUser,
+		cfg.ExccdPass, cfg.ExccdCert, cfg.DisableDaemonTLS)
 	if err != nil {
 		log.Fatalf("Unable to connect to RPC server: %v", err)
 		return err
@@ -115,7 +116,7 @@ func mainCore() error {
 	}
 
 	// Configure PostgreSQL ChainDB
-	dbi := dcrpg.DBInfo{
+	dbi := exccpg.DBInfo{
 		Host:   host,
 		Port:   port,
 		User:   cfg.DBUser,
@@ -123,7 +124,7 @@ func mainCore() error {
 		DBName: cfg.DBName,
 	}
 	// Construct a ChainDB without a stakeDB to allow quick dropping of tables.
-	db, err := dcrpg.NewChainDB(&dbi, activeChain, nil, false)
+	db, err := exccpg.NewChainDB(&dbi, activeChain, nil, false)
 	if db != nil {
 		defer db.Close()
 	}

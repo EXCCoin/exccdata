@@ -3,7 +3,7 @@ package explorer
 import (
 	"testing"
 
-	"github.com/decred/dcrd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg"
 )
 
 func TestTestNet3Name(t *testing.T) {

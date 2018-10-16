@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
@@ -9,41 +10,41 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/v3/api/insight"
-	"github.com/decred/dcrdata/v3/blockdata"
-	"github.com/decred/dcrdata/v3/db/dcrpg"
-	"github.com/decred/dcrdata/v3/db/dcrsqlite"
-	"github.com/decred/dcrdata/v3/explorer"
-	"github.com/decred/dcrdata/v3/mempool"
-	"github.com/decred/dcrdata/v3/stakedb"
-	"github.com/decred/dcrwallet/wallet/udb"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/v3/api/insight"
+	"github.com/EXCCoin/exccdata/v3/blockdata"
+	"github.com/EXCCoin/exccdata/v3/db/exccpg"
+	"github.com/EXCCoin/exccdata/v3/db/exccsqlite"
+	"github.com/EXCCoin/exccdata/v3/explorer"
+	"github.com/EXCCoin/exccdata/v3/mempool"
+	"github.com/EXCCoin/exccdata/v3/stakedb"
+	"github.com/EXCCoin/exccwallet/wallet/udb"
 )
 
-// RegisterNodeNtfnHandlers registers with dcrd to receive new block,
+// RegisterNodeNtfnHandlers registers with exccd to receive new block,
 // transaction and winning ticket notifications.
-func RegisterNodeNtfnHandlers(dcrdClient *rpcclient.Client) *ContextualError {
+func RegisterNodeNtfnHandlers(exccdClient *rpcclient.Client) *ContextualError {
 	var err error
 	// Register for block connection and chain reorg notifications.
-	if err = dcrdClient.NotifyBlocks(); err != nil {
+	if err = exccdClient.NotifyBlocks(); err != nil {
 		return newContextualError("block notification "+
 			"registration failed", err)
 	}
 
 	// Register for tx accepted into mempool ntfns
-	if err = dcrdClient.NotifyNewTransactions(true); err != nil {
+	if err = exccdClient.NotifyNewTransactions(true); err != nil {
 		return newContextualError("new transaction verbose notification registration failed", err)
 	}
 
 	// For OnNewTickets
 	//  Commented since there is a bug in rpcclient/notify.go
-	// dcrdClient.NotifyNewTickets()
+	// exccdClient.NotifyNewTickets()
 
-	if err = dcrdClient.NotifyWinningTickets(); err != nil {
+	if err = exccdClient.NotifyWinningTickets(); err != nil {
 		return newContextualError("winning ticket "+
 			"notification registration failed", err)
 	}
@@ -52,7 +53,7 @@ func RegisterNodeNtfnHandlers(dcrdClient *rpcclient.Client) *ContextualError {
 	// OnRelevantTxAccepted.
 	// TODO: register outpoints (third argument).
 	// if len(addresses) > 0 {
-	// 	if err = dcrdClient.LoadTxFilter(true, addresses, nil); err != nil {
+	// 	if err = exccdClient.LoadTxFilter(true, addresses, nil); err != nil {
 	// 		return newContextualError("load tx filter failed", err)
 	// 	}
 	// }
@@ -126,7 +127,7 @@ func (q *collectionQueue) ProcessBlocks() {
 	}
 }
 
-// MakeNodeNtfnHandlers defines the dcrd notification handlers
+// MakeNodeNtfnHandlers defines the exccd notification handlers
 func MakeNodeNtfnHandlers() (*rpcclient.NotificationHandlers, *collectionQueue) {
 	blockQueue := NewCollectionQueue()
 	go blockQueue.ProcessBlocks()
@@ -149,10 +150,10 @@ func MakeNodeNtfnHandlers() (*rpcclient.NotificationHandlers, *collectionQueue) 
 		OnReorganization: func(oldHash *chainhash.Hash, oldHeight int32,
 			newHash *chainhash.Hash, newHeight int32) {
 			wg := new(sync.WaitGroup)
-			// Send reorg data to dcrsqlite's monitor
+			// Send reorg data to exccsqlite's monitor
 			wg.Add(1)
 			select {
-			case NtfnChans.ReorgChanWiredDB <- &dcrsqlite.ReorgData{
+			case NtfnChans.ReorgChanWiredDB <- &exccsqlite.ReorgData{
 				OldChainHead:   *oldHash,
 				OldChainHeight: oldHeight,
 				NewChainHead:   *newHash,
@@ -195,7 +196,7 @@ func MakeNodeNtfnHandlers() (*rpcclient.NotificationHandlers, *collectionQueue) 
 			// Send reorg data to ChainDB's monitor
 			wg.Add(1)
 			select {
-			case NtfnChans.ReorgChanDcrpgDB <- &dcrpg.ReorgData{
+			case NtfnChans.ReorgChanDcrpgDB <- &exccpg.ReorgData{
 				OldChainHead:   *oldHash,
 				OldChainHeight: oldHeight,
 				NewChainHead:   *newHash,
@@ -230,7 +231,7 @@ func MakeNodeNtfnHandlers() (*rpcclient.NotificationHandlers, *collectionQueue) 
 			if err != nil {
 				return
 			}
-			tx := dcrutil.NewTx(&rec.MsgTx)
+			tx := exccutil.NewTx(&rec.MsgTx)
 			txHash := rec.Hash
 			select {
 			case NtfnChans.RelevantTxMempoolChan <- tx:
@@ -241,9 +242,9 @@ func MakeNodeNtfnHandlers() (*rpcclient.NotificationHandlers, *collectionQueue) 
 		},
 
 		// OnTxAcceptedVerbose is invoked same as OnTxAccepted but is used here
-		// for the mempool monitors to avoid an extra call to dcrd for
+		// for the mempool monitors to avoid an extra call to exccd for
 		// the tx details
-		OnTxAcceptedVerbose: func(txDetails *dcrjson.TxRawResult) {
+		OnTxAcceptedVerbose: func(txDetails *exccjson.TxRawResult) {
 
 			select {
 			case NtfnChans.ExpNewTxChan <- &explorer.NewMempoolTx{

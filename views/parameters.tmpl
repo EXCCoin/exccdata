@@ -9,7 +9,7 @@
             <div class="row justify-content-between">
                 <div class="col-md-7 col-sm-6 d-flex">
                     <h4 class="mb-2">{{.Params.Net}} Parameters
-                        <a class="fs12" href="https://github.com/decred/dcrd/blob/master/chaincfg/params.go">github</a>
+                        <a class="fs12" href="https://github.com/EXCCoin/exccd/blob/master/chaincfg/params.go">github</a>
                     </h4>
                 </div>
             </div>
@@ -106,7 +106,7 @@
                         <tbody>
                             <tr>
                                 <td class="mono text-right pr-2 nowrap p03rem0">BaseSubsidy</td>
-                                <td class="mono">{{template "decimalParts" (amountAsDecimalParts .Params.BaseSubsidy true)}} DCR</td>
+                                <td class="mono">{{template "decimalParts" (amountAsDecimalParts .Params.BaseSubsidy true)}} EXCC</td>
                                 <td>Starting subsidy amount for mined blocks</td>
                             </tr>
                             <tr>
@@ -151,7 +151,7 @@
                         <tbody>
                             <tr>
                                 <td class="mono text-right pr-2 nowrap p03rem0">MinimumStakeDiff</td>
-                                <td class="mono">{{template "decimalParts" (amountAsDecimalParts .Params.MinimumStakeDiff true)}} DCR</td>
+                                <td class="mono">{{template "decimalParts" (amountAsDecimalParts .Params.MinimumStakeDiff true)}} EXCC</td>
                                 <td>Minimum amount of Atoms required to purchase a stake ticket</td>
                             </tr>
                             <tr>

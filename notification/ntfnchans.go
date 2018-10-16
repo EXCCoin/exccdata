@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
@@ -5,17 +6,17 @@
 package notification
 
 import (
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccutil"
 
-	"github.com/decred/dcrdata/v3/api/insight"
-	"github.com/decred/dcrdata/v3/blockdata"
-	"github.com/decred/dcrdata/v3/db/dcrpg"
-	"github.com/decred/dcrdata/v3/db/dcrsqlite"
-	"github.com/decred/dcrdata/v3/explorer"
-	"github.com/decred/dcrdata/v3/mempool"
-	"github.com/decred/dcrdata/v3/stakedb"
-	"github.com/decred/dcrdata/v3/txhelpers"
+	"github.com/EXCCoin/exccdata/v3/api/insight"
+	"github.com/EXCCoin/exccdata/v3/blockdata"
+	"github.com/EXCCoin/exccdata/v3/db/exccpg"
+	"github.com/EXCCoin/exccdata/v3/db/exccsqlite"
+	"github.com/EXCCoin/exccdata/v3/explorer"
+	"github.com/EXCCoin/exccdata/v3/mempool"
+	"github.com/EXCCoin/exccdata/v3/stakedb"
+	"github.com/EXCCoin/exccdata/v3/txhelpers"
 )
 
 const (
@@ -39,15 +40,15 @@ var NtfnChans struct {
 	ConnectChan                       chan *chainhash.Hash
 	ReorgChanBlockData                chan *blockdata.ReorgData
 	ConnectChanWiredDB                chan *chainhash.Hash
-	ReorgChanWiredDB                  chan *dcrsqlite.ReorgData
+	ReorgChanWiredDB                  chan *exccsqlite.ReorgData
 	ConnectChanStakeDB                chan *chainhash.Hash
 	ReorgChanStakeDB                  chan *stakedb.ReorgData
 	ConnectChanDcrpgDB                chan *chainhash.Hash
-	ReorgChanDcrpgDB                  chan *dcrpg.ReorgData
+	ReorgChanDcrpgDB                  chan *exccpg.ReorgData
 	UpdateStatusNodeHeight            chan uint32
 	UpdateStatusDBHeight              chan uint32
 	SpendTxBlockChan, RecvTxBlockChan chan *txhelpers.BlockWatchedTx
-	RelevantTxMempoolChan             chan *dcrutil.Tx
+	RelevantTxMempoolChan             chan *exccutil.Tx
 	NewTxChan                         chan *mempool.NewTx
 	ExpNewTxChan                      chan *explorer.NewMempoolTx
 	InsightNewTxChan                  chan *insight.NewTx
@@ -72,9 +73,9 @@ func MakeNtfnChans(monitorMempool, postgresEnabled bool) {
 
 	// Reorg data channels
 	NtfnChans.ReorgChanBlockData = make(chan *blockdata.ReorgData)
-	NtfnChans.ReorgChanWiredDB = make(chan *dcrsqlite.ReorgData)
+	NtfnChans.ReorgChanWiredDB = make(chan *exccsqlite.ReorgData)
 	NtfnChans.ReorgChanStakeDB = make(chan *stakedb.ReorgData)
-	NtfnChans.ReorgChanDcrpgDB = make(chan *dcrpg.ReorgData)
+	NtfnChans.ReorgChanDcrpgDB = make(chan *exccpg.ReorgData)
 
 	// To update app status
 	NtfnChans.UpdateStatusNodeHeight = make(chan uint32, blockConnChanBuffer)
@@ -85,7 +86,7 @@ func MakeNtfnChans(monitorMempool, postgresEnabled bool) {
 	// // recv/SpendTxBlockChan come with connected blocks
 	// 	NtfnChans.RecvTxBlockChan = make(chan *txhelpers.BlockWatchedTx, blockConnChanBuffer)
 	// 	NtfnChans.SpendTxBlockChan = make(chan *txhelpers.BlockWatchedTx, blockConnChanBuffer)
-	// 	NtfnChans.RelevantTxMempoolChan = make(chan *dcrutil.Tx, relevantMempoolTxChanBuffer)
+	// 	NtfnChans.RelevantTxMempoolChan = make(chan *exccutil.Tx, relevantMempoolTxChanBuffer)
 	// }
 
 	if monitorMempool {

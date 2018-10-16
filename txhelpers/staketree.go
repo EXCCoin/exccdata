@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/decred/dcrd/blockchain/stake"
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/database"
-	_ "github.com/decred/dcrd/database/ffldb" // init the ffldb driver
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrd/wire"
+	"github.com/EXCCoin/exccd/blockchain/stake"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/database"
+	_ "github.com/EXCCoin/exccd/database/ffldb" // init the ffldb driver
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccd/wire"
 )
 
 const (
@@ -25,7 +25,7 @@ const (
 // tree update with a single block or chunk of blocks.  This does NOT SCALE!
 
 // BuildStakeTree returns a database with a stake tree
-func BuildStakeTree(blocks map[int64]*dcrutil.Block, netParams *chaincfg.Params,
+func BuildStakeTree(blocks map[int64]*exccutil.Block, netParams *chaincfg.Params,
 	nodeClient *rpcclient.Client, poolRequiredHeight int64, DBName ...string) (database.DB, []int64, error) {
 
 	if blocks[0] == nil || blocks[0].Height() != 0 {
@@ -143,7 +143,7 @@ func BuildStakeTree(blocks map[int64]*dcrutil.Block, netParams *chaincfg.Params,
 /// kang
 
 // TicketsInBlock finds all the new tickets in the block.
-func TicketsInBlock(bl *dcrutil.Block) ([]chainhash.Hash, []*wire.MsgTx) {
+func TicketsInBlock(bl *exccutil.Block) ([]chainhash.Hash, []*wire.MsgTx) {
 	tickets := make([]chainhash.Hash, 0)
 	ticketsMsgTx := make([]*wire.MsgTx, 0)
 	for _, stx := range bl.STransactions() {
@@ -158,9 +158,9 @@ func TicketsInBlock(bl *dcrutil.Block) ([]chainhash.Hash, []*wire.MsgTx) {
 }
 
 // TicketTxnsInBlock finds all the new tickets in the block.
-func TicketTxnsInBlock(bl *dcrutil.Block) ([]chainhash.Hash, []*dcrutil.Tx) {
+func TicketTxnsInBlock(bl *exccutil.Block) ([]chainhash.Hash, []*exccutil.Tx) {
 	tickets := make([]chainhash.Hash, 0)
-	ticketTxns := make([]*dcrutil.Tx, 0)
+	ticketTxns := make([]*exccutil.Tx, 0)
 	for _, stx := range bl.STransactions() {
 		if stake.DetermineTxType(stx.MsgTx()) == stake.TxTypeSStx {
 			h := stx.Hash()
@@ -173,7 +173,7 @@ func TicketTxnsInBlock(bl *dcrutil.Block) ([]chainhash.Hash, []*dcrutil.Tx) {
 }
 
 // TicketsSpentInBlock finds all the tickets spent in the block.
-func TicketsSpentInBlock(bl *dcrutil.Block) []chainhash.Hash {
+func TicketsSpentInBlock(bl *exccutil.Block) []chainhash.Hash {
 	tickets := make([]chainhash.Hash, 0)
 	for _, stx := range bl.STransactions() {
 		if stake.DetermineTxType(stx.MsgTx()) == stake.TxTypeSSGen {
@@ -186,7 +186,7 @@ func TicketsSpentInBlock(bl *dcrutil.Block) []chainhash.Hash {
 }
 
 // VotesInBlock finds all the votes in the block.
-func VotesInBlock(bl *dcrutil.Block) []chainhash.Hash {
+func VotesInBlock(bl *exccutil.Block) []chainhash.Hash {
 	votes := make([]chainhash.Hash, 0)
 	for _, stx := range bl.STransactions() {
 		if stake.DetermineTxType(stx.MsgTx()) == stake.TxTypeSSGen {
@@ -199,7 +199,7 @@ func VotesInBlock(bl *dcrutil.Block) []chainhash.Hash {
 }
 
 // RevokedTicketsInBlock finds all the revoked tickets in the block.
-func RevokedTicketsInBlock(bl *dcrutil.Block) []chainhash.Hash {
+func RevokedTicketsInBlock(bl *exccutil.Block) []chainhash.Hash {
 	tickets := make([]chainhash.Hash, 0)
 	for _, stx := range bl.STransactions() {
 		if stake.DetermineTxType(stx.MsgTx()) == stake.TxTypeSSRtx {

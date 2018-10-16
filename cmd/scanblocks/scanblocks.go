@@ -8,20 +8,20 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/decred/dcrd/blockchain"
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
-	apitypes "github.com/decred/dcrdata/v3/api/types"
-	"github.com/decred/dcrdata/v3/rpcutils"
-	"github.com/decred/dcrdata/v3/txhelpers"
-	"github.com/decred/slog"
+	"github.com/EXCCoin/exccd/blockchain"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
+	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
+	"github.com/EXCCoin/exccdata/v3/rpcutils"
+	"github.com/EXCCoin/exccdata/v3/txhelpers"
+	"github.com/EXCCoin/slog"
 )
 
 var host = flag.String("host", "127.0.0.1:9109", "node RPC host:port")
-var user = flag.String("user", "dcrd", "node RPC username")
+var user = flag.String("user", "exccd", "node RPC username")
 var pass = flag.String("pass", "bananas", "node RPC password")
-var cert = flag.String("cert", "dcrd.cert", "node RPC TLS certificate (when notls=false)")
+var cert = flag.String("cert", "exccd.cert", "node RPC TLS certificate (when notls=false)")
 var notls = flag.Bool("notls", true, "Disable use of TLS for node connection")
 
 var (
@@ -59,7 +59,7 @@ func mainCore() int {
 	}
 
 	blockSummaries := make([]apitypes.BlockDataBasic, height+1)
-	blocks := make(map[int64]*dcrutil.Block)
+	blocks := make(map[int64]*exccutil.Block)
 
 	for i := int64(0); i < height+1; i++ {
 		blockhash, err := client.GetBlockHash(i)
@@ -73,7 +73,7 @@ func mainCore() int {
 			log.Errorf("GetBlock failed (%s): %v", blockhash, err)
 			return 4
 		}
-		blocks[i] = dcrutil.NewBlock(msgBlock)
+		blocks[i] = exccutil.NewBlock(msgBlock)
 
 		// info, err := client.GetInfo()
 		// if err != nil {
@@ -93,7 +93,7 @@ func mainCore() int {
 			Size:       header.Size,
 			Hash:       blockhash.String(),
 			Difficulty: diffRatio,
-			StakeDiff:  dcrutil.Amount(header.SBits).ToCoin(),
+			StakeDiff:  exccutil.Amount(header.SBits).ToCoin(),
 			Time:       header.Timestamp.Unix(),
 			PoolInfo: apitypes.TicketPoolInfo{
 				Size: header.PoolSize,
@@ -114,7 +114,7 @@ func mainCore() int {
 
 	log.Info("Extracting pool values...")
 	for i := range blockSummaries {
-		blockSummaries[i].PoolInfo.Value = dcrutil.Amount(poolValues[i]).ToCoin()
+		blockSummaries[i].PoolInfo.Value = exccutil.Amount(poolValues[i]).ToCoin()
 		if blockSummaries[i].PoolInfo.Size > 0 {
 			blockSummaries[i].PoolInfo.ValAvg = blockSummaries[i].PoolInfo.Value / float64(blockSummaries[i].PoolInfo.Size)
 		} else {

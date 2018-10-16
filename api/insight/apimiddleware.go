@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
@@ -12,9 +13,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	apitypes "github.com/decred/dcrdata/v3/api/types"
-	m "github.com/decred/dcrdata/v3/middleware"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
+	m "github.com/EXCCoin/exccdata/v3/middleware"
 	"github.com/go-chi/chi"
 )
 

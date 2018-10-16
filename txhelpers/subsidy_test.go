@@ -3,13 +3,13 @@ package txhelpers
 import (
 	"testing"
 
-	"github.com/decred/dcrd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg"
 )
 
 func TestBlockSubsidy(t *testing.T) {
 	totalSubsidy := UltimateSubsidy(&chaincfg.MainNetParams)
 
-	if totalSubsidy != 2099999999800912 {
-		t.Errorf("Bad total subsidy; want 2099999999800912, got %v", totalSubsidy)
+	if totalSubsidy != 3200307811695360 {
+		t.Errorf("Bad total subsidy; want 3200307811695360, got %v", totalSubsidy)
 	}
 }

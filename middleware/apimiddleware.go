@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
@@ -14,9 +15,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrjson"
-	apitypes "github.com/decred/dcrdata/v3/api/types"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccjson"
+	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/docgen"
 )
@@ -54,7 +55,7 @@ type DataSource interface {
 	GetBlockHash(idx int64) (string, error)
 }
 
-type StakeVersionsLatest func() (*dcrjson.StakeVersions, error)
+type StakeVersionsLatest func() (*exccjson.StakeVersions, error)
 
 // GetBlockStepCtx retrieves the ctxBlockStep data from the request context. If
 // not set, the return value is -1.

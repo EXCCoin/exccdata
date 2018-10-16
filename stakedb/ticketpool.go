@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2018, The dcrdata developers
 // See LICENSE for details.
@@ -13,8 +14,8 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 	"github.com/asdine/storm"
-	"github.com/decred/dcrd/chaincfg/chainhash"
 	"github.com/dgraph-io/badger"
 )
 

@@ -14,8 +14,8 @@ set -ex
 # static checker.
 
 GOVERSION=${1:-1.11}
-REPO=dcrdata
-DOCKER_IMAGE_TAG=decred-golang-builder-$GOVERSION
+REPO=exccdata
+DOCKER_IMAGE_TAG=excc-golang-builder-$GOVERSION
 
 testrepo () {
   TMPFILE=$(mktemp)
@@ -29,7 +29,7 @@ testrepo () {
   fi
 
   # Check tests
-  git clone https://github.com/dcrlabs/bug-free-happiness test-data-repo
+  git clone https://github.com/excclabs/bug-free-happiness test-data-repo
   tar xvf test-data-repo/stakedb/test_ticket_pool.bdgr.tar.xz -C ./stakedb
 
   env GORACE='halt_on_error=1' go test -v -race ./...
@@ -47,17 +47,17 @@ if [ $GOVERSION == "local" ]; then
     exit
 fi
 
-docker pull decred/$DOCKER_IMAGE_TAG
+docker pull EXCCoin/$DOCKER_IMAGE_TAG
 if [ $? != 0 ]; then
         echo 'docker pull failed'
         exit 1
 fi
 
-docker run --rm -it -v $(pwd):/src decred/$DOCKER_IMAGE_TAG /bin/bash -c "\
+docker run --rm -it -v $(pwd):/src EXCCoin/$DOCKER_IMAGE_TAG /bin/bash -c "\
   rsync -ra --include-from=<(git --git-dir=/src/.git ls-files) \
   --filter=':- .gitignore' \
-  /src/ /go/src/github.com/decred/$REPO/ && \
-  cd github.com/decred/$REPO/ && \
+  /src/ /go/src/github.com/EXCCoin/$REPO/ && \
+  cd github.com/EXCCoin/$REPO/ && \
   bash run_tests.sh local"
 if [ $? != 0 ]; then
         echo 'docker run failed'

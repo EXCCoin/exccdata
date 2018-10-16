@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
 
@@ -24,7 +25,7 @@ var ver = version{
 // go build -ldflags "-X main.CommitHash=`git rev-parse --short HEAD`"
 var CommitHash string
 
-const appName string = "dcrdata-api"
+const appName string = "exccdata-api"
 
 func (v *version) String() string {
 	var hashStr string

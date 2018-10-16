@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
@@ -14,16 +15,16 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/rpcclient"
-	apitypes "github.com/decred/dcrdata/v3/api/types"
-	"github.com/decred/dcrdata/v3/db/dbtypes"
-	"github.com/decred/dcrdata/v3/explorer"
-	m "github.com/decred/dcrdata/v3/middleware"
-	notify "github.com/decred/dcrdata/v3/notification"
-	"github.com/decred/dcrdata/v3/txhelpers"
-	appver "github.com/decred/dcrdata/v3/version"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/rpcclient"
+	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
+	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
+	"github.com/EXCCoin/exccdata/v3/explorer"
+	m "github.com/EXCCoin/exccdata/v3/middleware"
+	notify "github.com/EXCCoin/exccdata/v3/notification"
+	"github.com/EXCCoin/exccdata/v3/txhelpers"
+	appver "github.com/EXCCoin/exccdata/v3/version"
 )
 
 // DataSourceLite specifies an interface for collecting data from the built-in
@@ -35,23 +36,23 @@ type DataSourceLite interface {
 	GetBlockHash(idx int64) (string, error)
 	GetBlockHeight(hash string) (int64, error)
 	//Get(idx int) *blockdata.BlockData
-	GetHeader(idx int) *dcrjson.GetBlockHeaderVerboseResult
-	GetBlockVerbose(idx int, verboseTx bool) *dcrjson.GetBlockVerboseResult
-	GetBlockVerboseByHash(hash string, verboseTx bool) *dcrjson.GetBlockVerboseResult
+	GetHeader(idx int) *exccjson.GetBlockHeaderVerboseResult
+	GetBlockVerbose(idx int, verboseTx bool) *exccjson.GetBlockVerboseResult
+	GetBlockVerboseByHash(hash string, verboseTx bool) *exccjson.GetBlockVerboseResult
 	GetRawTransaction(txid string) *apitypes.Tx
 	GetTransactionHex(txid string) string
 	GetTrimmedTransaction(txid string) *apitypes.TrimmedTx
 	GetRawTransactionWithPrevOutAddresses(txid string) (*apitypes.Tx, [][]string)
 	GetVoteInfo(txid string) (*apitypes.VoteInfo, error)
-	GetVoteVersionInfo(ver uint32) (*dcrjson.GetVoteInfoResult, error)
-	GetStakeVersions(txHash string, count int32) (*dcrjson.GetStakeVersionsResult, error)
-	GetStakeVersionsLatest() (*dcrjson.StakeVersions, error)
+	GetVoteVersionInfo(ver uint32) (*exccjson.GetVoteInfoResult, error)
+	GetStakeVersions(txHash string, count int32) (*exccjson.GetStakeVersionsResult, error)
+	GetStakeVersionsLatest() (*exccjson.StakeVersions, error)
 	GetAllTxIn(txid string) []*apitypes.TxIn
 	GetAllTxOut(txid string) []*apitypes.TxOut
 	GetTransactionsForBlock(idx int64) *apitypes.BlockTransactions
 	GetTransactionsForBlockByHash(hash string) *apitypes.BlockTransactions
-	GetFeeInfo(idx int) *dcrjson.FeeInfoBlock
-	//GetStakeDiffEstimate(idx int) *dcrjson.EstimateStakeDiffResult
+	GetFeeInfo(idx int) *exccjson.FeeInfoBlock
+	//GetStakeDiffEstimate(idx int) *exccjson.EstimateStakeDiffResult
 	GetStakeInfoExtended(idx int) *apitypes.StakeInfoExtended
 	//needs db update: GetStakeInfoExtendedByHash(hash string) *apitypes.StakeInfoExtended
 	GetStakeDiffEstimates() *apitypes.StakeDiff
@@ -95,7 +96,7 @@ type DataSourceAux interface {
 		chartGroupings dbtypes.ChartGrouping) (*dbtypes.ChartsData, error)
 }
 
-// dcrdata application context used by all route handlers
+// exccdata application context used by all route handlers
 type appContext struct {
 	nodeClient    *rpcclient.Client
 	Params        *chaincfg.Params
@@ -127,7 +128,7 @@ func NewContext(client *rpcclient.Client, params *chaincfg.Params, dataSource Da
 			Height:          uint32(nodeHeight),
 			NodeConnections: conns,
 			APIVersion:      APIVersion,
-			DcrdataVersion:  appver.Version(),
+			ExccdataVersion: appver.Version(),
 		},
 		JSONIndent: JSONIndent,
 	}
@@ -209,7 +210,7 @@ out:
 // root is a http.Handler intended for the API root path. This essentially
 // provides a heartbeat, and no information about the application status.
 func (c *appContext) root(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "dcrdata api running")
+	fmt.Fprint(w, "exccdata api running")
 }
 
 func (c *appContext) writeJSONHandlerFunc(thing interface{}) http.HandlerFunc {
@@ -668,7 +669,7 @@ func (c *appContext) getStakeDiffCurrent(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	stakeDiffCurrent := dcrjson.GetStakeDifficultyResult{
+	stakeDiffCurrent := exccjson.GetStakeDifficultyResult{
 		CurrentStakeDifficulty: stakeDiff.CurrentStakeDifficulty,
 		NextStakeDifficulty:    stakeDiff.NextStakeDifficulty,
 	}

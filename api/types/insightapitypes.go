@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
 
@@ -6,7 +7,7 @@ package types
 import (
 	"encoding/json"
 
-	"github.com/decred/dcrdata/v3/db/dbtypes"
+	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
 )
 
 // InsightAddress models an address transactions

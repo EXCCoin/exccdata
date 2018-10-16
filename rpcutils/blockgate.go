@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
 
@@ -7,9 +8,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
 )
 
 // BlockGetter is an interface for requesting blocks
@@ -17,20 +18,20 @@ type BlockGetter interface {
 	NodeHeight() (int64, error)
 	BestBlockHeight() int64
 	BestBlockHash() (chainhash.Hash, int64, error)
-	BestBlock() (*dcrutil.Block, error)
-	Block(chainhash.Hash) (*dcrutil.Block, error)
+	BestBlock() (*exccutil.Block, error)
+	Block(chainhash.Hash) (*exccutil.Block, error)
 	WaitForHeight(int64) chan chainhash.Hash
 	WaitForHash(chainhash.Hash) chan int64
 }
 
 // MasterBlockGetter builds on BlockGetter, adding functions that fetch blocks
-// directly from dcrd via RPC and subsequently update the internal block cache
+// directly from exccd via RPC and subsequently update the internal block cache
 // with the retrieved block.
 type MasterBlockGetter interface {
 	BlockGetter
-	UpdateToBestBlock() (*dcrutil.Block, error)
-	UpdateToNextBlock() (*dcrutil.Block, error)
-	UpdateToBlock(height int64) (*dcrutil.Block, error)
+	UpdateToBestBlock() (*exccutil.Block, error)
+	UpdateToNextBlock() (*exccutil.Block, error)
+	UpdateToBlock(height int64) (*exccutil.Block, error)
 }
 
 // BlockGate is an implementation of MasterBlockGetter with cache
@@ -40,7 +41,7 @@ type BlockGate struct {
 	height        int64
 	fetchToHeight int64
 	hashAtHeight  map[int64]chainhash.Hash
-	blockWithHash map[chainhash.Hash]*dcrutil.Block
+	blockWithHash map[chainhash.Hash]*exccutil.Block
 	heightWaiters map[int64][]chan chainhash.Hash
 	hashWaiters   map[chainhash.Hash][]chan int64
 	expireQueue   heightHashQueue
@@ -85,7 +86,7 @@ func NewBlockGate(client *rpcclient.Client, capacity int) *BlockGate {
 		height:        -1,
 		fetchToHeight: -1,
 		hashAtHeight:  make(map[int64]chainhash.Hash),
-		blockWithHash: make(map[chainhash.Hash]*dcrutil.Block),
+		blockWithHash: make(map[chainhash.Hash]*exccutil.Block),
 		heightWaiters: make(map[int64][]chan chainhash.Hash),
 		hashWaiters:   make(map[chainhash.Hash][]chan int64),
 		expireQueue: heightHashQueue{
@@ -103,7 +104,7 @@ func (g *BlockGate) SetFetchToHeight(height int64) {
 	g.fetchToHeight = height
 }
 
-// NodeHeight gets the chain height from dcrd.
+// NodeHeight gets the chain height from exccd.
 func (g *BlockGate) NodeHeight() (int64, error) {
 	_, height, err := g.client.GetBestBlock()
 	return height, err
@@ -129,7 +130,7 @@ func (g *BlockGate) BestBlockHash() (chainhash.Hash, int64, error) {
 }
 
 // BestBlock gets the best block in cache.
-func (g *BlockGate) BestBlock() (*dcrutil.Block, error) {
+func (g *BlockGate) BestBlock() (*exccutil.Block, error) {
 	g.RLock()
 	defer g.RUnlock()
 	var err error
@@ -145,7 +146,7 @@ func (g *BlockGate) BestBlock() (*dcrutil.Block, error) {
 }
 
 // Block attempts to get the block with the specified hash from cache.
-func (g *BlockGate) Block(hash chainhash.Hash) (*dcrutil.Block, error) {
+func (g *BlockGate) Block(hash chainhash.Hash) (*exccutil.Block, error) {
 	g.RLock()
 	defer g.RUnlock()
 	var err error
@@ -157,7 +158,7 @@ func (g *BlockGate) Block(hash chainhash.Hash) (*dcrutil.Block, error) {
 }
 
 // UpdateToBestBlock gets the best block via RPC and updates the cache.
-func (g *BlockGate) UpdateToBestBlock() (*dcrutil.Block, error) {
+func (g *BlockGate) UpdateToBestBlock() (*exccutil.Block, error) {
 	_, height, err := g.client.GetBestBlock()
 	if err != nil {
 		return nil, fmt.Errorf("GetBestBlockHash failed: %v", err)
@@ -168,7 +169,7 @@ func (g *BlockGate) UpdateToBestBlock() (*dcrutil.Block, error) {
 
 // UpdateToNextBlock gets the next block following the best in cache via RPC and
 // updates the cache.
-func (g *BlockGate) UpdateToNextBlock() (*dcrutil.Block, error) {
+func (g *BlockGate) UpdateToNextBlock() (*exccutil.Block, error) {
 	g.Lock()
 	height := g.height + 1
 	g.Unlock()
@@ -176,14 +177,14 @@ func (g *BlockGate) UpdateToNextBlock() (*dcrutil.Block, error) {
 }
 
 // UpdateToBlock gets the block at the specified height on the main chain from
-// dcrd and stores it in cache.
-func (g *BlockGate) UpdateToBlock(height int64) (*dcrutil.Block, error) {
+// exccd and stores it in cache.
+func (g *BlockGate) UpdateToBlock(height int64) (*exccutil.Block, error) {
 	g.Lock()
 	defer g.Unlock()
 	return g.updateToBlock(height)
 }
 
-func (g *BlockGate) updateToBlock(height int64) (*dcrutil.Block, error) {
+func (g *BlockGate) updateToBlock(height int64) (*exccutil.Block, error) {
 	block, hash, err := GetBlock(height, g.client)
 	if err != nil {
 		return nil, fmt.Errorf("GetBlock (%d) failed: %v", height, err)

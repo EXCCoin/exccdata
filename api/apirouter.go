@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
 
@@ -7,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	m "github.com/decred/dcrdata/v3/middleware"
+	m "github.com/EXCCoin/exccdata/v3/middleware"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/rs/cors"
@@ -199,8 +200,8 @@ func NewAPIRouter(app *appContext, userRealIP bool) apiMux {
 	// 	buf.WriteTo(os.Stdout)
 
 	// 	fmt.Println(docgen.MarkdownRoutesDoc(mux, docgen.MarkdownOpts{
-	// 		ProjectPath: "github.com/decred/dcrdata/v3",
-	// 		Intro:       "dcrdata HTTP router directory",
+	// 		ProjectPath: "github.com/EXCCoin/exccdata/v3",
+	// 		Intro:       "exccdata HTTP router directory",
 	// 	}))
 	// 	return
 	// }
@@ -231,7 +232,7 @@ func NewAPIRouter(app *appContext, userRealIP bool) apiMux {
 func (mux *apiMux) ListenAndServeProto(listen, proto string) {
 	apiLog.Infof("Now serving on %s://%v/", proto, listen)
 	if proto == "https" {
-		go http.ListenAndServeTLS(listen, "dcrdata.cert", "dcrdata.key", mux)
+		go http.ListenAndServeTLS(listen, "exccdata.cert", "exccdata.key", mux)
 	}
 	go http.ListenAndServe(listen, mux)
 }

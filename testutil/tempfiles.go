@@ -8,7 +8,7 @@ import (
 
 const (
 	DefaultDataDirname = "test.data"
-	DefaultDBFileName  = "test.dcrdata.sqlt.db"
+	DefaultDBFileName  = "test.exccdata.sqlt.db"
 )
 
 // TempFolderPath returns path of a temporary directory used by these tests to

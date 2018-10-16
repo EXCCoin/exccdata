@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
@@ -16,17 +17,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
-	apitypes "github.com/decred/dcrdata/v3/api/types"
-	"github.com/decred/dcrdata/v3/db/dbtypes"
-	"github.com/decred/dcrdata/v3/db/dcrpg"
-	m "github.com/decred/dcrdata/v3/middleware"
-	"github.com/decred/dcrdata/v3/semver"
-	"github.com/decred/dcrdata/v3/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
+	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
+	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
+	"github.com/EXCCoin/exccdata/v3/db/exccpg"
+	m "github.com/EXCCoin/exccdata/v3/middleware"
+	"github.com/EXCCoin/exccdata/v3/semver"
+	"github.com/EXCCoin/exccdata/v3/txhelpers"
 )
 
 // DataSourceLite specifies an interface for collecting data from the built-in
@@ -37,7 +38,7 @@ type DataSourceLite interface {
 
 type insightApiContext struct {
 	nodeClient *rpcclient.Client
-	BlockData  *dcrpg.ChainDBRPC
+	BlockData  *exccpg.ChainDBRPC
 	params     *chaincfg.Params
 	MemPool    DataSourceLite
 	Status     apitypes.Status
@@ -45,7 +46,7 @@ type insightApiContext struct {
 }
 
 // NewInsightContext Constructor for insightApiContext
-func NewInsightContext(client *rpcclient.Client, blockData *dcrpg.ChainDBRPC, params *chaincfg.Params, memPoolData DataSourceLite, JSONIndent string) *insightApiContext {
+func NewInsightContext(client *rpcclient.Client, blockData *exccpg.ChainDBRPC, params *chaincfg.Params, memPoolData DataSourceLite, JSONIndent string) *insightApiContext {
 	conns, _ := client.GetConnectionCount()
 	nodeHeight, _ := client.GetBlockCount()
 	version := semver.NewSemver(1, 0, 0)
@@ -59,7 +60,7 @@ func NewInsightContext(client *rpcclient.Client, blockData *dcrpg.ChainDBRPC, pa
 			Height:          uint32(nodeHeight),
 			NodeConnections: conns,
 			APIVersion:      APIVersion,
-			DcrdataVersion:  version.String(),
+			ExccdataVersion: version.String(),
 		},
 	}
 	return &newContext
@@ -117,7 +118,7 @@ func (c *insightApiContext) getTransaction(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	txsOld := []*dcrjson.TxRawResult{txOld}
+	txsOld := []*exccjson.TxRawResult{txOld}
 
 	// convert to insight struct
 	txsNew, err := c.TxConverter(txsOld)
@@ -173,8 +174,8 @@ func (c *insightApiContext) getBlockSummary(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	blockSummary := []*dcrjson.GetBlockVerboseResult{blockDcrd}
-	blockInsight, err := c.DcrToInsightBlock(blockSummary)
+	blockSummary := []*exccjson.GetBlockVerboseResult{blockDcrd}
+	blockInsight, err := c.ExccToInsightBlock(blockSummary)
 	if err != nil {
 		apiLog.Errorf("Unable to process block (%s)", hash)
 		writeInsightError(w, "Unable to Process Block")
@@ -341,7 +342,7 @@ func (c *insightApiContext) getAddressesTxnOutput(w http.ResponseWriter, r *http
 					TxnID:         fundingTx.Hash().String(),
 					Vout:          f.Index,
 					ScriptPubKey:  hex.EncodeToString(fundingTx.Tx.TxOut[f.Index].PkScript),
-					Amount:        dcrutil.Amount(fundingTx.Tx.TxOut[f.Index].Value).ToCoin(),
+					Amount:        exccutil.Amount(fundingTx.Tx.TxOut[f.Index].Value).ToCoin(),
 					Satoshis:      fundingTx.Tx.TxOut[f.Index].Value,
 					Confirmations: 0,
 					BlockTime:     fundingTx.MemPoolTime,
@@ -399,7 +400,7 @@ func (c *insightApiContext) getTransactions(w http.ResponseWriter, r *http.Reque
 			return
 		}
 
-		txsOld := []*dcrjson.TxRawResult{}
+		txsOld := []*exccjson.TxRawResult{}
 		txcount := len(blkTrans.RawTx) + len(blkTrans.RawSTx)
 		// Merge tx and stx together and limit result to 10 max
 		count := 0
@@ -438,7 +439,7 @@ func (c *insightApiContext) getTransactions(w http.ResponseWriter, r *http.Reque
 
 	if address != "" {
 		// Validate Address
-		_, err := dcrutil.DecodeAddress(address)
+		_, err := exccutil.DecodeAddress(address)
 		if err != nil {
 			writeInsightError(w, fmt.Sprintf("Address is invalid (%s)", address))
 			return
@@ -485,7 +486,7 @@ func (c *insightApiContext) getTransactions(w http.ResponseWriter, r *http.Reque
 			rawTxs = rawTxs[0:10]
 		}
 
-		txsOld := []*dcrjson.TxRawResult{}
+		txsOld := []*exccjson.TxRawResult{}
 		for _, rawTx := range rawTxs {
 			txOld, err1 := c.BlockData.GetRawTransaction(rawTx)
 			if err1 != nil {
@@ -539,7 +540,7 @@ func (c *insightApiContext) getAddressesTxn(w http.ResponseWriter, r *http.Reque
 
 	// Confirm all addresses are valid and pull unconfirmed transactions for all addresses
 	for _, addr := range addresses {
-		address, err := dcrutil.DecodeAddress(addr)
+		address, err := exccutil.DecodeAddress(addr)
 		if err != nil {
 			writeInsightError(w, fmt.Sprintf("Address is invalid (%s)", addr))
 			return
@@ -605,7 +606,7 @@ func (c *insightApiContext) getAddressesTxn(w http.ResponseWriter, r *http.Reque
 	addressOutput.From = int(from)
 	addressOutput.To = int(to)
 
-	txsOld := []*dcrjson.TxRawResult{}
+	txsOld := []*exccjson.TxRawResult{}
 	for _, rawTx := range rawTxs {
 		txOld, err := c.BlockData.GetRawTransaction(rawTx)
 		if err != nil {
@@ -617,7 +618,7 @@ func (c *insightApiContext) getAddressesTxn(w http.ResponseWriter, r *http.Reque
 	}
 
 	// Convert to Insight API struct
-	txsNew, err := c.DcrToInsightTxns(txsOld, noAsm, noScriptSig, noSpent)
+	txsNew, err := c.ExccToInsightTxns(txsOld, noAsm, noScriptSig, noSpent)
 	if err != nil {
 		apiLog.Error("Unable to process transactions")
 		writeInsightError(w, fmt.Sprintf("Unable to convert transactions (%s)", err))
@@ -843,7 +844,7 @@ func (c *insightApiContext) getAddressInfo(w http.ResponseWriter, r *http.Reques
 	address := m.GetAddressCtx(r)
 	command, isCmd := c.GetAddressCommandCtx(r)
 
-	_, err := dcrutil.DecodeAddress(address)
+	_, err := exccutil.DecodeAddress(address)
 	if err != nil {
 		writeInsightError(w, "Invalid Address")
 		return
@@ -930,7 +931,7 @@ func (c *insightApiContext) getAddressInfo(w http.ResponseWriter, r *http.Reques
 			}
 
 			// Sent total sats has to be a lookup of the vout:i prevout value
-			// because vin:i valuein is not reliable from dcrd at present
+			// because vin:i valuein is not reliable from exccd at present
 			prevhash := spendingTx.Tx.TxIn[f.InputIndex].PreviousOutPoint.Hash
 			previndex := spendingTx.Tx.TxIn[f.InputIndex].PreviousOutPoint.Index
 			valuein := addressOuts.TxnsStore[prevhash].Tx.TxOut[previndex].Value
@@ -982,11 +983,11 @@ func (c *insightApiContext) getAddressInfo(w http.ResponseWriter, r *http.Reques
 		TotalReceivedSat:         (totalSpent + totalUnspent),
 		TotalSentSat:             totalSpent,
 		BalanceSat:               totalUnspent,
-		TotalReceived:            dcrutil.Amount(totalSpent + totalUnspent).ToCoin(),
-		TotalSent:                dcrutil.Amount(totalSpent).ToCoin(),
-		Balance:                  dcrutil.Amount(totalUnspent).ToCoin(),
+		TotalReceived:            exccutil.Amount(totalSpent + totalUnspent).ToCoin(),
+		TotalSent:                exccutil.Amount(totalSpent).ToCoin(),
+		Balance:                  exccutil.Amount(totalUnspent).ToCoin(),
 		TxAppearances:            int64(confirmedTxCount),
-		UnconfirmedBalance:       dcrutil.Amount(unconfirmedBalanceSat).ToCoin(),
+		UnconfirmedBalance:       exccutil.Amount(unconfirmedBalanceSat).ToCoin(),
 		UnconfirmedBalanceSat:    unconfirmedBalanceSat,
 		UnconfirmedTxAppearances: int64(len(unconfirmedTxs)),
 	}
@@ -1005,7 +1006,7 @@ func (c *insightApiContext) getEstimateFee(w http.ResponseWriter, r *http.Reques
 	}
 	estimateFee := make(map[string]float64)
 
-	// A better solution would be a call to the DCRD RPC "estimatefee" endpoint
+	// A better solution would be a call to the EXCCD RPC "estimatefee" endpoint
 	// but that does not appear to be exposed currently.
 	infoResult, err := c.nodeClient.GetInfo()
 	if err != nil {

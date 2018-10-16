@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2018, The dcrdata developers
 // Copyright (c) 2017, Jonathan Chappelow
@@ -13,16 +14,16 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/decred/dcrd/blockchain/stake"
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/database"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrd/wire"
-	apitypes "github.com/decred/dcrdata/v3/api/types"
-	"github.com/decred/dcrdata/v3/rpcutils"
-	"github.com/decred/dcrdata/v3/txhelpers"
+	"github.com/EXCCoin/exccd/blockchain/stake"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/database"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccd/wire"
+	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
+	"github.com/EXCCoin/exccdata/v3/rpcutils"
+	"github.com/EXCCoin/exccdata/v3/txhelpers"
 	"github.com/oleiade/lane"
 )
 
@@ -92,7 +93,7 @@ type StakeDatabase struct {
 	StakeDB         database.DB
 	BestNode        *stake.Node
 	blkMtx          sync.RWMutex
-	blockCache      map[int64]*dcrutil.Block
+	blockCache      map[int64]*exccutil.Block
 	liveTicketMtx   sync.RWMutex
 	liveTicketCache map[chainhash.Hash]int64
 	poolValue       int64
@@ -137,7 +138,7 @@ func LoadAndRecover(client *rpcclient.Client, params *chaincfg.Params,
 	sDB := &StakeDatabase{
 		params:          params,
 		NodeClient:      client,
-		blockCache:      make(map[int64]*dcrutil.Block),
+		blockCache:      make(map[int64]*exccutil.Block),
 		liveTicketCache: make(map[chainhash.Hash]int64, params.TicketPoolSize*(params.TicketsPerBlock+1)),
 		poolInfo:        NewPoolInfoCache(513),
 		PoolDB:          poolDB,
@@ -238,7 +239,7 @@ func NewStakeDatabase(client *rpcclient.Client, params *chaincfg.Params,
 	sDB := &StakeDatabase{
 		params:          params,
 		NodeClient:      client,
-		blockCache:      make(map[int64]*dcrutil.Block),
+		blockCache:      make(map[int64]*exccutil.Block),
 		liveTicketCache: make(map[chainhash.Hash]int64, params.TicketPoolSize*(params.TicketsPerBlock+1)),
 		poolInfo:        NewPoolInfoCache(513),
 		PoolDB:          poolDB,
@@ -263,7 +264,7 @@ func NewStakeDatabase(client *rpcclient.Client, params *chaincfg.Params,
 			log.Warnf("The ticket DB format has changed in v2.1. Did you upgrade?")
 			// Try to close but ignore any error
 			_ = sDB.Close()
-			return nil, heightTicketPool, fmt.Errorf("Remove %s and start dcrdata again.",
+			return nil, heightTicketPool, fmt.Errorf("Remove %s and start exccdata again.",
 				filepath.Join(dataDir, DefaultTicketPoolDbFolder))
 		}
 		// Roll stake DB back to the height of the ticket pool DB
@@ -306,7 +307,7 @@ func NewStakeDatabase(client *rpcclient.Client, params *chaincfg.Params,
 // cache and computes the internally-stored pool value.
 func (db *StakeDatabase) PopulateLiveTicketCache() error {
 	var err error
-	// Live tickets from dcrdata's stake Node's perspective
+	// Live tickets from exccdata's stake Node's perspective
 	liveTickets := db.BestNode.LiveTickets()
 
 	log.Info("Pre-populating live ticket cache and computing pool value...")
@@ -433,7 +434,7 @@ func (db *StakeDatabase) Height() uint32 {
 
 // BlockCached attempts to find the block at the specified height in the block
 // cache. The returned boolean indicates if it was found.
-func (db *StakeDatabase) BlockCached(ind int64) (*dcrutil.Block, bool) {
+func (db *StakeDatabase) BlockCached(ind int64) (*exccutil.Block, bool) {
 	db.blkMtx.RLock()
 	defer db.blkMtx.RUnlock()
 	block, found := db.blockCache[ind]
@@ -443,7 +444,7 @@ func (db *StakeDatabase) BlockCached(ind int64) (*dcrutil.Block, bool) {
 // block first tries to find the block at the input height in cache, and if that
 // fails it will request it from the node RPC client. Don't use this casually
 // since reorganization may redefine a block at a given height.
-func (db *StakeDatabase) block(ind int64) (*dcrutil.Block, bool) {
+func (db *StakeDatabase) block(ind int64) (*exccutil.Block, bool) {
 	block, ok := db.BlockCached(ind)
 	if !ok {
 		var err error
@@ -465,12 +466,12 @@ func (db *StakeDatabase) ForgetBlock(ind int64) {
 
 // ConnectBlockHash is a wrapper for ConnectBlock. For the input block hash, it
 // gets the block from the node RPC client and calls ConnectBlock.
-func (db *StakeDatabase) ConnectBlockHash(hash *chainhash.Hash) (*dcrutil.Block, error) {
+func (db *StakeDatabase) ConnectBlockHash(hash *chainhash.Hash) (*exccutil.Block, error) {
 	msgBlock, err := db.NodeClient.GetBlock(hash)
 	if err != nil {
 		return nil, err
 	}
-	block := dcrutil.NewBlock(msgBlock)
+	block := exccutil.NewBlock(msgBlock)
 	return block, db.ConnectBlock(block)
 }
 
@@ -478,7 +479,7 @@ func (db *StakeDatabase) ConnectBlockHash(hash *chainhash.Hash) (*dcrutil.Block,
 // the best stake node. This exported function gets any revoked and spend
 // tickets from the input block, and any maturing tickets from the past block in
 // which those tickets would be found, and passes them to connectBlock.
-func (db *StakeDatabase) ConnectBlock(block *dcrutil.Block) error {
+func (db *StakeDatabase) ConnectBlock(block *exccutil.Block) error {
 	height := block.Height()
 	maturingHeight := height - int64(db.params.TicketMaturity)
 
@@ -555,7 +556,7 @@ func (db *StakeDatabase) ConnectBlock(block *dcrutil.Block) error {
 	return db.PoolDB.Append(poolDiff, bestNodeHeight+1)
 }
 
-func (db *StakeDatabase) connectBlock(block *dcrutil.Block, spent []chainhash.Hash,
+func (db *StakeDatabase) connectBlock(block *exccutil.Block, spent []chainhash.Hash,
 	revoked []chainhash.Hash, maturing []chainhash.Hash) error {
 	hB, err := block.BlockHeaderBytes()
 	if err != nil {
@@ -730,7 +731,7 @@ func (db *StakeDatabase) Open(dbName string) error {
 	if err != nil {
 		if strings.Contains(err.Error(), "resource temporarily unavailable") ||
 			strings.Contains(err.Error(), "is being used by another process") {
-			return fmt.Errorf("Stake DB already opened. dcrdata running?")
+			return fmt.Errorf("Stake DB already opened. exccdata running?")
 		}
 		if strings.Contains(err.Error(), "does not exist") {
 			log.Info("Creating new stake DB.")
@@ -847,7 +848,7 @@ func (db *StakeDatabase) PoolInfoBest() *apitypes.TicketPoolInfo {
 
 func (db *StakeDatabase) makePoolInfo(poolValue, poolSize int64,
 	winningTickets []chainhash.Hash, height uint32) *apitypes.TicketPoolInfo {
-	poolCoin := dcrutil.Amount(poolValue).ToCoin()
+	poolCoin := exccutil.Amount(poolValue).ToCoin()
 	valAvg := 0.0
 	if poolSize > 0 {
 		valAvg = poolCoin / float64(poolSize)
@@ -888,7 +889,7 @@ func (db *StakeDatabase) calcPoolInfo(liveTickets, winningTickets []chainhash.Ha
 	}
 	db.liveTicketMtx.Unlock()
 
-	poolCoin := dcrutil.Amount(poolValue).ToCoin()
+	poolCoin := exccutil.Amount(poolValue).ToCoin()
 	valAvg := 0.0
 	if len(liveTickets) > 0 {
 		valAvg = poolCoin / float64(poolSize)
@@ -991,10 +992,10 @@ func (db *StakeDatabase) DBPrevBlockHeader() (*wire.BlockHeader, error) {
 	return db.NodeClient.GetBlockHeader(&parentHeader.PrevBlock)
 }
 
-// DBTipBlock gets the dcrutil.Block for the current best block in the stake
+// DBTipBlock gets the exccutil.Block for the current best block in the stake
 // database. It used DBState to get the best block hash, and the node RPC client
 // to get the block itself.
-func (db *StakeDatabase) DBTipBlock() (*dcrutil.Block, error) {
+func (db *StakeDatabase) DBTipBlock() (*exccutil.Block, error) {
 	_, hash, err := db.DBState()
 	if err != nil {
 		return nil, err
@@ -1003,10 +1004,10 @@ func (db *StakeDatabase) DBTipBlock() (*dcrutil.Block, error) {
 	return db.getBlock(hash)
 }
 
-// DBPrevBlock gets the dcrutil.Block for the previous best block in the stake
+// DBPrevBlock gets the exccutil.Block for the previous best block in the stake
 // database. It used DBState to get the best block hash, and the node RPC client
 // to get the block itself.
-func (db *StakeDatabase) DBPrevBlock() (*dcrutil.Block, error) {
+func (db *StakeDatabase) DBPrevBlock() (*exccutil.Block, error) {
 	_, hash, err := db.DBState()
 	if err != nil {
 		return nil, err
@@ -1021,7 +1022,7 @@ func (db *StakeDatabase) DBPrevBlock() (*dcrutil.Block, error) {
 }
 
 // dbPrevBlock is the non-thread-safe version of DBPrevBlock.
-func (db *StakeDatabase) dbPrevBlock() (*dcrutil.Block, error) {
+func (db *StakeDatabase) dbPrevBlock() (*exccutil.Block, error) {
 	_, hash, err := db.dbState()
 	if err != nil {
 		return nil, err
@@ -1035,10 +1036,10 @@ func (db *StakeDatabase) dbPrevBlock() (*dcrutil.Block, error) {
 	return db.getBlock(&parentHeader.PrevBlock)
 }
 
-func (db *StakeDatabase) getBlock(hash *chainhash.Hash) (*dcrutil.Block, error) {
+func (db *StakeDatabase) getBlock(hash *chainhash.Hash) (*exccutil.Block, error) {
 	msgBlock, err := db.NodeClient.GetBlock(hash)
 	if err == nil {
-		return dcrutil.NewBlock(msgBlock), nil
+		return exccutil.NewBlock(msgBlock), nil
 	}
 	return nil, err
 }

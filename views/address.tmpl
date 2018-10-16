@@ -18,7 +18,7 @@
                     {{.Address}}<a
                         id="qrcode-init"
                         href="javascript:showAddressQRCode('{{.Address}}');"
-                        class="dcricon-qrcode jsonly no-underline color-inherit p10"
+                        class="exccicon-qrcode jsonly no-underline color-inherit p10"
                     ></a>
                 </div>
                 <div class="row">
@@ -51,9 +51,9 @@
                         {{if .Fullmode}}
                             <td class="fs28 mono nowrap fs16-decimal d-flex align-items-center justify-content-end">
                                 {{if .Balance}}
-                                    {{template "decimalParts" (amountAsDecimalParts .Balance.TotalUnspent true)}}<span class="pl-1 unit">DCR</span>
+                                    {{template "decimalParts" (amountAsDecimalParts .Balance.TotalUnspent true)}}<span class="pl-1 unit">EXCC</span>
                                 {{else}}
-                                <span class="pl-1 unit">0.000000000 DCR</span>
+                                <span class="pl-1 unit">0.000000000 EXCC</span>
                                 {{end}}
                             </td>
                         {{else}}
@@ -70,9 +70,9 @@
                             <td class="mono nowrap text-right">
                                 {{if .Balance}}
                                     {{$received := add .Balance.TotalSpent .Balance.TotalUnspent}}
-                                    {{template "decimalParts" (amountAsDecimalParts $received true)}}<span class="pl-1 unit">DCR</span>
+                                    {{template "decimalParts" (amountAsDecimalParts $received true)}}<span class="pl-1 unit">EXCC</span>
                                 {{else}}
-                                <span class="pl-1 unit">0.000000000 DCR</span>
+                                <span class="pl-1 unit">0.000000000 EXCC</span>
                                 {{end}}
                             </td>
                         {{else}}
@@ -88,9 +88,9 @@
                         {{if .Fullmode}}
                             <td class="mono nowrap text-right">
                                 {{if .Balance}}
-                                    {{template "decimalParts" (amountAsDecimalParts .Balance.TotalSpent true)}}<span class="pl-1 unit">DCR</span>
+                                    {{template "decimalParts" (amountAsDecimalParts .Balance.TotalSpent true)}}<span class="pl-1 unit">EXCC</span>
                                 {{else}}
-                                <span class="pl-1 unit">0.000000000 DCR</span>
+                                <span class="pl-1 unit">0.000000000 EXCC</span>
                                 {{end}}
                             </td>
                         {{else}}
@@ -211,12 +211,12 @@
                             {{if eq $txType "merged_debit"}}
                                 <th># of Input(s)</th>
                             {{else}}
-                                <th class="text-right">Credit DCR</th>
+                                <th class="text-right">Credit EXCC</th>
                             {{end}}
                             {{if eq $txType "merged_debit"}}
-                                <th class="text-center">Debit DCR</th>
+                                <th class="text-center">Debit EXCC</th>
                             {{else}}
-                                <th>Debit DCR</th>
+                                <th>Debit EXCC</th>
                             {{end}}
                             <th>Time UTC</th>
                             <th>Age</th>

@@ -4,21 +4,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="dcrdata, an original Decred block explorer powered by Go">
+    <meta name="description" content="exccdata, an original Decred block explorer powered by Go">
     <meta name="author" content="The Decred developers">
     <!--  Custom favicon  -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon.png">
     <link rel="icon" href="/images/favicon/favicon.ico">
     <link rel="icon" type="image/png" href="/images/favicon/favicon-32x32.png" sizes="32x32">
     <link rel="icon" type="image/png" href="/images/favicon/favicon-16x16.png" sizes="16x16">
     <link rel="manifest" href="/images/favicon/manifest.json">
-    <link rel="mask-icon" href="/images/favicon/safari-pinned-tab.svg">
     <link rel="shortcut icon" href="/images/favicon/favicon.ico">
-    <meta name="apple-mobile-web-app-title" content="Decred - Autonomous Digital Currency">
-    <meta name="application-name" content="Decred - Autonomous Digital Currency">
-    <meta name="msapplication-TileColor" content="#2973ff">
-    <meta name="msapplication-TileImage" content="/images/favicon/mstile-144x144.png">
-    <meta name="msapplication-config" content="/images/favicon/browserconfig.xml">
+    <meta name="apple-mobile-web-app-title" content="ExchangeCoin">
+    <meta name="application-name" content="ExchangeCoin">
     <meta name="turbolinks-cache-control" content="no-cache">
     <title>{{.}}</title>
     <link href="/css/bootstrap.css" rel="stylesheet">
@@ -46,8 +41,10 @@
     <div class="container">
         <div class="d-flex align-items-center flex-wrap">
             <div class="d-flex align-items-center">
-                <div class="col-sm-auto" style="padding: 0 2px">
-                    <a href="/" class="dcricon-decred no-underline"></a>
+               <div class="col-sm-auto" style="padding: 4px 2px;">
+                    <a href="/" class="no-underline">
+                        <img src="/images/favicon/favicon-32x32.png" />
+                    </a>
                 </div>
             </div>
             <div class="col pl-2">
@@ -79,15 +76,15 @@
                         <a data-keynav-skip href="/agendas" title="Agendas">Agendas</a>
                         <a data-keynav-skip href="/decodetx" title="Decode or send a raw transaction">Decode/Broadcast Tx</a>
                         {{if eq .NetName "Mainnet"}}
-                           <a data-keynav-skip href="http://testnet.dcrdata.org/" title="Home">Switch To Testnet</a>
+                           <a data-keynav-skip href="http://testnet.exccdata.org/" title="Home">Switch To Testnet</a>
                         {{else}}
-                           <a data-keynav-skip href="https://explorer.dcrdata.org/" title="Home">Switch To Mainnet</a>
+                           <a data-keynav-skip href="https://explorer.exccdata.org/" title="Home">Switch To Mainnet</a>
                         {{end}}
-                        <a data-keynav-skip data-turbolinks="false" href="javascript:toggleSun()" class="jsonly"><span id="sun-icon" class="dcricon-sun-fill no-underline pr-2"></span> Night Mode</a>
+                        <a data-keynav-skip data-turbolinks="false" href="javascript:toggleSun()" class="jsonly"><span id="sun-icon" class="exccicon-sun-fill no-underline pr-2"></span> Night Mode</a>
                         <a data-keynav-skip data-turbolinks="false" href="#" class="jsonly" id="keynav-toggle">
                             <span class="text">Enable Hot Keys</span><span class="keys-hint">(&nbsp;&nbsp;<span class="arrows"> &#8592;<br>&#8594;</span>&nbsp;&nbsp;enter&nbsp;&nbsp;\&nbsp;&nbsp;=&nbsp;&nbsp;)</span>
                         </a>
-                        <a data-keynav-skip href="https://github.com/decred/dcrdata#json-rest-api" title="API Endpoints" target="_blank">JSON API Docs</a>
+                        <a data-keynav-skip href="https://github.com/EXCCoin/exccdata#json-rest-api" title="API Endpoints" target="_blank">JSON API Docs</a>
                     </div>
                 </div>
             </nav>
@@ -107,7 +104,7 @@
         document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
     }
     var sunIcon = document.getElementById("sun-icon")
-    var darkBGCookieName = 'dcrdataDarkBG';
+    var darkBGCookieName = 'exccdataDarkBG';
     function darkEnabled() {
         return document.cookie.includes(darkBGCookieName)
     }
@@ -117,14 +114,14 @@
         toggleToLightClasses(document.body)
     }
     function toggleToDarkClasses(body) {
-        $(sunIcon).removeClass('dcricon-sun-fill')
-        $(sunIcon).addClass('dcricon-sun-stroke')
+        $(sunIcon).removeClass('exccicon-sun-fill')
+        $(sunIcon).addClass('exccicon-sun-stroke')
         $(body).addClass('darkBG')
     }
     function toggleToLightClasses(body) {
         $(body).removeClass('darkBG');
-        $(sunIcon).removeClass('dcricon-sun-stroke')
-        $(sunIcon).addClass('dcricon-sun-fill')
+        $(sunIcon).removeClass('exccicon-sun-stroke')
+        $(sunIcon).addClass('exccicon-sun-fill')
     }
     function toggleSun() {
         if (darkEnabled()) {
@@ -313,8 +310,8 @@
         var newBlockNtfn = new Notify('New Decred Block Mined', {
             body: 'Block mined at height ' + block.height,
             tag: 'blockheight',
-            image: '/images/dcrdata144x128.png',
-            icon: '/images/dcrdata144x128.png',
+            image: '/images/exccdata144x128.png',
+            icon: '/images/exccdata144x128.png',
             notifyShow: onShowNotification,
             notifyClose: onCloseNotification,
             notifyClick: onClickNotification,
@@ -345,8 +342,9 @@
 <footer class="navbar-fixed-bottom">
     <div class="container wrapper text-center">
         <div style="text-align: left; margin:0 auto !important; display:inline-block">
-            <a class="nav-item" href="https://github.com/decred/dcrdata" title="dcrdata on GitHub" target="_blank">dcrdata v{{.Version}}</a>
-            <a class="nav-item" href="https://github.com/decred/dcrdata/blob/master/LICENSE" target="_blank">© 2018 The Decred developers (ISC)</a>
+            <a class="nav-item" href="https://github.com/EXCCoin/exccdata" title="exccdata on GitHub" target="_blank">exccdata v{{.Version}}</a>
+            <a class="nav-item" href="https://github.com/decred/dcrdata/blob/master/LICENSE" target="_blank">© 2018 The Decred developers (ISC)</a>	            <a class="nav-item" href="https://github.com/EXCCoin/exccdata/blob/master/LICENSE" target="_blank">© 2018 The Decred developers (ISC)</a>
+            <a class="nav-item" href="https://github.com/EXCCoin/exccdata/blob/master/LICENSE" target="_blank">© 2018 The ExchangeCoin team (ISC)</a>
         </div>
         <div style="float: right;">
             <span data-turbolinks-permanent class="nav-item" id="connection"
@@ -363,7 +361,7 @@
     var targetsLength;
     var currentIndex = 0;
     var jumpToIndexOnLoad;
-    var keyNavCookieName = 'dcrdataKeyNav';
+    var keyNavCookieName = 'exccdataKeyNav';
 
     function keyNavEnabled() {
         return document.cookie.includes(keyNavCookieName)

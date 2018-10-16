@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
@@ -8,9 +9,9 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrdata/v3/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccdata/v3/txhelpers"
 )
 
 // ReorgData contains the information from a reoranization notification
@@ -124,18 +125,18 @@ out:
 				p.reorgLock.Unlock()
 				log.Infof("Reorganization to block %v (height %d) complete in blockdata",
 					p.reorgData.NewChainHead, p.reorgData.NewChainHeight)
-				// dcrsqlite's chainmonitor handles the reorg, but we keep going
+				// exccsqlite's chainmonitor handles the reorg, but we keep going
 				// to update the web UI with the new best block.
 			}
 
-			msgBlock, _ := p.collector.dcrdChainSvr.GetBlock(hash)
-			block := dcrutil.NewBlock(msgBlock)
+			msgBlock, _ := p.collector.exccdChainSvr.GetBlock(hash)
+			block := exccutil.NewBlock(msgBlock)
 			height := block.Height()
 			log.Infof("Block height %v connected. Collecting data...", height)
 
 			if len(p.watchaddrs) > 0 {
 				// txsForOutpoints := blockConsumesOutpointWithAddresses(block, p.watchaddrs,
-				// 	p.collector.dcrdChainSvr)
+				// 	p.collector.exccdChainSvr)
 				// if len(txsForOutpoints) > 0 {
 				// 	p.spendTxBlockChan <- &BlockWatchedTx{height, txsForOutpoints}
 				// }
@@ -150,7 +151,7 @@ out:
 			}
 
 			var blockData *BlockData
-			chainHeight, err := p.collector.dcrdChainSvr.GetBlockCount()
+			chainHeight, err := p.collector.exccdChainSvr.GetBlockCount()
 			if err != nil {
 				log.Errorf("Unable to get chain height: %v", err)
 				release()

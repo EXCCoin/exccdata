@@ -1,4 +1,4 @@
-module github.com/decred/dcrdata/v3
+module github.com/EXCCoin/exccdata/v3
 
 require (
 	github.com/AndreasBriese/bbloom v0.0.0-20170702084017-28f7e881ca57 // indirect
@@ -10,21 +10,21 @@ require (
 	github.com/chappjc/trylock v1.0.0
 	github.com/coreos/bbolt v1.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1
-	github.com/decred/dcrd/blockchain v1.0.2
-	github.com/decred/dcrd/blockchain/stake v1.0.2
-	github.com/decred/dcrd/chaincfg v1.1.1
-	github.com/decred/dcrd/chaincfg/chainhash v1.0.1
-	github.com/decred/dcrd/database v1.0.2
-	github.com/decred/dcrd/dcrec v0.0.0-20180817010327-36f61d8ebd7a // indirect
-	github.com/decred/dcrd/dcrec/edwards v0.0.0-20180817010327-36f61d8ebd7a // indirect
-	github.com/decred/dcrd/dcrjson v1.0.0
-	github.com/decred/dcrd/dcrutil v1.1.1
-	github.com/decred/dcrd/gcs v1.0.2 // indirect
-	github.com/decred/dcrd/rpcclient v1.0.1
-	github.com/decred/dcrd/txscript v1.0.1
-	github.com/decred/dcrd/wire v1.1.0
-	github.com/decred/dcrwallet/wallet v1.0.0
-	github.com/decred/slog v1.0.0
+	github.com/EXCCoin/exccd/blockchain v1.0.2
+	github.com/EXCCoin/exccd/blockchain/stake v1.0.2
+	github.com/EXCCoin/exccd/chaincfg v1.1.1
+	github.com/EXCCoin/exccd/chaincfg/chainhash v1.0.1
+	github.com/EXCCoin/exccd/database v1.0.2
+	github.com/EXCCoin/exccd/exccec v0.0.0-20180817010327-36f61d8ebd7a // indirect
+	github.com/EXCCoin/exccd/exccec/edwards v0.0.0-20180817010327-36f61d8ebd7a // indirect
+	github.com/EXCCoin/exccd/exccjson v1.0.0
+	github.com/EXCCoin/exccd/exccutil v1.1.1
+	github.com/EXCCoin/exccd/gcs v1.0.2 // indirect
+	github.com/EXCCoin/exccd/rpcclient v1.0.1
+	github.com/EXCCoin/exccd/txscript v1.0.1
+	github.com/EXCCoin/exccd/wire v1.1.0
+	github.com/EXCCoin/exccwallet/wallet v1.0.0
+	github.com/EXCCoin/slog v1.0.0
 	github.com/dgraph-io/badger v1.5.3
 	github.com/dgryski/go-farm v0.0.0-20180109070241-2de33835d102 // indirect
 	github.com/didip/tollbooth v4.0.0+incompatible

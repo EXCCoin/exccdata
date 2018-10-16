@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
@@ -8,8 +9,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/decred/dcrd/blockchain/stake"
-	"github.com/decred/dcrdata/v3/txhelpers"
+	"github.com/EXCCoin/exccd/blockchain/stake"
+	"github.com/EXCCoin/exccdata/v3/txhelpers"
 	humanize "github.com/dustin/go-humanize"
 )
 
@@ -99,7 +100,7 @@ func (exp *explorerUI) mempoolMonitor(txChan chan *NewMempoolTx) {
 			exp.MempoolData.Tickets = append([]MempoolTx{tx}, exp.MempoolData.Tickets...)
 			exp.MempoolData.NumTickets++
 		case "Vote":
-			// Votes on the next block may be recieve just prior to dcrdata
+			// Votes on the next block may be recieve just prior to exccdata
 			// actually processing the new block. Do not broadcast these ahead
 			// of the full update with the new block signal as the vote will be
 			// included in that update.

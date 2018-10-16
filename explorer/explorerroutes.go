@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
@@ -13,12 +14,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrdata/v3/db/agendadb"
-	"github.com/decred/dcrdata/v3/db/dbtypes"
-	"github.com/decred/dcrdata/v3/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccdata/v3/db/agendadb"
+	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
+	"github.com/EXCCoin/exccdata/v3/txhelpers"
 	humanize "github.com/dustin/go-humanize"
 )
 
@@ -27,7 +28,7 @@ const (
 	defaultErrorMessage = "Try refreshing this page... it usually fixes things"
 )
 
-// netName returns the name used when referring to a decred network.
+// netName returns the name used when referring to a excc network.
 func netName(chainParams *chaincfg.Params) string {
 	if strings.HasPrefix(strings.ToLower(chainParams.Name), "testnet") {
 		return "Testnet"
@@ -527,7 +528,7 @@ func (exp *explorerUI) AddressPage(w http.ResponseWriter, r *http.Request) {
 					Time:          fundingTx.MemPoolTime,
 					FormattedSize: humanize.Bytes(uint64(fundingTx.Tx.SerializeSize())),
 					Total:         txhelpers.TotalOutFromMsgTx(fundingTx.Tx).ToCoin(),
-					ReceivedTotal: dcrutil.Amount(fundingTx.Tx.TxOut[f.Index].Value).ToCoin(),
+					ReceivedTotal: exccutil.Amount(fundingTx.Tx.TxOut[f.Index].Value).ToCoin(),
 				}
 				addrData.Transactions = append(addrData.Transactions, addrTx)
 			}
@@ -559,7 +560,7 @@ func (exp *explorerUI) AddressPage(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// sent total sats has to be a lookup of the vout:i prevout value
-			// because vin:i valuein is not reliable from dcrd at present
+			// because vin:i valuein is not reliable from exccd at present
 			prevhash := spendingTx.Tx.TxIn[f.InputIndex].PreviousOutPoint.Hash
 			previndex := spendingTx.Tx.TxIn[f.InputIndex].PreviousOutPoint.Index
 			valuein := addressOuts.TxnsStore[prevhash].Tx.TxOut[previndex].Value
@@ -571,7 +572,7 @@ func (exp *explorerUI) AddressPage(w http.ResponseWriter, r *http.Request) {
 					Time:          spendingTx.MemPoolTime,
 					FormattedSize: humanize.Bytes(uint64(spendingTx.Tx.SerializeSize())),
 					Total:         txhelpers.TotalOutFromMsgTx(spendingTx.Tx).ToCoin(),
-					SentTotal:     dcrutil.Amount(valuein).ToCoin(),
+					SentTotal:     exccutil.Amount(valuein).ToCoin(),
 				}
 				addrData.Transactions = append(addrData.Transactions, addrTx)
 			}
@@ -590,7 +591,6 @@ func (exp *explorerUI) AddressPage(w http.ResponseWriter, r *http.Request) {
 				NotFoundStatusType)
 			return
 		}
-
 
 	}
 

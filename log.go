@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2016, 2018 The Decred developers
 // Use of this source code is governed by an ISC
 // license that can be found in the LICENSE file.
@@ -9,19 +10,19 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/decred/dcrd/rpcclient"
-	"github.com/decred/dcrdata/v3/api"
-	"github.com/decred/dcrdata/v3/api/insight"
-	"github.com/decred/dcrdata/v3/blockdata"
-	"github.com/decred/dcrdata/v3/db/dcrpg"
-	"github.com/decred/dcrdata/v3/db/dcrsqlite"
-	"github.com/decred/dcrdata/v3/explorer"
-	"github.com/decred/dcrdata/v3/mempool"
-	"github.com/decred/dcrdata/v3/middleware"
-	notify "github.com/decred/dcrdata/v3/notification"
-	"github.com/decred/dcrdata/v3/rpcutils"
-	"github.com/decred/dcrdata/v3/stakedb"
-	"github.com/decred/slog"
+	"github.com/EXCCoin/exccd/rpcclient"
+	"github.com/EXCCoin/exccdata/v3/api"
+	"github.com/EXCCoin/exccdata/v3/api/insight"
+	"github.com/EXCCoin/exccdata/v3/blockdata"
+	"github.com/EXCCoin/exccdata/v3/db/exccpg"
+	"github.com/EXCCoin/exccdata/v3/db/exccsqlite"
+	"github.com/EXCCoin/exccdata/v3/explorer"
+	"github.com/EXCCoin/exccdata/v3/mempool"
+	"github.com/EXCCoin/exccdata/v3/middleware"
+	notify "github.com/EXCCoin/exccdata/v3/notification"
+	"github.com/EXCCoin/exccdata/v3/rpcutils"
+	"github.com/EXCCoin/exccdata/v3/stakedb"
+	"github.com/EXCCoin/slog"
 	"github.com/jrick/logrotate/rotator"
 )
 
@@ -68,8 +69,8 @@ var (
 
 // Initialize package-global logger variables.
 func init() {
-	dcrsqlite.UseLogger(sqliteLog)
-	dcrpg.UseLogger(postgresqlLog)
+	exccsqlite.UseLogger(sqliteLog)
+	exccpg.UseLogger(postgresqlLog)
 	stakedb.UseLogger(stakedbLog)
 	blockdata.UseLogger(BlockdataLog)
 	rpcclient.UseLogger(clientLog)

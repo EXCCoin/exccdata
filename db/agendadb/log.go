@@ -1,9 +1,10 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // See LICENSE for details.
 
 package agendadb
 
-import "github.com/decred/slog"
+import "github.com/EXCCoin/slog"
 
 // log is a logger that is initialized with no output filters.  This
 // means the package will not perform any logging by default until the caller

@@ -131,7 +131,7 @@
 [[projects]]
   branch = "master"
   digest = "1:6e0bace02164b96762f35e9011c931d6f270a4e84e46a35a854910b9216153d8"
-  name = "github.com/decred/base58"
+  name = "github.com/EXCCoin/base58"
   packages = ["."]
   pruneopts = "UT"
   revision = "56c501706f00d9e1cfacee19a27117e12da24734"
@@ -139,7 +139,7 @@
 [[projects]]
   branch = "master"
   digest = "1:90e23180f5a887b28d58ea40a94f88ad242b3f596adb4f512c5bad9be6b6eb00"
-  name = "github.com/decred/dcrd"
+  name = "github.com/EXCCoin/exccd"
   packages = [
     "blockchain",
     "blockchain/internal/dbnamespace",
@@ -154,12 +154,12 @@
     "database",
     "database/ffldb",
     "database/internal/treap",
-    "dcrec",
-    "dcrec/edwards",
-    "dcrec/secp256k1",
-    "dcrec/secp256k1/schnorr",
-    "dcrjson",
-    "dcrutil",
+    "exccec",
+    "exccec/edwards",
+    "exccec/secp256k1",
+    "exccec/secp256k1/schnorr",
+    "exccjson",
+    "exccutil",
     "gcs",
     "gcs/blockcf",
     "hdkeychain",
@@ -173,7 +173,7 @@
 [[projects]]
   branch = "master"
   digest = "1:a6dffa62798a090c972044178af71dd58cdc42088d56dc7cb08589b06135547c"
-  name = "github.com/decred/dcrwallet"
+  name = "github.com/EXCCoin/exccwallet"
   packages = [
     "errors",
     "internal/helpers",
@@ -191,7 +191,7 @@
 
 [[projects]]
   digest = "1:72c1f6339c7ca1ecea3e3d30f9cae51bfca19b02d04cfe7e6db32cbfb9a65ddc"
-  name = "github.com/decred/slog"
+  name = "github.com/EXCCoin/slog"
   packages = ["."]
   pruneopts = "UT"
   revision = "fbd821ef791ba2b8ae945f5d44f4e49396d230c5"
@@ -497,20 +497,20 @@
     "github.com/chappjc/logrus-prefix",
     "github.com/chappjc/trylock",
     "github.com/davecgh/go-spew/spew",
-    "github.com/decred/dcrd/blockchain",
-    "github.com/decred/dcrd/blockchain/stake",
-    "github.com/decred/dcrd/chaincfg",
-    "github.com/decred/dcrd/chaincfg/chainhash",
-    "github.com/decred/dcrd/database",
-    "github.com/decred/dcrd/database/ffldb",
-    "github.com/decred/dcrd/dcrjson",
-    "github.com/decred/dcrd/dcrutil",
-    "github.com/decred/dcrd/rpcclient",
-    "github.com/decred/dcrd/txscript",
-    "github.com/decred/dcrd/wire",
-    "github.com/decred/dcrwallet/netparams",
-    "github.com/decred/dcrwallet/wallet/udb",
-    "github.com/decred/slog",
+    "github.com/EXCCoin/exccd/blockchain",
+    "github.com/EXCCoin/exccd/blockchain/stake",
+    "github.com/EXCCoin/exccd/chaincfg",
+    "github.com/EXCCoin/exccd/chaincfg/chainhash",
+    "github.com/EXCCoin/exccd/database",
+    "github.com/EXCCoin/exccd/database/ffldb",
+    "github.com/EXCCoin/exccd/exccjson",
+    "github.com/EXCCoin/exccd/exccutil",
+    "github.com/EXCCoin/exccd/rpcclient",
+    "github.com/EXCCoin/exccd/txscript",
+    "github.com/EXCCoin/exccd/wire",
+    "github.com/EXCCoin/exccwallet/netparams",
+    "github.com/EXCCoin/exccwallet/wallet/udb",
+    "github.com/EXCCoin/slog",
     "github.com/dgraph-io/badger",
     "github.com/didip/tollbooth",
     "github.com/didip/tollbooth_chi",

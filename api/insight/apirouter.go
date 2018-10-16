@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
@@ -8,7 +9,7 @@
 package insight
 
 import (
-	m "github.com/decred/dcrdata/v3/middleware"
+	m "github.com/EXCCoin/exccdata/v3/middleware"
 	"github.com/didip/tollbooth"
 	"github.com/didip/tollbooth_chi"
 	"github.com/go-chi/chi"

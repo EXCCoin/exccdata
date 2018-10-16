@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2017, Jonathan Chappelow
 // See LICENSE for details.
@@ -8,9 +9,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/rpcclient"
 	"github.com/asdine/storm"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/rpcclient"
 )
 
 // AgendaDB represents the data for the saved db
@@ -95,28 +96,28 @@ func (db *AgendaDB) ListAgendas() error {
 	})
 }
 
-// AgendaTagged has the same fields as dcrjson.Agenda, but with the Id field
+// AgendaTagged has the same fields as exccjson.Agenda, but with the Id field
 // marked as the primary key via the `storm:"id"` tag. Fields tagged for
 // indexing by the DB are: StartTime, ExpireTime, Status, and QuorumProgress.
 type AgendaTagged struct {
-	Id             string           `json:"id" storm:"id"`
-	Description    string           `json:"description"`
-	Mask           uint16           `json:"mask"`
-	StartTime      uint64           `json:"starttime" storm:"index"`
-	ExpireTime     uint64           `json:"expiretime" storm:"index"`
-	Status         string           `json:"status" storm:"index"`
-	QuorumProgress float64          `json:"quorumprogress" storm:"index"`
-	Choices        []dcrjson.Choice `json:"choices"`
-	VoteVersion    uint32           `json:"voteversion"`
+	Id             string            `json:"id" storm:"id"`
+	Description    string            `json:"description"`
+	Mask           uint16            `json:"mask"`
+	StartTime      uint64            `json:"starttime" storm:"index"`
+	ExpireTime     uint64            `json:"expiretime" storm:"index"`
+	Status         string            `json:"status" storm:"index"`
+	QuorumProgress float64           `json:"quorumprogress" storm:"index"`
+	Choices        []exccjson.Choice `json:"choices"`
+	VoteVersion    uint32            `json:"voteversion"`
 }
 
-// ChoiceLabeled embeds dcrjson.Choice along with the AgendaID for the choice,
+// ChoiceLabeled embeds exccjson.Choice along with the AgendaID for the choice,
 // and a string array suitable for use as a primary key. The AgendaID is tagged
 // as an index for quick lookups based on the agenda.
 type ChoiceLabeled struct {
-	AgendaChoice   [2]string `storm:"id"`
-	AgendaID       string    `json:"agendaid" storm:"index"`
-	dcrjson.Choice `storm:"inline"`
+	AgendaChoice    [2]string `storm:"id"`
+	AgendaID        string    `json:"agendaid" storm:"index"`
+	exccjson.Choice `storm:"inline"`
 }
 
 // GetVoteAgendasForVersion is used in getting the agendas using the vote versions
@@ -188,7 +189,7 @@ func CheckForUpdates(client *rpcclient.Client) error {
 	}
 	// voteVersion is vote version as of when lnsupport and sdiffalgorithm votes
 	// casting was activated. More information can be found here
-	// https://docs.decred.org/getting-started/user-guides/agenda-voting/#voting-archive
+	// https://docs.excc.org/getting-started/user-guides/agenda-voting/#voting-archive
 	// Also at the moment all agenda version information available in the rpc
 	// is from version 4.
 	var voteVersion int64 = 4

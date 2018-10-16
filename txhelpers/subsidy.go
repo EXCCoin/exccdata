@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2015-2018 The Decred developers
 // Copyright (c) 2013-2015 The btcsuite developers
 // Use of this source code is governed by an ISC
@@ -6,8 +7,8 @@
 package txhelpers
 
 import (
-	"github.com/decred/dcrd/blockchain"
-	"github.com/decred/dcrd/chaincfg"
+	"github.com/EXCCoin/exccd/blockchain"
+	"github.com/EXCCoin/exccd/chaincfg"
 )
 
 // UltimateSubsidy computes the total subsidy over the entire subsidy
@@ -35,12 +36,10 @@ func UltimateSubsidy(params *chaincfg.Params) int64 {
 				params.TicketsPerBlock, params)
 			stake := blockchain.CalcStakeVoteSubsidy(subsidyCache, height,
 				params) * int64(params.TicketsPerBlock)
-			tax := blockchain.CalcBlockTaxSubsidy(subsidyCache, height,
-				params.TicketsPerBlock, params)
-			if (work + stake + tax) == 0 {
+			if (work + stake) == 0 {
 				break // all done
 			}
-			totalSubsidy += ((work + stake + tax) * numBlocks)
+			totalSubsidy += ((work + stake) * numBlocks)
 
 			// First reduction internal -- subtract the stake subsidy for blocks
 			// before the staking system is enabled.

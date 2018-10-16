@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2013-2015 The btcsuite developers
 // Copyright (c) 2016-2017 The Decred developers
 // Use of this source code is governed by an ISC
@@ -5,7 +6,7 @@
 
 package netparams
 
-import "github.com/decred/dcrd/chaincfg"
+import "github.com/EXCCoin/exccd/chaincfg"
 
 // Params is used to group parameters for various networks such as the main
 // network and test networks.
@@ -16,8 +17,8 @@ type Params struct {
 	GRPCServerPort    string
 }
 
-// MainNetParams contains parameters specific running dcrwallet and
-// dcrd on the main network (wire.MainNet).
+// MainNetParams contains parameters specific running exccwallet and
+// exccd on the main network (wire.MainNet).
 var MainNetParams = Params{
 	Params:            &chaincfg.MainNetParams,
 	JSONRPCClientPort: "9109",
@@ -25,8 +26,8 @@ var MainNetParams = Params{
 	GRPCServerPort:    "9111",
 }
 
-// TestNet3Params contains parameters specific running dcrwallet and
-// dcrd on the test network (version 3) (wire.TestNet3).
+// TestNet3Params contains parameters specific running exccwallet and
+// exccd on the test network (version 3) (wire.TestNet3).
 var TestNet3Params = Params{
 	Params:            &chaincfg.TestNet3Params,
 	JSONRPCClientPort: "19109",

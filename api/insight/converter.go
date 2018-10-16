@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
@@ -5,19 +6,19 @@
 package insight
 
 import (
-	"github.com/decred/dcrd/blockchain"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	apitypes "github.com/decred/dcrdata/v3/api/types"
+	"github.com/EXCCoin/exccd/blockchain"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	apitypes "github.com/EXCCoin/exccdata/v3/api/types"
 )
 
-// TxConverter converts dcrd-tx to insight tx
-func (c *insightApiContext) TxConverter(txs []*dcrjson.TxRawResult) ([]apitypes.InsightTx, error) {
-	return c.DcrToInsightTxns(txs, false, false, false)
+// TxConverter converts exccd-tx to insight tx
+func (c *insightApiContext) TxConverter(txs []*exccjson.TxRawResult) ([]apitypes.InsightTx, error) {
+	return c.ExccToInsightTxns(txs, false, false, false)
 }
 
-// DcrToInsightTxns takes struct with filter params
-func (c *insightApiContext) DcrToInsightTxns(txs []*dcrjson.TxRawResult,
+// ExccToInsightTxns takes struct with filter params
+func (c *insightApiContext) ExccToInsightTxns(txs []*exccjson.TxRawResult,
 	noAsm, noScriptSig, noSpent bool) ([]apitypes.InsightTx, error) {
 	var newTxs []apitypes.InsightTx
 	for _, tx := range txs {
@@ -64,17 +65,17 @@ func (c *insightApiContext) DcrToInsightTxns(txs []*dcrjson.TxRawResult,
 			_, addresses, value, err := c.BlockData.ChainDB.RetrieveAddressIDsByOutpoint(vin.Txid, vin.Vout)
 			if err == nil {
 				if len(addresses) > 0 {
-					// Update Vin due to DCRD AMOUNTIN - START
+					// Update Vin due to EXCCD AMOUNTIN - START
 					// NOTE THIS IS ONLY USEFUL FOR INPUT AMOUNTS THAT ARE NOT ALSO FROM MEMPOOL
 					if tx.Confirmations == 0 {
-						InsightVin.Value = dcrutil.Amount(value).ToCoin()
+						InsightVin.Value = exccutil.Amount(value).ToCoin()
 					}
-					// Update Vin due to DCRD AMOUNTIN - END
+					// Update Vin due to EXCCD AMOUNTIN - END
 					InsightVin.Addr = addresses[0]
 				}
 			}
-			dcramt, _ := dcrutil.NewAmount(InsightVin.Value)
-			InsightVin.ValueSat = int64(dcramt)
+			exccamt, _ := exccutil.NewAmount(InsightVin.Value)
+			InsightVin.ValueSat = int64(exccamt)
 
 			vInSum += InsightVin.Value
 			txNew.Vins = append(txNew.Vins, InsightVin)
@@ -100,14 +101,14 @@ func (c *insightApiContext) DcrToInsightTxns(txs []*dcrjson.TxRawResult,
 			vOutSum += v.Value
 		}
 
-		dcramt, _ := dcrutil.NewAmount(vOutSum)
-		txNew.ValueOut = dcramt.ToCoin()
+		exccamt, _ := exccutil.NewAmount(vOutSum)
+		txNew.ValueOut = exccamt.ToCoin()
 
-		dcramt, _ = dcrutil.NewAmount(vInSum)
-		txNew.ValueIn = dcramt.ToCoin()
+		exccamt, _ = exccutil.NewAmount(vInSum)
+		txNew.ValueIn = exccamt.ToCoin()
 
-		dcramt, _ = dcrutil.NewAmount(txNew.ValueIn - txNew.ValueOut)
-		txNew.Fees = dcramt.ToCoin()
+		exccamt, _ = exccutil.NewAmount(txNew.ValueIn - txNew.ValueOut)
+		txNew.Fees = exccamt.ToCoin()
 
 		// Return true if coinbase value is not empty, return 0 at some fields
 		if txNew.Vins != nil && txNew.Vins[0].CoinBase != "" {
@@ -135,14 +136,14 @@ func (c *insightApiContext) DcrToInsightTxns(txs []*dcrjson.TxRawResult,
 	return newTxs, nil
 }
 
-// DcrToInsightBlock converts a dcrjson.GetBlockVerboseResult to Insight block.
-func (c *insightApiContext) DcrToInsightBlock(inBlocks []*dcrjson.GetBlockVerboseResult) ([]*apitypes.InsightBlockResult, error) {
+// ExccToInsightBlock converts a exccjson.GetBlockVerboseResult to Insight block.
+func (c *insightApiContext) ExccToInsightBlock(inBlocks []*exccjson.GetBlockVerboseResult) ([]*apitypes.InsightBlockResult, error) {
 	RewardAtBlock := func(blocknum int64, voters uint16) float64 {
 		subsidyCache := blockchain.NewSubsidyCache(0, c.params)
 		work := blockchain.CalcBlockWorkSubsidy(subsidyCache, blocknum, voters, c.params)
 		stake := blockchain.CalcStakeVoteSubsidy(subsidyCache, blocknum, c.params) * int64(voters)
 		tax := blockchain.CalcBlockTaxSubsidy(subsidyCache, blocknum, voters, c.params)
-		return dcrutil.Amount(work + stake + tax).ToCoin()
+		return exccutil.Amount(work + stake + tax).ToCoin()
 	}
 
 	outBlocks := make([]*apitypes.InsightBlockResult, 0, len(inBlocks))

@@ -1,3 +1,4 @@
+// Copyright (c) 2018 The ExchangeCoin team
 // Copyright (c) 2018, The Decred developers
 // Copyright (c) 2017, The dcrdata developers
 // See LICENSE for details.
@@ -9,12 +10,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/decred/dcrd/chaincfg"
-	"github.com/decred/dcrd/dcrjson"
-	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrdata/v3/db/agendadb"
-	"github.com/decred/dcrdata/v3/db/dbtypes"
-	"github.com/decred/dcrdata/v3/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg"
+	"github.com/EXCCoin/exccd/exccjson"
+	"github.com/EXCCoin/exccd/exccutil"
+	"github.com/EXCCoin/exccdata/v3/db/agendadb"
+	"github.com/EXCCoin/exccdata/v3/db/dbtypes"
+	"github.com/EXCCoin/exccdata/v3/txhelpers"
 )
 
 // statusType defines the various status types supported by the system.
@@ -48,8 +49,8 @@ type TxBasic struct {
 	TxID          string
 	FormattedSize string
 	Total         float64
-	Fee           dcrutil.Amount
-	FeeRate       dcrutil.Amount
+	Fee           exccutil.Amount
+	FeeRate       exccutil.Amount
 	VoteInfo      *VoteInfo
 	Coinbase      bool
 }
@@ -167,7 +168,7 @@ type BlockValidation struct {
 
 // Vin models basic data about a tx input for display
 type Vin struct {
-	*dcrjson.Vin
+	*exccjson.Vin
 	Addresses       []string
 	FormattedAmount string
 }
@@ -207,7 +208,7 @@ type BlockInfo struct {
 	PreviousHash          string
 	NextHash              string
 	TotalSent             float64
-	MiningFee             dcrutil.Amount
+	MiningFee             exccutil.Amount
 	StakeValidationHeight int64
 }
 
@@ -221,7 +222,7 @@ type AddressTransactions struct {
 
 // AddressInfo models data for display on the address page
 type AddressInfo struct {
-	// Address is the decred address on the current page
+	// Address is the excc address on the current page
 	Address string
 
 	// Page parameters
@@ -242,9 +243,9 @@ type AddressInfo struct {
 	NumTransactions int64 // The number of transactions in the address
 	NumFundingTxns  int64 // number paying to the address
 	NumSpendingTxns int64 // number spending outpoints associated with the address
-	AmountReceived  dcrutil.Amount
-	AmountSent      dcrutil.Amount
-	AmountUnspent   dcrutil.Amount
+	AmountReceived  exccutil.Amount
+	AmountSent      exccutil.Amount
+	AmountUnspent   exccutil.Amount
 
 	// Balance is used in full mode, describing all known transactions
 	Balance *AddressBalance
@@ -261,7 +262,7 @@ type AddressInfo struct {
 
 	// IsDummyAddress is true when the address is the dummy address typically
 	// used for unspendable ticket change outputs. See
-	// https://github.com/decred/dcrdata/v3/issues/358 for details.
+	// https://github.com/EXCCoin/exccdata/v3/issues/358 for details.
 	IsDummyAddress bool
 }
 
@@ -306,8 +307,6 @@ type HomeInfo struct {
 	IdxBlockInWindow      int            `json:"window_idx"`
 	IdxInRewardWindow     int            `json:"reward_idx"`
 	Difficulty            float64        `json:"difficulty"`
-	DevFund               int64          `json:"dev_fund"`
-	DevAddress            string         `json:"dev_address"`
 	TicketReward          float64        `json:"reward"`
 	RewardPeriod          string         `json:"reward_period"`
 	ASR                   float64        `json:"ASR"`
@@ -316,12 +315,11 @@ type HomeInfo struct {
 	PoolInfo              TicketPoolInfo `json:"pool_info"`
 }
 
-// BlockSubsidy is an implementation of dcrjson.GetBlockSubsidyResult
+// BlockSubsidy is an implementation of exccjson.GetBlockSubsidyResult
 type BlockSubsidy struct {
 	Total int64 `json:"total"`
 	PoW   int64 `json:"pow"`
 	PoS   int64 `json:"pos"`
-	Dev   int64 `json:"dev"`
 }
 
 // MempoolInfo models data to update mempool info on the home page
@@ -395,7 +393,7 @@ func ReduceAddressHistory(addrHist []*dbtypes.AddressRow) *AddressInfo {
 		if !addrOut.ValidMainChain {
 			continue
 		}
-		coin := dcrutil.Amount(addrOut.Value).ToCoin()
+		coin := exccutil.Amount(addrOut.Value).ToCoin()
 		tx := AddressTx{
 			BlockTime: addrOut.TxBlockTime,
 			InOutID:   addrOut.TxVinVoutIndex,
@@ -428,9 +426,9 @@ func ReduceAddressHistory(addrHist []*dbtypes.AddressRow) *AddressInfo {
 		TxnsSpending:    debitTxns,
 		NumFundingTxns:  int64(len(creditTxns)),
 		NumSpendingTxns: int64(len(debitTxns)),
-		AmountReceived:  dcrutil.Amount(received),
-		AmountSent:      dcrutil.Amount(sent),
-		AmountUnspent:   dcrutil.Amount(received - sent),
+		AmountReceived:  exccutil.Amount(received),
+		AmountSent:      exccutil.Amount(sent),
+		AmountUnspent:   exccutil.Amount(received - sent),
 	}
 }
 
