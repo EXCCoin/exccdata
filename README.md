@@ -1,6 +1,8 @@
 # exccdata
 
 [![Build Status](https://img.shields.io/travis/EXCCoin/exccdata.svg)](https://travis-ci.org/EXCCoin/exccdata)
+[![Build status](https://ci.appveyor.com/api/projects/status/5r3l0hjuwx1rwdkb?svg=true)](https://ci.appveyor.com/project/Excc/exccdata)
+[![GitHub release](https://img.shields.io/github/release/EXCCoin/exccdata.svg)](https://github.com/EXCCoin/exccdata/releases)
 [![Latest tag](https://img.shields.io/github/tag/EXCCoin/exccdata.svg)](https://github.com/EXCCoin/exccdata/tags)
 [![Go Report Card](https://goreportcard.com/badge/github.com/EXCCoin/exccdata)](https://goreportcard.com/report/github.com/EXCCoin/exccdata)
 [![ISC License](https://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
