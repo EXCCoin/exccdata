@@ -205,7 +205,7 @@
             switch(chartName){
                 case 'ticket-price': // price graph
                     d = ticketsFunc(data)
-                    _.assign(gOptions, mapDygraphOptions(d, ['Date', 'Price'], true, 'Price (Decred)', 'Date', undefined, false, false))
+                    _.assign(gOptions, mapDygraphOptions(d, ['Date', 'Price'], true, 'Price (EXCC)', 'Date', undefined, false, false))
                 break;
 
                 case 'ticket-pool-size': // pool size graph

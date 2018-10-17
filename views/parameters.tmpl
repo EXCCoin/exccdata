@@ -1,7 +1,7 @@
 {{define "parameters"}}
 <!DOCTYPE html>
 <html lang="en">
-    {{ template "html-head" printf "Decred ChainParams"}}
+    {{ template "html-head" printf "ExchangeCoin ChainParams"}}
     <body class="{{ theme }}">
         {{template "navbar" . }}
         {{with .Cp}}
@@ -157,7 +157,7 @@
                             <tr>
                                 <td class="mono text-right pr-2 nowrap p03rem0">TicketsPerBlock</td>
                                 <td class="mono">{{.Params.TicketsPerBlock}}</td>
-                                <td>Average number of tickets per block for Decred PoS</td>
+                                <td>Average number of tickets per block for ExchangeCoin PoS</td>
                             </tr>
                             <tr>
                                 <td class="mono text-right pr-2 nowrap p03rem0">TicketMaturity</td>

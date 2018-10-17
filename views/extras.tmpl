@@ -4,7 +4,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="exccdata, an original Decred block explorer powered by Go">
+    <meta name="description" content="exccdata, an original ExchangeCoin block explorer powered by Go">
     <meta name="author" content="The Decred developers">
     <!--  Custom favicon  -->
     <link rel="icon" href="/images/favicon/favicon.ico">
@@ -69,9 +69,9 @@
                     <span class="patty short"></span>
                     <div id="menu">
                         <a data-keynav-skip href="/" title="Home">Home</a>
-                        <a data-keynav-skip href="/blocks" title="Decred blocks">Blocks</a>
-                        <a data-keynav-skip href="/mempool" title="Decred mempool">Mempool</a>
-                        <a data-keynav-skip href="/charts" title="Decred Charts">Charts</a>
+                        <a data-keynav-skip href="/blocks" title="ExchangeCoin blocks">Blocks</a>
+                        <a data-keynav-skip href="/mempool" title="ExchangeCoin mempool">Mempool</a>
+                        <a data-keynav-skip href="/charts" title="ExchangeCoin Charts">Charts</a>
                         <a data-keynav-skip href="/parameters" title="Chain Parameters">Parameters</a>
                         <a data-keynav-skip href="/agendas" title="Agendas">Agendas</a>
                         <a data-keynav-skip href="/decodetx" title="Decode or send a raw transaction">Decode/Broadcast Tx</a>
@@ -305,7 +305,7 @@
     }
 
     function doNotification(block) {
-        var newBlockNtfn = new Notify('New Decred Block Mined', {
+        var newBlockNtfn = new Notify('New ExchangeCoin Block Mined', {
             body: 'Block mined at height ' + block.height,
             tag: 'blockheight',
             image: '/images/exccdata144x128.png',

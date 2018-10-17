@@ -169,7 +169,7 @@ type DBInfo struct {
 	Host, Port, User, Pass, DBName string
 }
 
-// NewChainDB constructs a ChainDB for the given connection and Decred network
+// NewChainDB constructs a ChainDB for the given connection and ExchangeCoin network
 // parameters. By default, duplicate row checks on insertion are enabled.
 func NewChainDB(dbi *DBInfo, params *chaincfg.Params, stakeDB *stakedb.StakeDatabase) (*ChainDB, error) {
 	// Connect to the PostgreSQL daemon and return the *sql.DB

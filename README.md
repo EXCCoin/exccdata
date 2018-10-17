@@ -7,7 +7,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/EXCCoin/exccdata)](https://goreportcard.com/report/github.com/EXCCoin/exccdata)
 [![ISC License](https://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
 
-The exccdata repository is a collection of golang packages and apps for [Decred](https://www.excc.org/) data collection, storage, and presentation.
+The exccdata repository is a collection of golang packages and apps for [ExchangeCoin](https://www.excc.org/) data collection, storage, and presentation.
 
 ## Repository overview
 
@@ -213,10 +213,9 @@ with the `rebuilddb2` command line tool:
 * In case of irrecoverable errors, such as detected schema changes without an
   upgrade path, the tables and their indexes may be dropped with `rebuilddb2 -D`.
 
-Note that exccdata requires that
-[exccd](https://docs.excc.org/getting-started/user-guides/exccd-setup/) is
-running with some optional indexes enabled.  By default, these indexes are not
-turned on when exccd is installed. To enable them, set the following in
+Note that exccdata requires that exccd is running with some optional indexes enabled.
+By default, these indexes are not turned on when exccd is installed. 
+To enable them, set the following in
 exccd.conf:
 
 ```ini
@@ -470,7 +469,7 @@ of the exccdata daemon, but may be called alone with rebuilddb.
 
 `rebuilddb2` is a CLI app used for maintenance of exccdata's `exccpg` database
 (a.k.a. DB v2) that uses PostgreSQL to store a nearly complete record of the
-Decred blockchain data. This functionality is included in the startup of the
+ExchangeCoin blockchain data. This functionality is included in the startup of the
 exccdata daemon, but may be called alone with rebuilddb. See the
 [README.md](./cmd/rebuilddb2/README.md) for `rebuilddb2` for important usage
 information.
@@ -489,7 +488,7 @@ API.  This facilitates authoring of robust golang clients of the API.
 
 `package dbtypes` defines the data types used by the DB backends to model the
 block, transaction, and related blockchain data structures. Functions for
-converting from standard Decred data types (e.g. `wire.MsgBlock`) are also
+converting from standard ExchangeCoin data types (e.g. `wire.MsgBlock`) are also
 provided.
 
 `package rpcutils` includes helper functions for interacting with a
@@ -571,10 +570,8 @@ the latest version via:
 **To update `dep` from the network, it is important to use the `-u` flag as
 shown above.**
 
-Note that all exccdata.org community and team members are expected to adhere to
+Note that all explorer.excc.co community and team members are expected to adhere to
 the code of conduct, described in the CODE_OF_CONDUCT file.
-
-Also, [come chat with us on Slack](https://slack.excc.org/)!
 
 ## License
 

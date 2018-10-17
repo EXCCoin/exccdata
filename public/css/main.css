@@ -625,7 +625,6 @@ body.darkBG .progress {
   white-space: nowrap;
 }
 
-/*resemble voting.excc.org*/
 .highlight-text {
   height: 20px;
   margin-top: 3px;
@@ -807,12 +806,12 @@ body.darkBG .keynav-target {
   border-color: #2970ff;
 }
 .btn-success {
-  background-color: #2ed6a1;
-  border-color:  #2ed6a1;
+  background-color: #fa5baa;
+  border-color:  #fa5baa;
 }
 .btn-success:hover {
-  background: #3fc39a;
-  border-color: #3fc39a;
+  background: #fa78af;
+  border-color: #fa78af;
 }
 
 .nav-pills .nav-link {
@@ -932,3 +931,16 @@ body.darkBG .keynav-target {
 .upcoming-vote {
   background: #0078ff1c;
 }
+
+/*rawtx*/
+#rawtx{
+  color: rgb(5, 47, 75);
+  font-family: 'inconsolata-v15-latin-regular';
+}
+#rawtx::placeholder{
+  font-family: 'inconsolata-v15-latin-regular';
+}
+body.darkBG #rawtx{
+  background: #292929;
+  color: #fdfdfd;
+} 

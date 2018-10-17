@@ -390,7 +390,7 @@ func (exp *explorerUI) addRoutes() {
 // starting amount of EXCC and calculation parameters.  Generate a TEXT table of
 // the simulation results that can optionally be used for future expansion of
 // exccdata functionality.
-func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty bool,
+func (exp *explorerUI) simulateASR(StartingEXCCBalance float64, IntegerTicketQty bool,
 	CurrentStakePercent float64, ActualCoinbase float64, CurrentBlockNum float64,
 	ActualTicketPrice float64) (ASR float64, ReturnTable string) {
 
@@ -417,7 +417,7 @@ func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty 
 	}
 
 	MaxCoinSupplyAtBlock := func(blocknum float64) float64 {
-		// 4th order poly best fit curve to Decred mainnet emissions plot.
+		// 4th order poly best fit curve to ExchangeCoin mainnet emissions plot.
 		// Curve fit was done with 0 Y intercept and Pre-Mine added after.
 
 		return (-9E-19*math.Pow(blocknum, 4) +
@@ -442,7 +442,7 @@ func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty 
 	// Prepare for simulation
 	simblock := CurrentBlockNum
 	TicketPrice := ActualTicketPrice
-	EXCCBalance := StartingDCRBalance
+	EXCCBalance := StartingEXCCBalance
 
 	ReturnTable += fmt.Sprintf("\n\nBLOCKNUM        EXCC  TICKETS TKT_PRICE TKT_REWRD  ACTION\n")
 	ReturnTable += fmt.Sprintf("%8d  %9.2f %8.1f %9.2f %9.2f    INIT\n",
@@ -493,7 +493,7 @@ func (exp *explorerUI) simulateASR(StartingDCRBalance float64, IntegerTicketQty 
 	}
 
 	// Scale down to exactly 365 days
-	SimulationReward := ((EXCCBalance - StartingDCRBalance) / StartingDCRBalance) * 100
+	SimulationReward := ((EXCCBalance - StartingEXCCBalance) / StartingEXCCBalance) * 100
 	ASR = (BlocksPerYear / (simblock - CurrentBlockNum)) * SimulationReward
 	ReturnTable += fmt.Sprintf("ASR over 365 Days is %.2f.\n", ASR)
 	return

@@ -1,7 +1,7 @@
 # Command line app `rebuilddb2`
 
 The `rebuilddb2` app is used for maintenance of exccdata's `exccpg` database that
-uses PostgreSQL to store a nearly complete record of the Decred blockchain data.
+uses PostgreSQL to store a nearly complete record of the ExchangeCoin blockchain data.
 
 **IMPORTANT**: When performing a bulk data import (e.g. full chain scan from
 genesis block), be sure to configure PostgreSQL appropriately.  Please see
