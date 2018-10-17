@@ -24,6 +24,7 @@ require (
 	github.com/go-chi/chi v3.3.3+incompatible
 	github.com/go-chi/docgen v1.0.2
 	github.com/golang/protobuf v1.2.0 // indirect
+	github.com/google/go-cmp v0.2.0
 	github.com/google/gops v0.3.5
 	github.com/googollee/go-engine.io v0.0.0-20180829091931-e2f255711dcb // indirect
 	github.com/googollee/go-socket.io v0.0.0-20180921171217-25e1f67559cf
