@@ -8,6 +8,8 @@ import (
 )
 
 func TestIsZeroHashP2PHKAddress(t *testing.T) {
+	t.SkipNow()
+
 	testutil.BindCurrentTestSetup(t)
 
 	mainnetDummy := "DsQxuVRvS4eaJ42dhQEsCXauMWjvopWgrVg"
