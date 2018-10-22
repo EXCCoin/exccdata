@@ -45,8 +45,8 @@
         }
         return {
             rangeSelectorAlpha: .4,
-            gridLineColor: "#C4CBD2",
-            colors: ['#2970FF','#2DD8A3']
+            gridLineColor: "rgba(210,215,255,0.2)",
+            colors: ['#4854a5','rgba(210,215,255,0.2)']
         }
     }
 
@@ -172,7 +172,7 @@
             var options = {
                 digitsAfterDecimal: 8,
                 showRangeSelector: true,
-                rangeSelectorPlotFillColor: '#8997A5',
+                rangeSelectorPlotFillColor: '#4854a5',
                 rangeSelectorPlotFillGradientColor: "",
                 rangeSelectorPlotStrokeColor: "",
                 rangeSelectorAlpha: .4,

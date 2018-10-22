@@ -112,7 +112,7 @@ body.loading .modal {
     z-index: 10;
     line-height: normal;
     overflow: hidden;
-    color: black; 
+    color: #d2d7ff;
 }
 .dygraph-title {
     font-weight: bold;
@@ -148,41 +148,55 @@ body.loading .modal {
     display: block;
 }
 .chart-control-wrapper {
-    border: 1px solid #E6EAED;
 }
 .chart-control-label {
     font-size: 14px;
-    font-weight: 600;
-    color: #8997A5;
+    font-weight: 500;
+    color: #ffffff;
     text-align: center;
-    border-bottom: 1px solid #E6EAED;
 }
 .chart-control {
     padding: 2px;
-    background: #fff;
-    height: 42px;
 }
+.chart-control .form-control {
+    background: none;
+    border: 1px solid rgba(210,215,255,0.1);
+    color: #d2d7ff;
+}
+
 .chart-control select,
 .chart-control input {
     border: none;
 }
+.chart-control .custom-select {
+    color: #d2d7ff;
+    background-size: 8px 10px !important;
+    background: transparent url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23d2d7ff' d='M2 0L0 2h4zm0 5L0 3h4z'/%3E%3C/svg%3E") no-repeat right 0.75rem center;
+}
 .chart-control input {
     height: 38px;
 }
-.chart-control-wrapper {
-    border-left:  1px solid #E6EAED;
+.chart-control .nav-pills .nav-link {
+    color: #d2d7ff;
 }
+.chart-control .nav-pills .nav-link.active {
+    background-color: #3F0049;
+    color: #ffffff;
+    border-radius: 4px;
+}
+
 .legend-wrapper {
     position: absolute;
-    top: 0;
+    top: -20px;
     left: 100px;
     right: 20px;
 }
 .legend {
-    background: #ececec;
+    background: none;
     z-index: 10000;
     padding: 0 2px 0 5px;
     font-size: 14px;
+    color: #d2d7ff;
 }
 .darkBG .dygraph-axis-label {
     color:  #C4CBD2;
