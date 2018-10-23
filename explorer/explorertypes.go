@@ -482,10 +482,10 @@ type AddrPrefix struct {
 func AddressPrefixes(params *chaincfg.Params) []AddrPrefix {
 	Descriptions := []string{"P2PK address",
 		"P2PKH address prefix",
-		"P2PKH address prefix",
+		"Edwards P2PKH address prefix",
 		"secp256k1 Schnorr P2PKH address prefix",
 		"P2SH address prefix",
-		"WIF private key prefix",
+		"WIF private key prefix (uncompressed or compressed)",
 		"HD extended private key prefix",
 		"HD extended public key prefix",
 	}
@@ -499,9 +499,9 @@ func AddressPrefixes(params *chaincfg.Params) []AddrPrefix {
 		"HDPublicKeyID",
 	}
 
-	MainnetPrefixes := []string{"Dk", "Ds", "De", "DS", "Dc", "Pm", "dprv", "dpub"}
-	TestnetPrefixes := []string{"Tk", "Ts", "Te", "TS", "Tc", "Pt", "tprv", "tpub"}
-	SimnetPrefixes := []string{"Sk", "Ss", "Se", "SS", "Sc", "Ps", "sprv", "spub"}
+	MainnetPrefixes := []string{"2s", "22", "2e", "2S", "2c", "5 or K", "xprv", "xpub"}
+	TestnetPrefixes := []string{"Tk", "Ts", "Te", "TS", "Tc", "9 or c", "tprv", "tpub"}
+	SimnetPrefixes := []string{"Sk", "Ss", "Se", "SS", "Sc", "9 or c", "sprv", "spub"}
 
 	name := params.Name
 	var netPrefixes []string
