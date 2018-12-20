@@ -3,8 +3,8 @@ module github.com/EXCCoin/exccdata
 require (
 	github.com/AndreasBriese/bbloom v0.0.0-20180913140656-343706a395b7 // indirect
 	github.com/EXCCoin/base58 v0.0.0-20180515090142-e1a805ee5d9f // indirect
-	github.com/EXCCoin/exccd v0.0.0-20180907111253-e377db154d35
-	github.com/EXCCoin/exccwallet v1.0.0
+	github.com/EXCCoin/exccd v0.0.0-20180725103841-d3143e42e2ad
+	github.com/EXCCoin/exccwallet v0.0.0-20180724154108-db2ff6e08893
 	github.com/aead/siphash v1.0.1 // indirect
 	github.com/agl/ed25519 v0.0.0-20170116200512-5312a6153412 // indirect
 	github.com/asdine/storm v2.1.2+incompatible

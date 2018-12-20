@@ -1,64 +1,82 @@
 #!/usr/bin/env bash
+
+# usage:
+# ./run_tests.sh                         # local, go 1.11
+# ./run_tests.sh docker                  # docker, go 1.11
+# ./run_tests.sh podman                  # podman, go 1.11
+
 set -ex
 
 # The script does automatic checking on a Go package and its sub-packages,
 # including:
 # 1. gofmt         (http://golang.org/cmd/gofmt/)
-# 2. go vet        (http://golang.org/cmd/vet)
-# 3. gosimple      (https://github.com/dominikh/go-simple)
-# 4. unconvert     (https://github.com/mdempsky/unconvert)
-# 5. ineffassign   (https://github.com/gordonklaus/ineffassign)
-# 6. race detector (http://blog.golang.org/race-detector)
+# 2. gosimple      (https://github.com/dominikh/go-simple)
+# 3. unconvert     (https://github.com/mdempsky/unconvert)
+# 4. ineffassign   (https://github.com/gordonklaus/ineffassign)
+# 5. race detector (http://blog.golang.org/race-detector)
 
 # gometalinter (github.com/alecthomas/gometalinter) is used to run each each
 # static checker.
 
-GOVERSION=${1:-1.11}
+# To run on docker on windows, symlink /mnt/c to /c and then execute the script
+# from the repo path under /c.  See:
+# https://github.com/Microsoft/BashOnWindows/issues/1854
+# for more details.
+
+# Default GOVERSION
+[[ ! "$GOVERSION" ]] && GOVERSION=1.11
+
 GITHUB_ORG=EXCCoin
 GITHUB_REPO=exccdata
 DOCKER_ORG=exccco
 DOCKER_IMAGE_TAG=exchangecoin-golang-builder-$GOVERSION
 
 testrepo () {
-  TMPFILE=$(mktemp)
-  export GO111MODULE=on
+  GO=go
 
-  # Test application install
-  go install . ./cmd/...
-  if [ $? != 0 ]; then
-    echo 'go install failed'
-    exit 1
-  fi
+  $GO version
 
-  # Check tests
-  env GORACE='halt_on_error=1' go test -race ./...
-  if [ $? != 0 ]; then
-    echo 'go tests failed'
-    exit 1
-  fi
+  # binary needed for RPC tests
+  env CC=gcc $GO build
+  cp "$GITHUB_REPO" "$GOPATH/bin/"
+
+  # run tests on all modules
+  ROOTPATH=$($GO list -m -f {{.Dir}} 2>/dev/null)
+  ROOTPATHPATTERN=$(echo $ROOTPATH | sed 's/\\/\\\\/g' | sed 's/\//\\\//g')
+  MODPATHS=$($GO list -m -f {{.Dir}} all 2>/dev/null | grep "^$ROOTPATHPATTERN"\
+    | sed -e "s/^$ROOTPATHPATTERN//" -e 's/^\\//' -e 's/^\///')
+  MODPATHS=". $MODPATHS"
+  for module in $MODPATHS; do
+    echo "==> ${module}"
+    (cd $module && env GORACE='halt_on_error=1' CC=gcc $GO test -short -race \
+      -tags rpctest ./...)
+  done
 
   echo "------------------------------------------"
   echo "Tests completed successfully!"
 }
 
-if [ $GOVERSION == "local" ]; then
+DOCKER=
+[[ "$1" == "docker" || "$1" == "podman" ]] && DOCKER=$1
+if [ ! "$DOCKER" ]; then
     testrepo
     exit
 fi
 
-docker pull $DOCKER_ORG/$DOCKER_IMAGE_TAG
-if [ $? != 0 ]; then
-        echo 'docker pull failed'
-        exit 1
+# use Travis cache with docker
+mkdir -p ~/.cache
+if [ -f ~/.cache/$DOCKER_IMAGE_TAG.tar ]; then
+  # load via cache
+  $DOCKER load -i ~/.cache/$DOCKER_IMAGE_TAG.tar
+else
+  # pull and save image to cache
+  $DOCKER pull $DOCKER_ORG/$DOCKER_IMAGE_TAG
+  $DOCKER save $DOCKER_ORG/$DOCKER_IMAGE_TAG > ~/.cache/$DOCKER_IMAGE_TAG.tar
 fi
 
-docker run --rm -it -v $(pwd):/src $DOCKER_ORG/$DOCKER_IMAGE_TAG /bin/bash -c "\
-  rsync -ra --include-from=<(git --git-dir=/src/.git ls-files) \
-  --filter=':- .gitignore' \
-  /src/ /go/src/github.com/$GITHUB_ORG/$GITHUB_REPO/ && \
-  cd github.com/$GITHUB_ORG/$GITHUB_REPO/ && \
-  bash run_tests.sh local"
-if [ $? != 0 ]; then
-        echo 'docker run failed'
-        exit 1
-fi
+$DOCKER run --rm -it \
+  -v $(pwd):/src:Z \
+  $DOCKER_ORG/$DOCKER_IMAGE_TAG /bin/bash -c "\
+    rsync -ra --filter=':- .gitignore' /src/ /go/src/github.com/$GITHUB_ORG/$GITHUB_REPO/ && \
+    cd /go/src/github.com/$GITHUB_ORG/$GITHUB_REPO/ && \
+    env GOVERSION=$GOVERSION GO111MODULE=on bash run_tests.sh"
