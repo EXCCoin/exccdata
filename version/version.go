@@ -25,9 +25,9 @@ const (
 // versioning 2.0.0 spec (http://semver.org/).
 const (
 	AppName  string = "exccdata"
-	AppMajor uint   = 3
+	AppMajor uint   = 4
 	AppMinor uint   = 0
-	AppPatch uint   = 2
+	AppPatch uint   = 0
 )
 
 // go build -ldflags "-X github.com/EXCCoin/exccdata/version.appPreRelease= -X github.com/EXCCoin/exccdata/version.appBuild=`git rev-parse --short HEAD`"
