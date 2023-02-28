@@ -134,7 +134,6 @@ func RewardsAtBlock(blockIdx int64, votes uint16, p *chaincfg.Params, useDCP0010
 	subsidyCache := networkSubsidyCache(p)
 	work = subsidyCache.CalcWorkSubsidyV2(blockIdx, votes, useDCP0010)
 	stake = subsidyCache.CalcStakeVoteSubsidyV2(blockIdx, useDCP0010)
-	treasuryActive := IsTreasuryActive(p.Net, blockIdx)
-	tax = subsidyCache.CalcTreasurySubsidy(blockIdx, votes, treasuryActive)
+	tax = 0
 	return
 }

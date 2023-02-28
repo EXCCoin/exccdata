@@ -40,25 +40,10 @@ var (
 var CoinbaseFlags = "/exccd/"
 var CoinbaseScript = append([]byte{0x00, 0x00}, []byte(CoinbaseFlags)...)
 
-const (
-	treasuryHeightMainnet  = 552448 // lockedin at 544384
-	treasuryHeightTestnet3 = 560208
-)
-
 // IsTreasuryActive indicates if the decentralized treasury is active for the
 // given network and block height.
 func IsTreasuryActive(net wire.CurrencyNet, height int64) bool {
-	switch net {
-	case wire.MainNet:
-		return height >= treasuryHeightMainnet
-	case wire.TestNet3:
-		return height >= treasuryHeightTestnet3
-	case wire.SimNet:
-		return height >= 2
-	default:
-		fmt.Printf("unrecognized network %v\n", net)
-		return false
-	}
+	return false
 }
 
 // SubsidySplitStakeVer locates the "changesubsidysplit" agenda item in the

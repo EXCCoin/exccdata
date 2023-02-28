@@ -191,17 +191,6 @@ func GetTpCtx(r *http.Request) string {
 	return tp
 }
 
-// GetProposalTokenCtx retrieves the ctxProposalToken data from the request context.
-// If the value is not set, an empty string is returned.
-func GetProposalTokenCtx(r *http.Request) string {
-	tp, ok := r.Context().Value(ctxProposalToken).(string)
-	if !ok {
-		apiLog.Trace("proposal token hash not set")
-		return ""
-	}
-	return tp
-}
-
 // GetRawHexTx retrieves the ctxRawHexTx data from the request context. If not
 // set, the return value is an empty string.
 func GetRawHexTx(r *http.Request) (string, error) {

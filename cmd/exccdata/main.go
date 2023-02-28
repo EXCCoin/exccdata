@@ -638,7 +638,6 @@ func _main(ctx context.Context) error {
 		DataSource:        chainDB,
 		XcBot:             xcBot,
 		AgendasDBInstance: agendaDB,
-		ProposalsDB:       proposalsDB,
 		MaxAddrs:          cfg.MaxCSVAddrs,
 		Charts:            charts,
 	})
@@ -765,12 +764,8 @@ func _main(ctx context.Context) error {
 		r.With(explorer.TransactionHashCtx, explorer.TransactionIoIndexCtx).Get("/tx/{txid}/{inout}/{inoutid}", explore.TxPage)
 		r.With(explorer.AddressPathCtx).Get("/address/{address}", explore.AddressPage)
 		r.With(explorer.AddressPathCtx).Get("/addresstable/{address}", explore.AddressTable)
-		r.Get("/treasury", explore.TreasuryPage)
-		r.Get("/treasurytable", explore.TreasuryTable)
 		r.Get("/agendas", explore.AgendasPage)
 		r.With(explorer.AgendaPathCtx).Get("/agenda/{agendaid}", explore.AgendaPage)
-		r.Get("/proposals", explore.ProposalsPage)
-		r.With(explorer.ProposalPathCtx).Get("/proposal/{proposaltoken}", explore.ProposalPage)
 		r.Get("/decodetx", explore.DecodeTxPage)
 		r.Get("/search", explore.Search)
 		r.Get("/charts", explore.Charts)

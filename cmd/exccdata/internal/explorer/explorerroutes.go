@@ -5,7 +5,6 @@
 package explorer
 
 import (
-	"context"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -63,7 +62,6 @@ type CommonPageData struct {
 	Version       string
 	ChainParams   *chaincfg.Params
 	BlockTimeUnix int64
-	DevAddress    string
 	Links         *links
 	NetName       string
 	Cookies       Cookies
@@ -164,8 +162,6 @@ type homeConversions struct {
 	StakeDiff       *exchanges.Conversion
 	CoinSupply      *exchanges.Conversion
 	PowSplit        *exchanges.Conversion
-	TreasurySplit   *exchanges.Conversion
-	TreasuryBalance *exchanges.Conversion
 }
 
 // Home is the page handler for the "/" path.
@@ -205,8 +201,6 @@ func (exp *explorerUI) Home(w http.ResponseWriter, r *http.Request) {
 			StakeDiff:       xcBot.Conversion(homeInfo.StakeDiff),
 			CoinSupply:      xcBot.Conversion(dcrutil.Amount(homeInfo.CoinSupply).ToCoin()),
 			PowSplit:        xcBot.Conversion(dcrutil.Amount(homeInfo.NBlockSubsidy.PoW).ToCoin()),
-			TreasurySplit:   xcBot.Conversion(dcrutil.Amount(homeInfo.NBlockSubsidy.Dev).ToCoin()),
-			TreasuryBalance: xcBot.Conversion(dcrutil.Amount(homeInfo.DevFund + homeInfo.TreasuryBalance.Balance).ToCoin()),
 		}
 	}
 
@@ -921,15 +915,12 @@ func (exp *explorerUI) TxPage(w http.ResponseWriter, r *http.Request) {
 
 		// Convert to explorer.Vout, getting spending information from DB.
 		for iv := range vouts {
-			// Check pkScript for OP_RETURN and OP_TADD.
+			// Check pkScript for OP_RETURN.
 			pkScript := vouts[iv].ScriptPubKey
-			opTAdd := len(pkScript) > 0 && pkScript[0] == txscript.OP_TADD
+			asm, _ := txscript.DisasmString(pkScript)
 			var opReturn string
-			if !opTAdd {
-				asm, _ := txscript.DisasmString(pkScript)
-				if strings.HasPrefix(asm, "OP_RETURN") {
-					opReturn = asm
-				}
+			if strings.HasPrefix(asm, "OP_RETURN") {
+				opReturn = asm
 			}
 			// Determine if the outpoint is spent
 			spendingTx, _, _, err := exp.dataSource.SpendingTransaction(hash, vouts[iv].TxIndex)
@@ -948,7 +939,6 @@ func (exp *explorerUI) TxPage(w http.ResponseWriter, r *http.Request) {
 				Type:            vouts[iv].ScriptPubKeyData.Type.String(),
 				Spent:           spendingTx != "",
 				OP_RETURN:       opReturn,
-				OP_TADD:         opTAdd,
 				Index:           vouts[iv].TxIndex,
 				Version:         vouts[iv].Version,
 			})
@@ -1402,105 +1392,6 @@ type TreasuryInfo struct {
 	TypeCount        int64
 }
 
-// TreasuryPage is the page handler for the "/treasury" path
-func (exp *explorerUI) TreasuryPage(w http.ResponseWriter, r *http.Request) {
-	ctx := context.WithValue(r.Context(), ctxAddress, exp.pageData.HomeInfo.DevAddress)
-	r = r.WithContext(ctx)
-	if queryVals := r.URL.Query(); queryVals.Get("txntype") == "" {
-		queryVals.Set("txntype", "tspend")
-		r.URL.RawQuery = queryVals.Encode()
-	}
-
-	limitN := defaultAddressRows
-	if nParam := r.URL.Query().Get("n"); nParam != "" {
-		val, err := strconv.ParseUint(nParam, 10, 64)
-		if err != nil {
-			exp.StatusPage(w, defaultErrorCode, "invalid n value", "", ExpStatusError)
-			return
-		}
-		if int64(val) > MaxTreasuryRows {
-			log.Warnf("TreasuryPage: requested up to %d address rows, "+
-				"limiting to %d", limitN, MaxTreasuryRows)
-			limitN = MaxTreasuryRows
-		} else {
-			limitN = int64(val)
-		}
-	}
-
-	// Number of txns to skip (OFFSET in database query). For UX reasons, the
-	// "start" URL query parameter is used.
-	var offset int64
-	if startParam := r.URL.Query().Get("start"); startParam != "" {
-		val, err := strconv.ParseUint(startParam, 10, 64)
-		if err != nil {
-			exp.StatusPage(w, defaultErrorCode, "invalid start value", "", ExpStatusError)
-			return
-		}
-		offset = int64(val)
-	}
-
-	// Transaction types to show.
-	txTypeStr := r.URL.Query().Get("txntype")
-	txType := parseTreasuryTransactionType(txTypeStr)
-
-	txns, err := exp.dataSource.TreasuryTxns(limitN, offset, txType)
-	if exp.timeoutErrorPage(w, err, "TreasuryTxns") {
-		return
-	} else if err != nil {
-		exp.StatusPage(w, defaultErrorCode, err.Error(), "", ExpStatusError)
-		return
-	}
-
-	exp.pageData.RLock()
-	treasuryBalance := exp.pageData.HomeInfo.TreasuryBalance
-	exp.pageData.RUnlock()
-
-	typeCount := treasuryTypeCount(treasuryBalance, txType)
-
-	treasuryData := &TreasuryInfo{
-		Net:             exp.ChainParams.Net.String(),
-		MaxTxLimit:      MaxTreasuryRows,
-		Path:            r.URL.Path,
-		Limit:           limitN,
-		Offset:          offset,
-		TxnType:         txTypeStr,
-		NumTransactions: int64(len(txns)),
-		Transactions:    txns,
-		Balance:         treasuryBalance,
-		TypeCount:       typeCount,
-	}
-
-	xcBot := exp.xcBot
-	if xcBot != nil {
-		treasuryData.ConvertedBalance = xcBot.Conversion(math.Round(float64(treasuryBalance.Balance) / 1e8))
-	}
-
-	// Execute the HTML template.
-	linkTemplate := fmt.Sprintf("/treasury?start=%%d&n=%d&txntype=%v", limitN, txType)
-	pageData := struct {
-		*CommonPageData
-		Data        *TreasuryInfo
-		FiatBalance *exchanges.Conversion
-		Pages       []pageNumber
-	}{
-		CommonPageData: exp.commonData(r),
-		Data:           treasuryData,
-		FiatBalance:    exp.xcBot.Conversion(dcrutil.Amount(treasuryBalance.Balance).ToCoin()),
-		Pages:          calcPages(int(typeCount), int(limitN), int(offset), linkTemplate),
-	}
-	str, err := exp.templates.exec("treasury", pageData)
-	if err != nil {
-		log.Errorf("Template execute failure: %v", err)
-		exp.StatusPage(w, defaultErrorCode, defaultErrorMessage, "", ExpStatusError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "text/html")
-	w.Header().Set("Turbolinks-Location", r.URL.RequestURI())
-	w.WriteHeader(http.StatusOK)
-	io.WriteString(w, str)
-}
-
 // AddressPage is the page handler for the "/address" path.
 func (exp *explorerUI) AddressPage(w http.ResponseWriter, r *http.Request) {
 	// AddressPageData is the data structure passed to the HTML template
@@ -1662,69 +1553,6 @@ func (exp *explorerUI) AddressTable(w http.ResponseWriter, r *http.Request) {
 
 	log.Tracef(`"addresstable" template HTML size: %.2f kiB (%s, %v, %d)`,
 		float64(len(response.HTML))/1024.0, address, txnType, addrData.NumTransactions)
-
-	w.Header().Set("Content-Type", "application/json")
-	enc := json.NewEncoder(w)
-	//enc.SetEscapeHTML(false)
-	err = enc.Encode(response)
-	if err != nil {
-		log.Debug(err)
-	}
-}
-
-// TreasuryTable is the handler for the "/treasurytable" path.
-func (exp *explorerUI) TreasuryTable(w http.ResponseWriter, r *http.Request) {
-	// Grab the URL query parameters
-	txType, limitN, offset, err := parseTreasuryParams(r)
-	if err != nil {
-		log.Errorf("TreasuryTable request error: %v", err)
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-		return
-	}
-
-	txns, err := exp.dataSource.TreasuryTxns(limitN, offset, txType)
-	if exp.timeoutErrorPage(w, err, "TreasuryTxns") {
-		return
-	} else if err != nil {
-		exp.StatusPage(w, defaultErrorCode, err.Error(), "", ExpStatusError)
-		return
-	}
-
-	exp.pageData.RLock()
-	bal := exp.pageData.HomeInfo.TreasuryBalance
-	exp.pageData.RUnlock()
-
-	linkTemplate := "/treasury" + "?start=%d&n=" + strconv.FormatInt(limitN, 10) + "&txntype=" + fmt.Sprintf("%v", txType)
-
-	response := struct {
-		TxnCount int64        `json:"tx_count"`
-		HTML     string       `json:"html"`
-		Pages    []pageNumber `json:"pages"`
-	}{
-		TxnCount: treasuryTypeCount(bal, txType),
-		Pages:    calcPages(int(treasuryTypeCount(bal, txType)), int(limitN), int(offset), linkTemplate),
-	}
-
-	type txData struct {
-		Transactions []*dbtypes.TreasuryTx
-	}
-
-	response.HTML, err = exp.templates.exec("treasurytable", struct {
-		Data txData
-	}{
-		Data: txData{
-			Transactions: txns,
-		},
-	})
-	if err != nil {
-		log.Errorf("Template execute failure: %v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-		return
-	}
-
-	log.Tracef(`"treasurytable" template HTML size: %.2f kiB (%v, %d)`,
-		float64(len(response.HTML))/1024.0, txType, len(txns))
 
 	w.Header().Set("Content-Type", "application/json")
 	enc := json.NewEncoder(w)
@@ -1963,21 +1791,8 @@ func (exp *explorerUI) Search(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	tryProp := func() bool {
-		// Try proposal token.
-		proposalInfo, err := exp.proposals.ProposalByToken(searchStr)
-		if err == nil {
-			http.Redirect(w, r, "/proposal/"+proposalInfo.Token, http.StatusPermanentRedirect)
-			return true
-		}
-		return false
-	}
-
 	// If it is not a valid hash, try proposals and give up.
 	if _, err = chainhash.NewHashFromStr(searchStrSplit[0]); err != nil {
-		if tryProp() {
-			return
-		}
 		exp.StatusPage(w, "search failed",
 			"Search string is not a valid block, tx hash, address, or proposal: "+searchStr,
 			"", ExpStatusNotFound)
@@ -2008,11 +1823,6 @@ func (exp *explorerUI) Search(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/tx/"+searchStrRewritten, http.StatusPermanentRedirect)
 			return
 		}
-	}
-
-	// Before checking the DB for txns in orphaned blocks, try props.
-	if tryProp() {
-		return
 	}
 
 	// Also check the DB as it may have transactions from orphaned blocks.
@@ -2333,14 +2143,11 @@ func (exp *explorerUI) StatsPage(w http.ResponseWriter, r *http.Request) {
 		UltimateSupply: ultSubsidy,
 		TotalSupplyPercentage: float64(exp.pageData.HomeInfo.CoinSupply) /
 			float64(ultSubsidy) * 100,
-		ProjectFunds:             exp.pageData.HomeInfo.DevFund,
-		ProjectAddress:           exp.pageData.HomeInfo.DevAddress,
 		PoWDiff:                  exp.pageData.HomeInfo.Difficulty,
 		BlockReward:              blockSubsidy.Total,
 		NextBlockReward:          exp.pageData.HomeInfo.NBlockSubsidy.Total,
 		PoWReward:                exp.pageData.HomeInfo.NBlockSubsidy.PoW,
 		PoSReward:                exp.pageData.HomeInfo.NBlockSubsidy.PoS,
-		ProjectFundReward:        exp.pageData.HomeInfo.NBlockSubsidy.Dev,
 		VotesInMempool:           numVotes,
 		TicketsInMempool:         numTickets,
 		TicketPrice:              exp.pageData.HomeInfo.StakeDiff,
@@ -2433,7 +2240,6 @@ func (exp *explorerUI) commonData(r *http.Request) *CommonPageData {
 		Version:       exp.Version,
 		ChainParams:   exp.ChainParams,
 		BlockTimeUnix: int64(exp.ChainParams.TargetTimePerBlock.Seconds()),
-		DevAddress:    exp.pageData.HomeInfo.DevAddress,
 		NetName:       exp.NetName,
 		Links:         explorerLinks,
 		Cookies: Cookies{

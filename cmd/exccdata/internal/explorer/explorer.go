@@ -13,7 +13,6 @@ import (
 	"os"
 	"os/signal"
 	"reflect"
-	"runtime"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -73,11 +72,9 @@ type explorerDataSource interface {
 	SpendingTransaction(fundingTx string, vout uint32) (string, uint32, int8, error)
 	SpendingTransactions(fundingTxID string) ([]string, []uint32, []uint32, error)
 	PoolStatusForTicket(txid string) (dbtypes.TicketSpendType, dbtypes.TicketPoolStatus, error)
-	TreasuryBalance() (*dbtypes.TreasuryBalance, error)
 	TreasuryTxns(n, offset int64, txType stake.TxType) ([]*dbtypes.TreasuryTx, error)
 	AddressHistory(address string, N, offset int64, txnType dbtypes.AddrTxnViewType) ([]*dbtypes.AddressRow, *dbtypes.AddressBalance, error)
 	AddressData(address string, N, offset int64, txnType dbtypes.AddrTxnViewType) (*dbtypes.AddressInfo, error)
-	DevBalance() (*dbtypes.AddressBalance, error)
 	FillAddressTransactions(addrInfo *dbtypes.AddressInfo) error
 	BlockMissedVotes(blockHash string) ([]string, error)
 	TicketMiss(ticketHash string) (string, int64, error)
@@ -208,7 +205,6 @@ type explorerUI struct {
 	voteTracker      *agendas.VoteTracker
 	proposals        PoliteiaBackend
 	dbsSyncing       atomic.Value
-	devPrefetch      bool
 	templates        templates
 	wsHub            *WebsocketHub
 	pageData         *pageData
@@ -302,7 +298,6 @@ func New(cfg *ExplorerConfig) *explorerUI {
 	// Allocate Mempool fields.
 	exp.invs = new(types.MempoolInfo)
 	exp.Version = cfg.AppVersion
-	exp.devPrefetch = cfg.DevPrefetch
 	exp.xcBot = cfg.XcBot
 	exp.xcDone = make(chan struct{})
 	exp.agendasSource = cfg.AgendasSource
@@ -334,17 +329,9 @@ func New(cfg *ExplorerConfig) *explorerUI {
 	exp.MeanVotingBlocks = txhelpers.CalcMeanVotingBlocks(params)
 	exp.premine = params.BlockOneSubsidy()
 
-	// Development subsidy address of the current network
-	devSubsidyAddress, err := dbtypes.DevSubsidyAddress(params)
-	if err != nil {
-		log.Warnf("explorer.New: %v", err)
-	}
-	log.Debugf("Organization address: %s", devSubsidyAddress)
-
 	exp.pageData = &pageData{
 		BlockInfo: new(types.BlockInfo),
 		HomeInfo: &types.HomeInfo{
-			DevAddress: devSubsidyAddress,
 			Params: types.ChainParams{
 				WindowSize:       exp.ChainParams.StakeDiffWindowSize,
 				RewardWindowSize: exp.ChainParams.SubsidyReductionInterval,
@@ -476,12 +463,6 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, msgBlock *wire.MsgB
 		stakePerc = blockData.PoolInfo.Value / dcrutil.Amount(blockData.ExtraInfo.CoinSupply).ToCoin()
 	}
 
-	treasuryBalance, err := exp.dataSource.TreasuryBalance()
-	if err != nil {
-		log.Errorf("Store: TreasuryBalance failed: %v", err)
-		treasuryBalance = &dbtypes.TreasuryBalance{}
-	}
-
 	// Update pageData with block data and chain (home) info.
 	p := exp.pageData
 	p.Lock()
@@ -502,8 +483,6 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, msgBlock *wire.MsgB
 	p.HomeInfo.IdxBlockInWindow = blockData.IdxBlockInWindow
 	p.HomeInfo.IdxInRewardWindow = int(newBlockData.Height%exp.ChainParams.SubsidyReductionInterval) + 1
 	p.HomeInfo.Difficulty = difficulty
-	p.HomeInfo.TreasuryBalance = treasuryBalance
-	p.HomeInfo.NBlockSubsidy.Dev = blockData.ExtraInfo.NextBlockSubsidy.Developer
 	p.HomeInfo.NBlockSubsidy.PoS = blockData.ExtraInfo.NextBlockSubsidy.PoS
 	p.HomeInfo.NBlockSubsidy.PoW = blockData.ExtraInfo.NextBlockSubsidy.PoW
 	p.HomeInfo.NBlockSubsidy.Total = blockData.ExtraInfo.NextBlockSubsidy.Total
@@ -578,11 +557,6 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, msgBlock *wire.MsgB
 	}(newBlockData.Height, blockData.CurrentStakeDiff.CurrentStakeDifficulty,
 		blockData.ExtraInfo.CoinSupply) // eval args now instead of in closure
 
-	// Project fund balance, not useful while syncing.
-	if exp.devPrefetch {
-		go exp.updateDevFundBalance()
-	}
-
 	// Trigger a vote info refresh.
 	if exp.voteTracker != nil {
 		go exp.voteTracker.Refresh()
@@ -622,20 +596,6 @@ func (exp *explorerUI) ChartsUpdated() {
 		exp.pageData.HomeInfo.MixedPercent = float64(anonSet) / float64(exp.pageData.HomeInfo.CoinSupply) * 100
 	}
 	exp.pageData.Unlock()
-}
-
-func (exp *explorerUI) updateDevFundBalance() {
-	// yield processor to other goroutines
-	runtime.Gosched()
-
-	devBalance, err := exp.dataSource.DevBalance()
-	if err == nil && devBalance != nil {
-		exp.pageData.Lock()
-		exp.pageData.HomeInfo.DevFund = devBalance.TotalUnspent
-		exp.pageData.Unlock()
-	} else {
-		log.Errorf("explorerUI.updateDevFundBalance failed: %v", err)
-	}
 }
 
 type loggerFunc func(string, ...interface{})

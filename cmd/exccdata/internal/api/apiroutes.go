@@ -156,7 +156,6 @@ func NewContext(cfg *AppContextConfig) *appContext {
 		DataSource:  cfg.DataSource,
 		xcBot:       cfg.XcBot,
 		AgendaDB:    cfg.AgendasDBInstance,
-		ProposalsDB: cfg.ProposalsDB,
 		Status:      apitypes.NewStatus(uint32(nodeHeight), conns, APIVersion, cfg.AppVer, cfg.Params.Name),
 		maxCSVAddrs: cfg.MaxAddrs,
 		charts:      cfg.Charts,
@@ -1202,25 +1201,6 @@ func (c *appContext) getTicketPoolByDate(w http.ResponseWriter, r *http.Request)
 	}
 
 	writeJSON(w, tpResponse, m.GetIndentCtx(r))
-}
-
-func (c *appContext) getProposalChartData(w http.ResponseWriter, r *http.Request) {
-	token := m.GetProposalTokenCtx(r)
-
-	proposal, err := c.ProposalsDB.ProposalByToken(token)
-	if dbtypes.IsTimeoutErr(err) {
-		apiLog.Errorf("ProposalByToken: %v", err)
-		http.Error(w, "Database timeout.", http.StatusServiceUnavailable)
-		return
-	}
-	if err != nil {
-		apiLog.Errorf("Unable to get proposal chart data for token %s : %v", token, err)
-		http.Error(w, http.StatusText(http.StatusUnprocessableEntity),
-			http.StatusUnprocessableEntity)
-		return
-	}
-
-	writeJSON(w, proposal.ChartData, m.GetIndentCtx(r))
 }
 
 func (c *appContext) getBlockSize(w http.ResponseWriter, r *http.Request) {

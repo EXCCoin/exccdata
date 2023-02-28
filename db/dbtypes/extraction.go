@@ -10,18 +10,6 @@ import (
 	"github.com/EXCCoin/exccdata/v8/txhelpers"
 )
 
-// DevSubsidyAddress returns the development subsidy address for the specified
-// network.
-func DevSubsidyAddress(params *chaincfg.Params) (string, error) {
-	_, devSubsidyAddresses := stdscript.ExtractAddrs(
-		params.OrganizationPkScriptVersion, params.OrganizationPkScript, params) // legacy org pkScript is not a treasury script
-	if len(devSubsidyAddresses) != 1 {
-		return "", fmt.Errorf("failed to decode dev subsidy address")
-	}
-
-	return devSubsidyAddresses[0].String(), nil
-}
-
 // ExtractBlockTransactions extracts transaction information from a
 // wire.MsgBlock and returns the processed information in slices of the dbtypes
 // Tx, Vout, and VinTxPropertyARRAY.

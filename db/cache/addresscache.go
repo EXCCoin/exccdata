@@ -723,7 +723,6 @@ type AddressCache struct {
 	// construction from the specified total utxo capacity specified in bytes.
 	maxUTXOsPerAddr int
 	cacheMetrics    cacheMetrics
-	ProjectAddress  string
 }
 
 // NewAddressCache constructs an AddressCache with capacity for the specified
@@ -1019,16 +1018,8 @@ func (ac *AddressCache) purgeRowsToFit(numRows int) (haveSpace bool) {
 
 	// First purge to meet address capacity when adding 1 new address.
 	addrsCached := len(ac.a)
-clearingaddrs:
 	for addrsCached >= ac.capAddr {
 		for a := range ac.a {
-			// Never purge the data for the project fund address.
-			if a == ac.ProjectAddress {
-				if len(ac.a) == 1 {
-					break clearingaddrs
-				}
-				continue
-			}
 			delete(ac.a, a)
 			break // recheck addrsCached
 		}
@@ -1038,18 +1029,10 @@ clearingaddrs:
 	// If the cache is at or above row capacity, remove cache items to make room
 	// for the given number of rows.
 	addrsCached, cacheSize, _ := ac.length()
-clearing:
 	for cacheSize > 0 && cacheSize+numRows > ac.cap {
 		for a, aaci := range ac.a {
 			// nothing much to clear for this cached item
 			if len(aaci.rows) == 0 {
-				continue
-			}
-			// Never purge the data for the project fund address.
-			if a == ac.ProjectAddress {
-				if len(ac.a) == 1 {
-					break clearing
-				}
 				continue
 			}
 			delete(ac.a, a)
@@ -1246,7 +1229,7 @@ func (ac *AddressCache) StoreUTXOs(addr string, utxos []*dbtypes.AddressTxnOutpu
 	}
 
 	// Only allow storing maxUTXOsPerAddr.
-	if len(utxos) > ac.maxUTXOsPerAddr && addr != ac.ProjectAddress {
+	if len(utxos) > ac.maxUTXOsPerAddr {
 		return false
 	}
 

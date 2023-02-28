@@ -24,7 +24,6 @@ import (
 	"github.com/decred/slog"
 	flags "github.com/jessevdk/go-flags"
 
-	"github.com/EXCCoin/exccdata/v8/db/dbtypes"
 	"github.com/EXCCoin/exccdata/v8/netparams"
 )
 
@@ -65,8 +64,6 @@ var (
 	defaultMPTriggerTickets   = 1
 
 	defaultAgendasDBFileName = "agendas.db"
-	defaultProposalsFileName = "proposals.db"
-	defaultPoliteiaURL       = "https://proposals.decred.org/"
 	defaultChartsCacheDump   = "chartscache.gob"
 
 	defaultPGHost           = "127.0.0.1:5432"
@@ -125,6 +122,9 @@ type config struct {
 	MempoolMaxInterval int `long:"mp-max-interval" description:"The maximum time in seconds between mempool reports (within a couple seconds), regardless of number of new tickets seen." env:"EXCCDATA_MEMPOOL_MAX_INTERVAL"`
 	MPTriggerTickets   int `long:"mp-ticket-trigger" description:"The minimum number of new tickets that must be seen to trigger a new mempool report." env:"EXCCDATA_MP_TRIGGER_TICKETS"`
 
+	// Consensus agendas and politeia proposals
+	AgendasDBFileName string `long:"agendadbfile" description:"Agendas DB file name (default is agendas.db)." env:"EXCCDATA_AGENDAS_DB_FILE_NAME"`
+
 	// Caching and optimization.
 	AddrCacheCap     int    `long:"addr-cache-cap" description:"Address cache capacity in bytes." env:"DCRDATA_ADDR_CACHE_CAP"`
 	AddrCacheLimit   int    `long:"addr-cache-address-limit" description:"Maximum number of addresses allowed in the address cache." env:"DCRDATA_ADDR_CACHE_LIMIT"`
@@ -174,8 +174,6 @@ var (
 		MaxLogZips:          defaultMaxLogZips,
 		ConfigFile:          defaultConfigFile,
 		AgendasDBFileName:   defaultAgendasDBFileName,
-		ProposalsFileName:   defaultProposalsFileName,
-		PoliteiaURL:         defaultPoliteiaURL,
 		ChartsCacheDump:     defaultChartsCacheDump,
 		DebugLevel:          defaultLogLevel,
 		HTTPProfPath:        defaultHTTPProfPath,
@@ -563,13 +561,6 @@ func loadConfig() (*config, error) {
 	log.Infof("Log folder:  %s", cfg.LogDir)
 	log.Infof("Config file: %s", configFile)
 
-	// Disable dev balance prefetch if network has invalid script.
-	_, err = dbtypes.DevSubsidyAddress(activeChain)
-	if !cfg.NoDevPrefetch && err != nil {
-		cfg.NoDevPrefetch = true
-		log.Warnf("%v. Disabling balance prefetch (--no-dev-prefetch).", err)
-	}
-
 	// Validate SyncStatusLimit has been set. Zero means always show sync status
 	// page instead of full block explorer pages.
 	if cfg.SyncStatusLimit != 0 {
@@ -637,14 +628,6 @@ func loadConfig() (*config, error) {
 		}
 	}
 
-	// Checks if the expected format of the politeia URL was set. It also drops any
-	// unnecessary parts of the URL.
-	urlPath, err := retrieveRootPath(cfg.PoliteiaURL)
-	if err != nil {
-		return loadConfigError(err)
-	}
-	cfg.PoliteiaURL = urlPath
-
 	switch cfg.ServerHeader {
 	case "off":
 		cfg.ServerHeader = ""
@@ -662,7 +645,6 @@ func loadConfig() (*config, error) {
 	// Expand some additional paths.
 	cfg.DcrdCert = cleanAndExpandPath(cfg.DcrdCert)
 	cfg.AgendasDBFileName = cleanAndExpandPath(cfg.AgendasDBFileName)
-	cfg.ProposalsFileName = cleanAndExpandPath(cfg.ProposalsFileName)
 	cfg.RateCertificate = cleanAndExpandPath(cfg.RateCertificate)
 	cfg.ChartsCacheDump = cleanAndExpandPath(cfg.ChartsCacheDump)
 

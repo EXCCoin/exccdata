@@ -105,16 +105,9 @@ func NewPubSubHub(dataSource DataSource) (*PubSubHub, error) {
 	sv := Version()
 	psh.ver = pstypes.NewVer(sv.Split())
 
-	// Development subsidy address of the current network
-	devSubsidyAddress, err := dbtypes.DevSubsidyAddress(params)
-	if err != nil {
-		return nil, fmt.Errorf("bad project fund address: %v", err)
-	}
-
 	psh.state = &State{
 		// Set the constant parameters of GeneralInfo.
 		GeneralInfo: &exptypes.HomeInfo{
-			DevAddress: devSubsidyAddress,
 			Params: exptypes.ChainParams{
 				WindowSize:       params.StakeDiffWindowSize,
 				RewardWindowSize: params.SubsidyReductionInterval,
@@ -657,7 +650,6 @@ func (psh *PubSubHub) Store(blockData *blockdata.BlockData, msgBlock *wire.MsgBl
 	p.GeneralInfo.IdxBlockInWindow = blockData.IdxBlockInWindow
 	p.GeneralInfo.IdxInRewardWindow = int(newBlockData.Height%psh.params.SubsidyReductionInterval) + 1
 	p.GeneralInfo.Difficulty = difficulty
-	p.GeneralInfo.NBlockSubsidy.Dev = blockData.ExtraInfo.NextBlockSubsidy.Developer
 	p.GeneralInfo.NBlockSubsidy.PoS = blockData.ExtraInfo.NextBlockSubsidy.PoS
 	p.GeneralInfo.NBlockSubsidy.PoW = blockData.ExtraInfo.NextBlockSubsidy.PoW
 	p.GeneralInfo.NBlockSubsidy.Total = blockData.ExtraInfo.NextBlockSubsidy.Total

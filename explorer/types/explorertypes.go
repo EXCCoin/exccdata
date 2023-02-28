@@ -427,7 +427,6 @@ type Vout struct {
 	Type            string
 	Spent           bool
 	OP_RETURN       string
-	OP_TADD         bool
 	Index           uint32
 	Version         uint16
 }
@@ -1138,15 +1137,12 @@ type StatsInfo struct {
 	UltimateSupply             int64
 	TotalSupply                int64
 	TotalSupplyPercentage      float64
-	ProjectFunds               int64
-	ProjectAddress             string
 	PoWDiff                    float64
 	HashRate                   float64
 	BlockReward                int64
 	NextBlockReward            int64
 	PoWReward                  int64
 	PoSReward                  int64
-	ProjectFundReward          int64
 	VotesInMempool             int
 	TicketsInMempool           int
 	TicketPrice                float64

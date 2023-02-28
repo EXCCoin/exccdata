@@ -104,11 +104,7 @@ func NewSocketServer(params *chaincfg.Params, txGetter txhelpers.RawTransactionG
 		PingTimeout:  5 * time.Second,
 		Transports:   []transport.Transport{wsTrans},
 	}
-	socketIOServer, err := socketio.NewServer(opts)
-	if err != nil {
-		apiLog.Errorf("Could not create socket.io server: %v", err)
-		return nil, err
-	}
+	socketIOServer := socketio.NewServer(opts)
 
 	// Each address subscription uses its own room, which has the same name as
 	// the address. The number of subscribers for each room is tracked.
@@ -153,7 +149,7 @@ func NewSocketServer(params *chaincfg.Params, txGetter txhelpers.RawTransactionG
 		}
 
 		// See if the room is a Decred address.
-		if _, err = stdaddr.DecodeAddress(room, params); err != nil {
+		if _, err := stdaddr.DecodeAddress(room, params); err != nil {
 			apiLog.Debugf("socket.io connection %s requested invalid subscription: %s",
 				so.ID(), room)
 			msg := fmt.Sprintf(`invalid subscription "%s"`, room)
