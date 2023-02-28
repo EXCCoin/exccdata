@@ -3,7 +3,7 @@ package txhelpers
 import (
 	"math"
 
-	"github.com/decred/dcrd/chaincfg/v3"
+	"github.com/EXCCoin/exccd/chaincfg/v3"
 )
 
 // CalcMeanVotingBlocks computes the average number of blocks a ticket will be
@@ -14,7 +14,7 @@ import (
 //
 // Where B is the block number and P(B) is the probability of voting at
 // block B.  For more information see:
-// https://github.com/decred/dcrdata/issues/471#issuecomment-390063025
+// https://github.com/EXCCoin/exccdata/issues/471#issuecomment-390063025
 func CalcMeanVotingBlocks(params *chaincfg.Params) int64 {
 	logPoolSizeM1 := math.Log(float64(params.TicketPoolSize) - 1)
 	logPoolSize := math.Log(float64(params.TicketPoolSize))

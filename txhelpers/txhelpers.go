@@ -20,16 +20,16 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/decred/base58"
-	"github.com/decred/dcrd/blockchain/stake/v4"
-	"github.com/decred/dcrd/blockchain/standalone/v2"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/chaincfg/v3"
-	"github.com/decred/dcrd/dcrutil/v4"
-	chainjson "github.com/decred/dcrd/rpc/jsonrpc/types/v3"
-	"github.com/decred/dcrd/txscript/v4/stdaddr"
-	"github.com/decred/dcrd/txscript/v4/stdscript"
-	"github.com/decred/dcrd/wire"
+	"github.com/EXCCoin/base58"
+	"github.com/EXCCoin/exccd/blockchain/stake/v4"
+	"github.com/EXCCoin/exccd/blockchain/standalone/v2"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/chaincfg/v3"
+	"github.com/EXCCoin/exccd/dcrutil/v4"
+	chainjson "github.com/EXCCoin/exccd/rpc/jsonrpc/types/v3"
+	"github.com/EXCCoin/exccd/txscript/v4/stdaddr"
+	"github.com/EXCCoin/exccd/txscript/v4/stdscript"
+	"github.com/EXCCoin/exccd/wire"
 )
 
 var (
@@ -37,7 +37,7 @@ var (
 	zeroHashStringBytes = []byte(chainhash.Hash{}.String())
 )
 
-var CoinbaseFlags = "/dcrd/"
+var CoinbaseFlags = "/exccd/"
 var CoinbaseScript = append([]byte{0x00, 0x00}, []byte(CoinbaseFlags)...)
 
 const (
@@ -1277,7 +1277,7 @@ func GenesisTxHash(params *chaincfg.Params) chainhash.Hash {
 }
 
 // IsZeroHashP2PHKAddress checks if the given address is the dummy (zero pubkey
-// hash) address. See https://github.com/decred/dcrdata/issues/358 for details.
+// hash) address. See https://github.com/EXCCoin/exccdata/issues/358 for details.
 func IsZeroHashP2PHKAddress(checkAddressString string, params *chaincfg.Params) bool {
 	zeroed := [20]byte{}
 	// expecting DsQxuVRvS4eaJ42dhQEsCXauMWjvopWgrVg address for mainnet

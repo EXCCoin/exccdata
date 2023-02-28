@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/db/dcrpg/v8/internal"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/db/dcrpg/v8/internal"
 )
 
 func TestGetAddressTransactionsRawWithSkip(t *testing.T) {

@@ -14,15 +14,15 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/decred/dcrd/blockchain/stake/v4"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/chaincfg/v3"
-	"github.com/decred/dcrd/database/v3"
-	"github.com/decred/dcrd/dcrutil/v4"
-	"github.com/decred/dcrd/wire"
+	"github.com/EXCCoin/exccd/blockchain/stake/v4"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/chaincfg/v3"
+	"github.com/EXCCoin/exccd/database/v3"
+	"github.com/EXCCoin/exccd/dcrutil/v4"
+	"github.com/EXCCoin/exccd/wire"
 
-	apitypes "github.com/decred/dcrdata/v8/api/types"
-	"github.com/decred/dcrdata/v8/txhelpers"
+	apitypes "github.com/EXCCoin/exccdata/v8/api/types"
+	"github.com/EXCCoin/exccdata/v8/txhelpers"
 )
 
 // PoolInfoCache contains a map of block hashes to ticket pool info data at that
@@ -795,7 +795,7 @@ func (db *StakeDatabase) Open(dbName string) error {
 	if err != nil {
 		if strings.Contains(err.Error(), "resource temporarily unavailable") ||
 			strings.Contains(err.Error(), "is being used by another process") {
-			return fmt.Errorf("Stake DB already opened. dcrdata running?")
+			return fmt.Errorf("Stake DB already opened. exccdata running?")
 		}
 		if strings.Contains(err.Error(), "does not exist") {
 			log.Info("Creating new stake DB.")

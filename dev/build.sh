@@ -1,5 +1,5 @@
 #!/bin/bash
-# Usage: build.sh [dcrdata_root] [destination_folder]
+# Usage: build.sh [exccdata_root] [destination_folder]
 #
 #   build.sh performs the following actions:
 #       1. Compile go code, generating the main binary.
@@ -10,10 +10,10 @@
 #       5. (Optional) Install everything.
 #
 #   When run with no arguments, build.sh will use the repository root as the
-#   root folder. If not running from a git repository, the dcrdata_root folder
+#   root folder. If not running from a git repository, the exccdata_root folder
 #   must be specified.
 #
-#   Specify destination_folder to install the dcrdata executable and the static
+#   Specify destination_folder to install the exccdata executable and the static
 #   assets (public and views folders). When destination_folder is omitted, the
 #   generated files are not installed.
 #
@@ -32,18 +32,18 @@ fi
 ROOT=${1:-$REPO}
 
 if [[ -z "$ROOT" ]]; then
-    echo "Not in git repository. You must specify the dcrdata root folder as the first argument!"
+    echo "Not in git repository. You must specify the exccdata root folder as the first argument!"
     exit 1
 fi
 
 set -e
 
-# Delete the old dcrdata binary that is now under cmd/dcrdata.
-rm -f ${ROOT}/dcrdata
+# Delete the old exccdata binary that is now under cmd/dcrdata.
+rm -f ${ROOT}/exccdata
 
-pushd $ROOT/cmd/dcrdata > /dev/null
+pushd $ROOT/cmd/exccdata > /dev/null
 
-echo "Building the dcrdata binary..."
+echo "Building the exccdata binary..."
 GO111MODULE=on go build -v
 
 echo "Packaging static frontend assets..."
@@ -75,7 +75,7 @@ find ./public -type f -name "*.gz.gz" -execdir rm {} \;
 DEST=$2
 
 if [[ -n "$DEST" ]]; then
-    sudo install -m 754 -o dcrdata -g decred ./dcrdata ${DEST}/
+    sudo install -m 754 -o exccdata -g excc ./exccdata ${DEST}/
     sudo rm -rf ${DEST}/views ${DEST}/public
     sudo cp -R views public ${DEST}/
 fi

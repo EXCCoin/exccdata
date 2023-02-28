@@ -16,7 +16,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 	"github.com/decred/slog"
 	"github.com/dgraph-io/badger"
 )

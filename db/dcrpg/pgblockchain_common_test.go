@@ -10,9 +10,9 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/decred/dcrd/chaincfg/v3"
-	"github.com/decred/dcrdata/v8/db/cache"
-	"github.com/decred/dcrdata/v8/testutil/dbconfig"
+	"github.com/EXCCoin/exccd/chaincfg/v3"
+	"github.com/EXCCoin/exccdata/v8/db/cache"
+	"github.com/EXCCoin/exccdata/v8/testutil/dbconfig"
 	"github.com/decred/slog"
 )
 

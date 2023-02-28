@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 	"github.com/decred/slog"
 )
 

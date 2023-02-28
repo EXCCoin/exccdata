@@ -9,9 +9,9 @@ import (
 	"math"
 	"sync"
 
-	"github.com/decred/dcrd/blockchain/standalone/v2"
-	"github.com/decred/dcrd/chaincfg/v3"
-	"github.com/decred/dcrd/wire"
+	"github.com/EXCCoin/exccd/blockchain/standalone/v2"
+	"github.com/EXCCoin/exccd/chaincfg/v3"
+	"github.com/EXCCoin/exccd/wire"
 )
 
 type netHeight struct {

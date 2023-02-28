@@ -13,10 +13,10 @@ import (
 
 	"github.com/asdine/storm/v3"
 	"github.com/asdine/storm/v3/q"
-	"github.com/decred/dcrd/dcrjson/v4"
-	chainjson "github.com/decred/dcrd/rpc/jsonrpc/types/v3"
-	"github.com/decred/dcrdata/v8/db/dbtypes"
-	"github.com/decred/dcrdata/v8/semver"
+	"github.com/EXCCoin/exccd/dcrjson/v4"
+	chainjson "github.com/EXCCoin/exccd/rpc/jsonrpc/types/v3"
+	"github.com/EXCCoin/exccdata/v8/db/dbtypes"
+	"github.com/EXCCoin/exccdata/v8/semver"
 )
 
 // AgendaDB represents the data for the stored DB.

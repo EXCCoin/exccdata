@@ -12,13 +12,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/blockchain/stake/v4"
-	"github.com/decred/dcrd/chaincfg/v3"
-	"github.com/decred/dcrd/dcrutil/v4"
-	chainjson "github.com/decred/dcrd/rpc/jsonrpc/types/v3"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/v8/db/dbtypes"
-	"github.com/decred/dcrdata/v8/txhelpers"
+	"github.com/EXCCoin/exccd/blockchain/stake/v4"
+	"github.com/EXCCoin/exccd/chaincfg/v3"
+	"github.com/EXCCoin/exccd/dcrutil/v4"
+	chainjson "github.com/EXCCoin/exccd/rpc/jsonrpc/types/v3"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/v8/db/dbtypes"
+	"github.com/EXCCoin/exccdata/v8/txhelpers"
 )
 
 // Types of votes
@@ -493,9 +493,6 @@ type HomeInfo struct {
 	IdxBlockInWindow      int                      `json:"window_idx"`
 	IdxInRewardWindow     int                      `json:"reward_idx"`
 	Difficulty            float64                  `json:"difficulty"`
-	DevFund               int64                    `json:"dev_fund"` // legacy treasury address
-	DevAddress            string                   `json:"dev_address"`
-	TreasuryBalance       *dbtypes.TreasuryBalance `json:"treasury_bal"` // new decentralized treasury account
 	TicketReward          float64                  `json:"reward"`
 	RewardPeriod          string                   `json:"reward_period"`
 	ASR                   float64                  `json:"ASR"`
@@ -514,7 +511,6 @@ type BlockSubsidy struct {
 	Total int64 `json:"total"`
 	PoW   int64 `json:"pow"`
 	PoS   int64 `json:"pos"`
-	Dev   int64 `json:"dev"`
 }
 
 // TrimmedMempoolInfo is mempool data for the home page.

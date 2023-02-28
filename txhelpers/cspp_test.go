@@ -3,7 +3,7 @@ package txhelpers
 import (
 	"testing"
 
-	"github.com/decred/dcrd/wire"
+	"github.com/EXCCoin/exccd/wire"
 )
 
 func TestIsMixedSplitTx(t *testing.T) {

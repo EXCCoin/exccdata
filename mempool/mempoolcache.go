@@ -8,12 +8,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/dcrutil/v4"
-	chainjson "github.com/decred/dcrd/rpc/jsonrpc/types/v3"
+	"github.com/EXCCoin/exccd/dcrutil/v4"
+	chainjson "github.com/EXCCoin/exccd/rpc/jsonrpc/types/v3"
 
-	apitypes "github.com/decred/dcrdata/v8/api/types"
-	"github.com/decred/dcrdata/v8/db/dbtypes"
-	exptypes "github.com/decred/dcrdata/v8/explorer/types"
+	apitypes "github.com/EXCCoin/exccdata/v8/api/types"
+	"github.com/EXCCoin/exccdata/v8/db/dbtypes"
+	exptypes "github.com/EXCCoin/exccdata/v8/explorer/types"
 )
 
 // DataCache models the basic data for the mempool cache.

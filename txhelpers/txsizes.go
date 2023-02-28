@@ -6,8 +6,8 @@
 package txhelpers
 
 import (
-	"github.com/decred/dcrd/dcrutil/v4"
-	"github.com/decred/dcrd/wire"
+	"github.com/EXCCoin/exccd/dcrutil/v4"
+	"github.com/EXCCoin/exccd/wire"
 )
 
 // DefaultRelayFeePerKb is the default minimum relay fee policy for a mempool.

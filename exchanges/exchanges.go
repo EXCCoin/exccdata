@@ -28,7 +28,7 @@ import (
 	"decred.org/dcrdex/dex/msgjson"
 	"github.com/carterjones/signalr"
 	"github.com/carterjones/signalr/hubs"
-	dcrrates "github.com/decred/dcrdata/exchanges/v3/ratesproto"
+	dcrrates "github.com/EXCCoin/exccdata/exchanges/v3/ratesproto"
 )
 
 // Tokens. Used to identify the exchange.
@@ -676,7 +676,7 @@ func (xc *CommonExchange) setWsFail(err error) {
 	if xc.sr != nil {
 		// The carterjones/signalr can hang on Close. The goroutine is a stopgap while
 		// we migrate to a new signalr client.
-		// https://github.com/decred/dcrdata/issues/1818
+		// https://github.com/EXCCoin/exccdata/issues/1818
 		go xc.sr.Close()
 		// Clear the field to prevent double Close'ing. signalr will hang on
 		// second call.

@@ -1,7 +1,7 @@
--- This resets the dcrdata_simnet database.
+-- This resets the exccdata_simnet database.
 
-DROP DATABASE IF EXISTS dcrdata_simnet;
-DROP USER IF exists dcrdata_simnet_stooge;
+DROP DATABASE IF EXISTS exccdata_simnet;
+DROP USER IF exists exccdata_simnet_stooge;
 
-CREATE USER dcrdata_simnet_stooge PASSWORD 'pass';
-CREATE DATABASE dcrdata_simnet OWNER dcrdata_simnet_stooge;
+CREATE USER exccdata_simnet_stooge PASSWORD 'pass';
+CREATE DATABASE exccdata_simnet OWNER exccdata_simnet_stooge;

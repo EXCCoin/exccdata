@@ -10,11 +10,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/chaincfg/v3"
-	"github.com/decred/dcrd/dcrutil/v4"
-	chainjson "github.com/decred/dcrd/rpc/jsonrpc/types/v3"
-	"github.com/decred/dcrd/wire"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/chaincfg/v3"
+	"github.com/EXCCoin/exccd/dcrutil/v4"
+	chainjson "github.com/EXCCoin/exccd/rpc/jsonrpc/types/v3"
+	"github.com/EXCCoin/exccd/wire"
 )
 
 type TxGetter struct {
@@ -165,7 +165,7 @@ func ConnectNodeRPC(host, user, pass, cert string, disableTLS bool) (*rpcclient.
 
 	dcrdClient, err := rpcclient.New(connCfgDaemon, nil)
 	if err != nil {
-		return nil, nodeVer, fmt.Errorf("Failed to start dcrd RPC client: %s", err.Error())
+		return nil, nodeVer, fmt.Errorf("Failed to start exccd RPC client: %s", err.Error())
 	}
 
 	// Ensure the RPC server has a compatible API version.
@@ -174,7 +174,7 @@ func ConnectNodeRPC(host, user, pass, cert string, disableTLS bool) (*rpcclient.
 		return nil, nodeVer, fmt.Errorf("unable to get node RPC version")
 	}
 
-	dcrdVer := ver["dcrdjsonrpcapi"]
+	dcrdVer := ver["exccdjsonrpcapi"]
 	nodeVer = semver.NewSemver(dcrdVer.Major, dcrdVer.Minor, dcrdVer.Patch)
 
 	return dcrdClient, nodeVer, nil

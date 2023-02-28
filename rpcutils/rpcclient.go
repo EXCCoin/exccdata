@@ -12,15 +12,15 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/chaincfg/v3"
-	"github.com/decred/dcrd/dcrutil/v4"
-	chainjson "github.com/decred/dcrd/rpc/jsonrpc/types/v3"
-	"github.com/decred/dcrd/rpcclient/v7"
-	"github.com/decred/dcrd/wire"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/chaincfg/v3"
+	"github.com/EXCCoin/exccd/dcrutil/v4"
+	chainjson "github.com/EXCCoin/exccd/rpc/jsonrpc/types/v3"
+	"github.com/EXCCoin/exccd/rpcclient/v7"
+	"github.com/EXCCoin/exccd/wire"
 
-	"github.com/decred/dcrdata/v8/semver"
-	"github.com/decred/dcrdata/v8/txhelpers"
+	"github.com/EXCCoin/exccdata/v8/semver"
+	"github.com/EXCCoin/exccdata/v8/txhelpers"
 )
 
 type MempoolGetter interface {
@@ -96,15 +96,15 @@ func ConnectNodeRPC(host, user, pass, cert string, disableTLS, disableReconnect 
 	if !disableTLS {
 		dcrdCerts, err = os.ReadFile(cert)
 		if err != nil {
-			log.Errorf("Failed to read dcrd cert file at %s: %s\n",
+			log.Errorf("Failed to read exccd cert file at %s: %s\n",
 				cert, err.Error())
 			return nil, nodeVer, err
 		}
-		log.Debugf("Attempting to connect to dcrd RPC %s as user %s "+
+		log.Debugf("Attempting to connect to exccd RPC %s as user %s "+
 			"using certificate located in %s",
 			host, user, cert)
 	} else {
-		log.Debugf("Attempting to connect to dcrd RPC %s as user %s (no TLS)",
+		log.Debugf("Attempting to connect to exccd RPC %s as user %s (no TLS)",
 			host, user)
 	}
 
@@ -127,7 +127,7 @@ func ConnectNodeRPC(host, user, pass, cert string, disableTLS, disableReconnect 
 	}
 	dcrdClient, err := rpcclient.New(connCfgDaemon, ntfnHdlrs)
 	if err != nil {
-		return nil, nodeVer, fmt.Errorf("Failed to start dcrd RPC client: %s", err.Error())
+		return nil, nodeVer, fmt.Errorf("Failed to start exccd RPC client: %s", err.Error())
 	}
 
 	// Ensure the RPC server has a compatible API version.
@@ -137,7 +137,7 @@ func ConnectNodeRPC(host, user, pass, cert string, disableTLS, disableReconnect 
 		return nil, nodeVer, fmt.Errorf("unable to get node RPC version")
 	}
 
-	dcrdVer := ver["dcrdjsonrpcapi"]
+	dcrdVer := ver["exccdjsonrpcapi"]
 	nodeVer = semver.NewSemver(dcrdVer.Major, dcrdVer.Minor, dcrdVer.Patch)
 
 	// Check if the dcrd RPC API version is compatible with dcrdata.
@@ -476,7 +476,7 @@ func OrphanedTipLength(ctx context.Context, client BlockHashGetter,
 		}
 		dcrdHash, err = client.GetBlockHash(ctx, commonHeight)
 		if err != nil {
-			return -1, fmt.Errorf("Unable to retrieve dcrd block at height %d: %v", commonHeight, err)
+			return -1, fmt.Errorf("Unable to retrieve exccd block at height %d: %v", commonHeight, err)
 		}
 		if dcrdHash.String() == dbHash {
 			break

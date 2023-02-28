@@ -13,19 +13,19 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg/v3"
-	"github.com/decred/dcrd/dcrutil/v4"
-	chainjson "github.com/decred/dcrd/rpc/jsonrpc/types/v3"
-	"github.com/decred/dcrd/txscript/v4/stdscript"
-	"github.com/decred/dcrd/wire"
+	"github.com/EXCCoin/exccd/chaincfg/v3"
+	"github.com/EXCCoin/exccd/dcrutil/v4"
+	chainjson "github.com/EXCCoin/exccd/rpc/jsonrpc/types/v3"
+	"github.com/EXCCoin/exccd/txscript/v4/stdscript"
+	"github.com/EXCCoin/exccd/wire"
 
-	"github.com/decred/dcrdata/v8/blockdata"
-	"github.com/decred/dcrdata/v8/db/dbtypes"
-	exptypes "github.com/decred/dcrdata/v8/explorer/types"
-	"github.com/decred/dcrdata/v8/mempool"
-	pstypes "github.com/decred/dcrdata/v8/pubsub/types"
-	"github.com/decred/dcrdata/v8/semver"
-	"github.com/decred/dcrdata/v8/txhelpers"
+	"github.com/EXCCoin/exccdata/v8/blockdata"
+	"github.com/EXCCoin/exccdata/v8/db/dbtypes"
+	exptypes "github.com/EXCCoin/exccdata/v8/explorer/types"
+	"github.com/EXCCoin/exccdata/v8/mempool"
+	pstypes "github.com/EXCCoin/exccdata/v8/pubsub/types"
+	"github.com/EXCCoin/exccdata/v8/semver"
+	"github.com/EXCCoin/exccdata/v8/txhelpers"
 	"golang.org/x/net/websocket"
 )
 
@@ -509,7 +509,7 @@ loop:
 			pushMsg.Message = buff.Bytes()
 
 		case sigByeNow:
-			pushMsg.Message = []byte(`"The dcrdata server is shutting down. Bye!"`)
+			pushMsg.Message = []byte(`"The exccdata server is shutting down. Bye!"`)
 			log.Tracef("Sending %v", string(pushMsg.Message))
 
 		// case sigSyncStatus:

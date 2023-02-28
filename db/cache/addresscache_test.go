@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrdata/v8/db/dbtypes"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccdata/v8/db/dbtypes"
 )
 
 func TestCacheLock_TryLock(t *testing.T) {

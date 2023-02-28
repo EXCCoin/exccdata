@@ -11,10 +11,10 @@ import (
 	"sync"
 	"time"
 
-	chainjson "github.com/decred/dcrd/rpc/jsonrpc/types/v3"
-	"github.com/decred/dcrd/txscript/v4/stdscript"
-	"github.com/decred/dcrdata/v8/db/dbtypes"
-	"github.com/decred/dcrdata/v8/txhelpers"
+	chainjson "github.com/EXCCoin/exccd/rpc/jsonrpc/types/v3"
+	"github.com/EXCCoin/exccd/txscript/v4/stdscript"
+	"github.com/EXCCoin/exccdata/v8/db/dbtypes"
+	"github.com/EXCCoin/exccdata/v8/txhelpers"
 )
 
 // TimeAPI is a fall back dbtypes.TimeDef wrapper that allows API endpoints that
@@ -551,7 +551,7 @@ type APIStatus struct {
 	Height          uint32 `json:"node_height"`
 	NodeConnections int64  `json:"node_connections"`
 	APIVersion      int    `json:"api_version"`
-	DcrdataVersion  string `json:"dcrdata_version"`
+	DcrdataVersion  string `json:"exccdata_version"`
 	NetworkName     string `json:"network_name"`
 }
 

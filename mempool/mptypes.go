@@ -6,9 +6,9 @@ package mempool
 import (
 	"time"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	chainjson "github.com/decred/dcrd/rpc/jsonrpc/types/v3"
-	apitypes "github.com/decred/dcrdata/v8/api/types"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	chainjson "github.com/EXCCoin/exccd/rpc/jsonrpc/types/v3"
+	apitypes "github.com/EXCCoin/exccdata/v8/api/types"
 )
 
 // MempoolInfo models basic data about the node's mempool

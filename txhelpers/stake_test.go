@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg/v3"
+	"github.com/EXCCoin/exccd/chaincfg/v3"
 )
 
 type networkRewardPeriod struct {

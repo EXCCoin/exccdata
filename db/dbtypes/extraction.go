@@ -3,11 +3,11 @@ package dbtypes
 import (
 	"fmt"
 
-	"github.com/decred/dcrd/blockchain/stake/v4"
-	"github.com/decred/dcrd/chaincfg/v3"
-	"github.com/decred/dcrd/txscript/v4/stdscript"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/v8/txhelpers"
+	"github.com/EXCCoin/exccd/blockchain/stake/v4"
+	"github.com/EXCCoin/exccd/chaincfg/v3"
+	"github.com/EXCCoin/exccd/txscript/v4/stdscript"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/v8/txhelpers"
 )
 
 // DevSubsidyAddress returns the development subsidy address for the specified

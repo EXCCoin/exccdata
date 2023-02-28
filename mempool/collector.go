@@ -11,15 +11,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/blockchain/stake/v4"
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/chaincfg/v3"
-	"github.com/decred/dcrd/dcrutil/v4"
-	chainjson "github.com/decred/dcrd/rpc/jsonrpc/types/v3"
+	"github.com/EXCCoin/exccd/blockchain/stake/v4"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/chaincfg/v3"
+	"github.com/EXCCoin/exccd/dcrutil/v4"
+	chainjson "github.com/EXCCoin/exccd/rpc/jsonrpc/types/v3"
 
-	apitypes "github.com/decred/dcrdata/v8/api/types"
-	exptypes "github.com/decred/dcrdata/v8/explorer/types"
-	"github.com/decred/dcrdata/v8/txhelpers"
+	apitypes "github.com/EXCCoin/exccdata/v8/api/types"
+	exptypes "github.com/EXCCoin/exccdata/v8/explorer/types"
+	"github.com/EXCCoin/exccdata/v8/txhelpers"
 )
 
 // NodeClient is similar to a rpcclient.Client, except for the addition of

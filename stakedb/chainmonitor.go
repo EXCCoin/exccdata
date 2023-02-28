@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil/v4"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/v8/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/dcrutil/v4"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/v8/txhelpers"
 )
 
 // ChainMonitor connects blocks to the stake DB as they come in.

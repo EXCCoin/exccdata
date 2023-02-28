@@ -43,8 +43,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/decred/dcrdata/db/dcrpg/v8/internal"
-	"github.com/decred/dcrdata/v8/db/dbtypes"
+	"github.com/EXCCoin/exccdata/db/dcrpg/v8/internal"
+	"github.com/EXCCoin/exccdata/v8/db/dbtypes"
 )
 
 func deleteMissesForBlock(dbTx SqlExecutor, hash string) (rowsDeleted int64, err error) {

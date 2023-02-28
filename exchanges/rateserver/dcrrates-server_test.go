@@ -8,8 +8,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/decred/dcrdata/exchanges/v3"
-	dcrrates "github.com/decred/dcrdata/exchanges/v3/ratesproto"
+	"github.com/EXCCoin/exccdata/exchanges/v3"
+	dcrrates "github.com/EXCCoin/exccdata/exchanges/v3/ratesproto"
 )
 
 func TestAddDeleteClient(t *testing.T) {
@@ -62,7 +62,7 @@ func TestDefaultAltDNSNames(t *testing.T) {
 
 	cfg, err := loadConfig()
 	if err != nil {
-		t.Fatalf("Failed to load dcrd config: %s", err)
+		t.Fatalf("Failed to load exccd config: %s", err)
 	}
 	if len(cfg.AltDNSNames) != 0 {
 		t.Fatalf("Invalid default value for altdnsnames: %s", cfg.AltDNSNames)

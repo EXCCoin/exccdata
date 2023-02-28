@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/wire"
-	"github.com/decred/dcrdata/v8/txhelpers"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/wire"
+	"github.com/EXCCoin/exccdata/v8/txhelpers"
 )
 
 // ChainMonitor responds to block connection and chain reorganization.
@@ -87,7 +87,7 @@ func (p *ChainMonitor) switchToSideChain(reorgData *txhelpers.ReorgData) (int32,
 		}
 		// Fetch the block by RPC if not found or wrong hash
 		if !found || msgBlock.BlockHash() != newChain[i] {
-			log.Debugf("block %v not found in stakedb cache, fetching from dcrd", newChain[i])
+			log.Debugf("block %v not found in stakedb cache, fetching from exccd", newChain[i])
 			// Request MsgBlock from dcrd
 			var err error
 			msgBlock, err = p.db.Client.GetBlock(context.TODO(), &newChain[i])

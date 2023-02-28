@@ -12,9 +12,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/decred/dcrd/chaincfg/v3"
-	"github.com/decred/dcrd/dcrutil/v4"
-	"github.com/decred/dcrdata/v8/netparams"
+	"github.com/EXCCoin/exccd/chaincfg/v3"
+	"github.com/EXCCoin/exccd/dcrutil/v4"
+	"github.com/EXCCoin/exccdata/v8/netparams"
 	flags "github.com/jessevdk/go-flags"
 )
 
@@ -29,11 +29,11 @@ var activeNet = &netparams.MainNetParams
 var activeChain = chaincfg.MainNetParams()
 
 var (
-	dcrdHomeDir              = dcrutil.AppDataDir("dcrd", false)
+	dcrdHomeDir              = dcrutil.AppDataDir("exccd", false)
 	defaultDcrdHost          = "localhost"
 	defaultDaemonRPCCertFile = filepath.Join(dcrdHomeDir, "rpc.cert")
 
-	dcrdataHomeDir = dcrutil.AppDataDir("dcrdata", false)
+	dcrdataHomeDir = dcrutil.AppDataDir("exccdata", false)
 	dcrdataDataDir = filepath.Join(dcrdataHomeDir, defaultDataDirName)
 
 	defaultAppDirectory = dcrutil.AppDataDir("chkdcrpg", false)
@@ -50,7 +50,7 @@ type config struct {
 	// General application behavior
 	ConfigPath           string `short:"c" long:"config" description:"Path to a custom configuration file. (~/.chkdcrpg/rateserver.conf)" env:"CHKDCRPG_CONFIG_PATH"`
 	AppDirectory         string `long:"appdir" description:"Path to application home directory. (~/.chkdcrpg)" env:"CHKDCRPG_APPDIR_PATH"`
-	DcrdataDataDirectory string `long:"dcrdata-datadir" description:"Path to a dcrdata datadir" env:"DCRDATA_DATA_DIR"`
+	DcrdataDataDirectory string `long:"exccdata-datadir" description:"Path to a exccdata datadir" env:"EXCCDATA_DATA_DIR"`
 	LogPath              string `long:"logpath" description:"Directory to log output. ([appdir]/logs/)" env:"CHKDCRPG_LOG_PATH"`
 	ShowVersion          bool   `short:"V" long:"version" description:"Display version information and exit"`
 	TestNet              bool   `long:"testnet" description:"Use the test network (default mainnet)"`
@@ -70,10 +70,10 @@ type config struct {
 	DBName     string `long:"dbname" description:"DB name"`
 
 	// RPC client options
-	DcrdUser         string `long:"dcrduser" description:"Daemon RPC user name"`
-	DcrdPass         string `long:"dcrdpass" description:"Daemon RPC password"`
-	DcrdServ         string `long:"dcrdserv" description:"Hostname/IP and port of dcrd RPC server to connect to (default localhost:9109, testnet: localhost:19109, simnet: localhost:19556)"`
-	DcrdCert         string `long:"dcrdcert" description:"File containing the dcrd certificate file"`
+	DcrdUser         string `long:"exccduser" description:"Daemon RPC user name"`
+	DcrdPass         string `long:"exccdpass" description:"Daemon RPC password"`
+	DcrdServ         string `long:"exccdserv" description:"Hostname/IP and port of exccd RPC server to connect to (default localhost:9109, testnet: localhost:19109, simnet: localhost:19556)"`
+	DcrdCert         string `long:"exccdcert" description:"File containing the exccd certificate file"`
 	DisableDaemonTLS bool   `long:"nodaemontls" description:"Disable TLS for the daemon RPC client -- NOTE: This is only allowed if the RPC client is connecting to localhost"`
 }
 

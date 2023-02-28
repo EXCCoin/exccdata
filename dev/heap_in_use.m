@@ -1,4 +1,4 @@
-% This will continuously plot HeapInUse for a process named "dcrdata". The dcrps
+% This will continuously plot HeapInUse for a process named "exccdata". The dcrps
 % binary is required. Install it with "go get github.com/dcrlabs/dcrps".
 
 % Try to get the GOPATH environment variable, but if it is not available
@@ -11,7 +11,7 @@ heapuse = [];
 h = figure;
 ax = axes('parent',h);
 while true,
-  [s,out] = system([dcrps  ' memstats dcrdata | grep heap-in-use | awk ''{print $3}'' | sed ''s/(//''']);
+  [s,out] = system([dcrps  ' memstats exccdata | grep heap-in-use | awk ''{print $3}'' | sed ''s/(//''']);
   heapuse(end+1) = str2double(out);
   plot(ax, heapuse, 'linewidth', 2); drawnow
   pause(0.05)

@@ -9,15 +9,15 @@ import (
 	"sort"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	chainjson "github.com/decred/dcrd/rpc/jsonrpc/types/v3"
-	"github.com/decred/dcrd/txscript/v4/stdaddr"
-	"github.com/decred/dcrd/wire"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	chainjson "github.com/EXCCoin/exccd/rpc/jsonrpc/types/v3"
+	"github.com/EXCCoin/exccd/txscript/v4/stdaddr"
+	"github.com/EXCCoin/exccd/wire"
 
-	apitypes "github.com/decred/dcrdata/v8/api/types"
-	"github.com/decred/dcrdata/v8/db/cache"
-	"github.com/decred/dcrdata/v8/db/dbtypes"
-	"github.com/decred/dcrdata/v8/txhelpers"
+	apitypes "github.com/EXCCoin/exccdata/v8/api/types"
+	"github.com/EXCCoin/exccdata/v8/db/cache"
+	"github.com/EXCCoin/exccdata/v8/db/dbtypes"
+	"github.com/EXCCoin/exccdata/v8/txhelpers"
 )
 
 // GetTransactionByHash gets a wire.MsgTx for the specified transaction hash.

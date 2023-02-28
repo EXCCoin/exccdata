@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-TMUX_SESSION="dcrdata-harness"
+TMUX_SESSION="exccdata-harness"
 
 tmux has-session -t ${TMUX_SESSION} &> /dev/null
 if [ $? -eq 1 ]; then

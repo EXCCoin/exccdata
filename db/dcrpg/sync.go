@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrdata/v8/db/dbtypes"
-	"github.com/decred/dcrdata/v8/rpcutils"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccdata/v8/db/dbtypes"
+	"github.com/EXCCoin/exccdata/v8/rpcutils"
 )
 
 const (
@@ -69,7 +69,7 @@ func (pgb *ChainDB) SyncChainDB(ctx context.Context, client rpcutils.BlockFetche
 		panic("invalid starting height")
 	}
 
-	log.Info("Current best block (dcrd):       ", nodeHeight)
+	log.Info("Current best block (exccd):      ", nodeHeight)
 	log.Info("Current best block (primary db): ", lastBlock)
 	log.Info("Current best block (stakedb):    ", stakeDBHeight)
 

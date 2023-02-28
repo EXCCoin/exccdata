@@ -12,19 +12,19 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/decred/dcrd/chaincfg/v3"
-	"github.com/decred/dcrd/dcrutil/v4"
-	"github.com/decred/dcrd/rpcclient/v7"
+	"github.com/EXCCoin/exccd/chaincfg/v3"
+	"github.com/EXCCoin/exccd/dcrutil/v4"
+	"github.com/EXCCoin/exccd/rpcclient/v7"
 
-	"github.com/decred/dcrdata/v8/rpcutils"
-	"github.com/decred/dcrdata/v8/txhelpers"
+	"github.com/EXCCoin/exccdata/v8/rpcutils"
+	"github.com/EXCCoin/exccdata/v8/txhelpers"
 	"github.com/decred/slog"
 )
 
 var host = flag.String("host", "127.0.0.1:9109", "node RPC host:port")
-var user = flag.String("user", "dcrd", "node RPC username")
+var user = flag.String("user", "exccd", "node RPC username")
 var pass = flag.String("pass", "bananas", "node RPC password")
-var cert = flag.String("cert", "dcrd.cert", "node RPC TLS certificate (when notls=false)")
+var cert = flag.String("cert", "exccd.cert", "node RPC TLS certificate (when notls=false)")
 var notls = flag.Bool("notls", false, "Disable use of TLS for node connection")
 var start = flag.Uint64("start", 491_705, "Start block height")
 var end = flag.Uint64("end", 1<<32, "End block height")

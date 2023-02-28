@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	chainjson "github.com/decred/dcrd/rpc/jsonrpc/types/v3"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	chainjson "github.com/EXCCoin/exccd/rpc/jsonrpc/types/v3"
 )
 
 func TestSideChainTips(t *testing.T) {

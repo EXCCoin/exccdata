@@ -13,9 +13,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/decred/dcrd/dcrutil/v4"
-	"github.com/decred/dcrdata/exchanges/v3"
-	dcrrates "github.com/decred/dcrdata/exchanges/v3/ratesproto"
+	"github.com/EXCCoin/exccd/dcrutil/v4"
+	"github.com/EXCCoin/exccdata/exchanges/v3"
+	dcrrates "github.com/EXCCoin/exccdata/exchanges/v3/ratesproto"
 	"google.golang.org/grpc"
 )
 

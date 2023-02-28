@@ -14,12 +14,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	"github.com/decred/dcrd/dcrutil/v4"
-	"github.com/decred/dcrd/txscript/v4/stdscript"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	"github.com/EXCCoin/exccd/dcrutil/v4"
+	"github.com/EXCCoin/exccd/txscript/v4/stdscript"
 
-	"github.com/decred/dcrdata/v8/db/dbtypes/internal"
-	"github.com/decred/dcrdata/v8/txhelpers"
+	"github.com/EXCCoin/exccdata/v8/db/dbtypes/internal"
+	"github.com/EXCCoin/exccdata/v8/txhelpers"
 )
 
 var scriptClassNames map[string]ScriptClass
@@ -2096,7 +2096,7 @@ type AddressInfo struct {
 
 	// IsDummyAddress is true when the address is the dummy address typically
 	// used for unspendable ticket change outputs. See
-	// https://github.com/decred/dcrdata/v5/issues/358 for details.
+	// https://github.com/EXCCoin/exccdata/v5/issues/358 for details.
 	IsDummyAddress bool
 
 	// Page parameters

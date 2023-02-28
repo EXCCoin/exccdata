@@ -8,10 +8,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/decred/dcrd/chaincfg/chainhash"
-	chainjson "github.com/decred/dcrd/rpc/jsonrpc/types/v3"
-	"github.com/decred/dcrd/rpcclient/v7"
-	"github.com/decred/dcrd/wire"
+	"github.com/EXCCoin/exccd/chaincfg/chainhash"
+	chainjson "github.com/EXCCoin/exccd/rpc/jsonrpc/types/v3"
+	"github.com/EXCCoin/exccd/rpcclient/v7"
+	"github.com/EXCCoin/exccd/wire"
 )
 
 const (

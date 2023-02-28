@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/decred/dcrd/chaincfg/v3"
-	chainjson "github.com/decred/dcrd/rpc/jsonrpc/types/v3"
+	"github.com/EXCCoin/exccd/chaincfg/v3"
+	chainjson "github.com/EXCCoin/exccd/rpc/jsonrpc/types/v3"
 )
 
 const (
