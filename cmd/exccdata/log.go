@@ -22,7 +22,6 @@ import (
 	"github.com/EXCCoin/exccdata/db/dcrpg/v8"
 	"github.com/EXCCoin/exccdata/exchanges/v3"
 	"github.com/EXCCoin/exccdata/gov/v6/agendas"
-	"github.com/EXCCoin/exccdata/gov/v6/politeia"
 
 	"github.com/EXCCoin/exccdata/v8/blockdata"
 	"github.com/EXCCoin/exccdata/v8/mempool"
@@ -91,7 +90,6 @@ func init() {
 	pubsub.UseLogger(pubsubLog)
 	exchanges.UseLogger(xcBotLog)
 	agendas.UseLogger(agendasLog)
-	politeia.UseLogger(proposalsLog)
 }
 
 // subsystemLoggers maps each subsystem identifier to its associated logger.

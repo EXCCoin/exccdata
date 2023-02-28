@@ -26,7 +26,6 @@ import (
 
 	"github.com/EXCCoin/exccdata/exchanges/v3"
 	"github.com/EXCCoin/exccdata/gov/v6/agendas"
-	pitypes "github.com/EXCCoin/exccdata/gov/v6/politeia/types"
 	"github.com/EXCCoin/exccdata/v8/blockdata"
 	"github.com/EXCCoin/exccdata/v8/db/dbtypes"
 	"github.com/EXCCoin/exccdata/v8/explorer/types"
@@ -109,13 +108,6 @@ type explorerDataSource interface {
 	GetExplorerFullBlocks(start int, end int) []*types.BlockInfo
 	CurrentDifficulty() (float64, error)
 	Difficulty(timestamp int64) float64
-}
-
-type PoliteiaBackend interface {
-	ProposalsLastSync() int64
-	ProposalsSync() error
-	ProposalsAll(offset, rowsCount int, filterByVoteStatus ...int) ([]*pitypes.ProposalRecord, int, error)
-	ProposalByToken(token string) (*pitypes.ProposalRecord, error)
 }
 
 // agendaBackend implements methods that manage agendas db data.
@@ -203,7 +195,6 @@ type explorerUI struct {
 	chartSource      ChartDataSource
 	agendasSource    agendaBackend
 	voteTracker      *agendas.VoteTracker
-	proposals        PoliteiaBackend
 	dbsSyncing       atomic.Value
 	templates        templates
 	wsHub            *WebsocketHub
@@ -217,7 +208,6 @@ type explorerUI struct {
 	// displaySyncStatusPage indicates if the sync status page is the only web
 	// page that should be accessible during DB synchronization.
 	displaySyncStatusPage atomic.Value
-	politeiaURL           string
 
 	invsMtx sync.RWMutex
 	invs    *types.MempoolInfo
@@ -281,8 +271,6 @@ type ExplorerConfig struct {
 	XcBot         *exchanges.ExchangeBot
 	AgendasSource agendaBackend
 	Tracker       *agendas.VoteTracker
-	Proposals     PoliteiaBackend
-	PoliteiaURL   string
 	MainnetLink   string
 	TestnetLink   string
 	OnionAddress  string
@@ -302,8 +290,6 @@ func New(cfg *ExplorerConfig) *explorerUI {
 	exp.xcDone = make(chan struct{})
 	exp.agendasSource = cfg.AgendasSource
 	exp.voteTracker = cfg.Tracker
-	exp.proposals = cfg.Proposals
-	exp.politeiaURL = cfg.PoliteiaURL
 	explorerLinks.Mainnet = cfg.MainnetLink
 	explorerLinks.Testnet = cfg.TestnetLink
 	explorerLinks.MainnetSearch = cfg.MainnetLink + "search?search="
@@ -560,19 +546,6 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, msgBlock *wire.MsgB
 	// Trigger a vote info refresh.
 	if exp.voteTracker != nil {
 		go exp.voteTracker.Refresh()
-	}
-
-	// Update proposals data every 5 blocks
-	if (newBlockData.Height%5 == 0) && exp.proposals != nil {
-		// Update the proposal DB. This is run asynchronously since it involves
-		// a query to Politeia (a remote system) and we do not want to block
-		// execution.
-		go func() {
-			err := exp.proposals.ProposalsSync()
-			if err != nil {
-				log.Errorf("(PoliteiaBackend).ProposalsSync: %v", err)
-			}
-		}()
 	}
 
 	// Update consensus agendas data every 5 blocks.

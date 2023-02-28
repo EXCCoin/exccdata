@@ -34,7 +34,6 @@ import (
 	m "github.com/EXCCoin/exccdata/cmd/exccdata/internal/middleware"
 	"github.com/EXCCoin/exccdata/exchanges/v3"
 	"github.com/EXCCoin/exccdata/gov/v6/agendas"
-	"github.com/EXCCoin/exccdata/gov/v6/politeia"
 	apitypes "github.com/EXCCoin/exccdata/v8/api/types"
 	"github.com/EXCCoin/exccdata/v8/db/cache"
 	"github.com/EXCCoin/exccdata/v8/db/dbtypes"
@@ -119,7 +118,6 @@ type appContext struct {
 	Status      *apitypes.Status
 	xcBot       *exchanges.ExchangeBot
 	AgendaDB    *agendas.AgendaDB
-	ProposalsDB *politeia.ProposalsDB
 	maxCSVAddrs int
 	charts      *cache.ChartData
 }
@@ -132,7 +130,6 @@ type AppContextConfig struct {
 	DataSource        DataSource
 	XcBot             *exchanges.ExchangeBot
 	AgendasDBInstance *agendas.AgendaDB
-	ProposalsDB       *politeia.ProposalsDB
 	MaxAddrs          int
 	Charts            *cache.ChartData
 	AppVer            string

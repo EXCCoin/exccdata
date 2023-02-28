@@ -27,7 +27,6 @@ import (
 	"github.com/EXCCoin/exccdata/db/dcrpg/v8"
 	"github.com/EXCCoin/exccdata/exchanges/v3"
 	"github.com/EXCCoin/exccdata/gov/v6/agendas"
-	politeia "github.com/EXCCoin/exccdata/gov/v6/politeia"
 
 	"github.com/EXCCoin/exccdata/v8/blockdata"
 	"github.com/EXCCoin/exccdata/v8/db/cache"
@@ -450,14 +449,6 @@ func _main(ctx context.Context) error {
 		return fmt.Errorf("failed to create new agendas db instance: %v", err)
 	}
 
-	// Creates a new or loads an existing proposals db instance that stores and
-	// retrieves data from politeia and is used by dcrdata.
-	proposalsDB, err := politeia.NewProposalsDB(cfg.PoliteiaURL,
-		filepath.Join(cfg.DataDir, cfg.ProposalsFileName))
-	if err != nil {
-		return fmt.Errorf("failed to create new proposals db instance: %v", err)
-	}
-
 	// A vote tracker tracks current block and stake versions and votes. Only
 	// initialize the vote tracker if not on simnet. nil tracker is a sentinel
 	// value throughout.
@@ -482,8 +473,6 @@ func _main(ctx context.Context) error {
 		XcBot:         xcBot,
 		AgendasSource: agendaDB,
 		Tracker:       tracker,
-		Proposals:     proposalsDB,
-		PoliteiaURL:   cfg.PoliteiaURL,
 		MainnetLink:   cfg.MainnetLink,
 		TestnetLink:   cfg.TestnetLink,
 		ReloadHTML:    cfg.ReloadHTML,
@@ -986,16 +975,6 @@ func _main(ctx context.Context) error {
 	if err = agendaDB.UpdateAgendas(); err != nil {
 		return fmt.Errorf("updating agendas db failed: %v", err)
 	}
-
-	// Retrieve updates and newly added proposals from Politeia and store them
-	// on our stormdb. This call is made asynchronously to not block execution
-	// while the proposals db is syncing.
-	log.Info("Syncing proposals data with Politeia...")
-	go func() {
-		if err := proposalsDB.ProposalsSync(); err != nil {
-			log.Errorf("updating proposals db failed: %v", err)
-		}
-	}()
 
 	// Monitors for new blocks, transactions, and reorgs should not run before
 	// blockchain syncing and DB indexing completes. If started before then, the
