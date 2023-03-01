@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/EXCCoin/exccd/chaincfg/v3"
 	"github.com/EXCCoin/exccd/wire"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func Test_processTransactions(t *testing.T) {

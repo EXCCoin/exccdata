@@ -5645,9 +5645,9 @@ func (pgb *ChainDB) BlockSubsidy(height int64, voters uint16) *chainjson.GetBloc
 	work, stake, _ := txhelpers.RewardsAtBlock(height, voters, pgb.chainParams, dcp0010Active)
 	stake *= int64(voters)
 	return &chainjson.GetBlockSubsidyResult{
-		PoW:       work,
-		PoS:       stake,
-		Total:     work + stake,
+		PoW:   work,
+		PoS:   stake,
+		Total: work + stake,
 	}
 }
 

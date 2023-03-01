@@ -28,7 +28,7 @@ pushd "$ROOT" > /dev/null
 
 # Do the module paths in order so that go mod tidy updates will cascade to
 # dependent modules.
-MODPATHS="./go.mod ./exchanges/go.mod ./gov/go.mod ./db/dcrpg/go.mod ./cmd/dcrdata/go.mod \
+MODPATHS="./go.mod ./exchanges/go.mod ./gov/go.mod ./db/dcrpg/go.mod ./cmd/exccdata/go.mod \
     ./pubsub/democlient/go.mod ./cmd/swapscan-btc/go.mod ./testutil/dbload/go.mod \
     ./testutil/apiload/go.mod ./exchanges/rateserver/go.mod"
 #MODPATHS=$(find . -name go.mod -type f -print)

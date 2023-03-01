@@ -158,10 +158,10 @@ func (exp *explorerUI) timeoutErrorPage(w http.ResponseWriter, err error, debugS
 
 // For the exchange rates on the homepage
 type homeConversions struct {
-	ExchangeRate    *exchanges.Conversion
-	StakeDiff       *exchanges.Conversion
-	CoinSupply      *exchanges.Conversion
-	PowSplit        *exchanges.Conversion
+	ExchangeRate *exchanges.Conversion
+	StakeDiff    *exchanges.Conversion
+	CoinSupply   *exchanges.Conversion
+	PowSplit     *exchanges.Conversion
 }
 
 // Home is the page handler for the "/" path.
@@ -197,10 +197,10 @@ func (exp *explorerUI) Home(w http.ResponseWriter, r *http.Request) {
 	xcBot := exp.xcBot
 	if xcBot != nil {
 		conversions = &homeConversions{
-			ExchangeRate:    xcBot.Conversion(1.0),
-			StakeDiff:       xcBot.Conversion(homeInfo.StakeDiff),
-			CoinSupply:      xcBot.Conversion(dcrutil.Amount(homeInfo.CoinSupply).ToCoin()),
-			PowSplit:        xcBot.Conversion(dcrutil.Amount(homeInfo.NBlockSubsidy.PoW).ToCoin()),
+			ExchangeRate: xcBot.Conversion(1.0),
+			StakeDiff:    xcBot.Conversion(homeInfo.StakeDiff),
+			CoinSupply:   xcBot.Conversion(dcrutil.Amount(homeInfo.CoinSupply).ToCoin()),
+			PowSplit:     xcBot.Conversion(dcrutil.Amount(homeInfo.NBlockSubsidy.PoW).ToCoin()),
 		}
 	}
 

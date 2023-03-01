@@ -18,9 +18,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/caarlos0/env/v6"
 	"github.com/EXCCoin/exccd/chaincfg/v3"
 	"github.com/EXCCoin/exccd/dcrutil/v4"
+	"github.com/caarlos0/env/v6"
 	"github.com/decred/slog"
 	flags "github.com/jessevdk/go-flags"
 

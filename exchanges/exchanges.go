@@ -26,9 +26,9 @@ import (
 	"decred.org/dcrdex/dex"
 	dexcandles "decred.org/dcrdex/dex/candles"
 	"decred.org/dcrdex/dex/msgjson"
+	dcrrates "github.com/EXCCoin/exccdata/exchanges/v3/ratesproto"
 	"github.com/carterjones/signalr"
 	"github.com/carterjones/signalr/hubs"
-	dcrrates "github.com/EXCCoin/exccdata/exchanges/v3/ratesproto"
 )
 
 // Tokens. Used to identify the exchange.
