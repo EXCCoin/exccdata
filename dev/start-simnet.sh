@@ -27,8 +27,8 @@ $PSQL < ./simnet.sql
 rm -rf ~/.exccdata/data/simnet
 rm -rf datadir
 pushd .. > /dev/null
-dcrdata -C ./dev/exccdata-simnet.conf -g --exccdserv=127.0.0.1:19201 \
---dcrdcert=${HARNESS_ROOT}/beta/rpc.cert
+exccdata -C ./dev/exccdata-simnet.conf -g --exccdserv=127.0.0.1:19201 \
+--exccdcert=${HARNESS_ROOT}/beta/rpc.cert
 popd > /dev/null
 
 echo " ***

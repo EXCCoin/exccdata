@@ -36,7 +36,7 @@ tmux send-keys "./ctl getbalance" C-m
 ################################################################################
 cat > "${HARNESS_ROOT}/${BETA}/ctl" <<EOF
 #!/bin/sh
-exccctl -C dcrbctl.conf \$*
+exccctl -C exccctl.conf \$*
 EOF
 chmod +x "${HARNESS_ROOT}/${BETA}/ctl"
 
@@ -60,7 +60,7 @@ cat > "${HARNESS_ROOT}/${BETA}/mine" <<EOF
       *) NUM=\$1 ;;
   esac
   for i in \$(seq \$NUM) ; do
-    exccctl -C dcrbctl.conf generate 1
+    exccctl -C exccctl.conf generate 1
     sleep 0.3
   done
 EOF

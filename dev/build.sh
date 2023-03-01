@@ -38,7 +38,7 @@ fi
 
 set -e
 
-# Delete the old exccdata binary that is now under cmd/dcrdata.
+# Delete the old exccdata binary that is now under cmd/exccdata.
 rm -f ${ROOT}/exccdata
 
 pushd $ROOT/cmd/exccdata > /dev/null
@@ -61,7 +61,7 @@ if [ -x "$(command -v parallel)" ]; then
         $FINDCMD | parallel --will-cite --bar gzip -k9f {} > /dev/null
     fi
 elif [ -x "$(command -v 7za)" ]; then
-    $FINDCMD -execdir 7za a -tgzip -mx=9 -mpass=13 {}.gz {} \; > /dev/null    
+    $FINDCMD -execdir 7za a -tgzip -mx=9 -mpass=13 {}.gz {} \; > /dev/null
 else
     $FINDCMD -execdir gzip -k9f {} \; > /dev/null
 fi
