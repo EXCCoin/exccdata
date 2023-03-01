@@ -490,7 +490,7 @@ export default class extends Controller {
       case 'ticket-price': // price graph
         d = ticketPriceFunc(data)
         assign(gOptions, mapDygraphOptions(d, [xlabel, 'Price', 'Tickets Bought'], true,
-          'Price (DCR)', true, false))
+          'Price (EXCC)', true, false))
         gOptions.y2label = 'Tickets Bought'
         gOptions.series = { 'Tickets Bought': { axis: 'y2' } }
         this.visibility = [this.ticketsPriceTarget.checked, this.ticketsPurchaseTarget.checked]
@@ -499,7 +499,7 @@ export default class extends Controller {
           valueRange: [0, windowSize * 20 * 8],
           axisLabelFormatter: (y) => Math.round(y)
         }
-        yFormatter = customYFormatter(y => y.toFixed(8) + ' DCR')
+        yFormatter = customYFormatter(y => y.toFixed(8) + ' EXCC')
         break
 
       case 'ticket-pool-size': // pool size graph
@@ -523,16 +523,16 @@ export default class extends Controller {
           'Stake Participation (%)', true, false))
         yFormatter = (div, data, i) => {
           addLegendEntryFmt(div, data.series[0], y => y.toFixed(4) + '%')
-          div.appendChild(legendEntry(`${legendMarker()} Ticket Pool Value: ${intComma(rawPoolValue[i])} DCR`))
-          div.appendChild(legendEntry(`${legendMarker()} Coin Supply: ${intComma(rawCoinSupply[i])} DCR`))
+          div.appendChild(legendEntry(`${legendMarker()} Ticket Pool Value: ${intComma(rawPoolValue[i])} EXCC`))
+          div.appendChild(legendEntry(`${legendMarker()} Coin Supply: ${intComma(rawCoinSupply[i])} EXCC`))
         }
         break
 
       case 'ticket-pool-value': // pool value graph
         d = zip2D(data, data.poolval, atomsToDCR)
         assign(gOptions, mapDygraphOptions(d, [xlabel, 'Ticket Pool Value'], true,
-          'Ticket Pool Value (DCR)', true, false))
-        yFormatter = customYFormatter(y => intComma(y) + ' DCR')
+          'Ticket Pool Value (EXCC)', true, false))
+        yFormatter = customYFormatter(y => intComma(y) + ' EXCC')
         break
 
       case 'block-size': // block size graph
@@ -560,7 +560,7 @@ export default class extends Controller {
       case 'coin-supply': // supply graph
         d = circulationFunc(data)
         assign(gOptions, mapDygraphOptions(d.data, [xlabel, 'Coin Supply', 'Inflation Limit', 'Mix Rate'],
-          true, 'Coin Supply (DCR)', true, false))
+          true, 'Coin Supply (EXCC)', true, false))
         gOptions.y2label = 'Inflation Limit'
         gOptions.y3label = 'Mix Rate'
         gOptions.series = { 'Inflation Limit': { axis: 'y2' }, 'Mix Rate': { axis: 'y3' } }
@@ -578,36 +578,36 @@ export default class extends Controller {
         }
         gOptions.inflation = d.inflation
         yFormatter = (div, data, i) => {
-          addLegendEntryFmt(div, data.series[0], y => intComma(y) + ' DCR')
+          addLegendEntryFmt(div, data.series[0], y => intComma(y) + ' EXCC')
           let change = 0
           if (i < d.inflation.length) {
             const supply = data.series[0].y
             if (this.anonymitySetTarget.checked) {
               const mixed = data.series[2].y
               const mixedPercentage = ((mixed / supply) * 100).toFixed(2)
-              div.appendChild(legendEntry(`${legendMarker()} Mixed: ${intComma(mixed)} DCR (${mixedPercentage}%)`))
+              div.appendChild(legendEntry(`${legendMarker()} Mixed: ${intComma(mixed)} EXCC (${mixedPercentage}%)`))
             }
             const predicted = d.inflation[i]
             const unminted = predicted - data.series[0].y
             change = ((unminted / predicted) * 100).toFixed(2)
-            div.appendChild(legendEntry(`${legendMarker()} Unminted: ${intComma(unminted)} DCR (${change}%)`))
+            div.appendChild(legendEntry(`${legendMarker()} Unminted: ${intComma(unminted)} EXCC (${change}%)`))
           }
         }
         break
 
       case 'fees': // block fee graph
         d = zip2D(data, data.fees, atomsToDCR)
-        assign(gOptions, mapDygraphOptions(d, [xlabel, 'Total Fee'], false, 'Total Fee (DCR)', true, false))
+        assign(gOptions, mapDygraphOptions(d, [xlabel, 'Total Fee'], false, 'Total Fee (EXCC)', true, false))
         break
 
       case 'privacy-participation': { // anonymity set graph
         d = anonymitySetFunc(data)
         this.customLimits = d.limits
         const label = 'Mix Rate'
-        assign(gOptions, mapDygraphOptions(d.data, [xlabel, label], false, `${label} (DCR)`, true, false))
+        assign(gOptions, mapDygraphOptions(d.data, [xlabel, label], false, `${label} (EXCC)`, true, false))
 
         yFormatter = (div, data, i) => {
-          addLegendEntryFmt(div, data.series[0], y => y > 0 ? intComma(y) : '0' + ' DCR')
+          addLegendEntryFmt(div, data.series[0], y => y > 0 ? intComma(y) : '0' + ' EXCC')
         }
         break
       }

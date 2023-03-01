@@ -1,7 +1,7 @@
 {{define "statistics"}}
 <!DOCTYPE html>
 <html lang="en">
-    {{ template "html-head" headData .CommonPageData "Decred Statistics"}}
+    {{ template "html-head" headData .CommonPageData "ExchangeCoin Statistics"}}
         {{ template "navbar" . }}
         {{with .Stats}}
         <div class="container py-1">
@@ -13,7 +13,7 @@
                         <div class="card-body card-body-padding-top">
                             <span id="total-supply-card" class="stat-data">{{template "decimalParts" (amountAsDecimalPartsTrimmed .TotalSupply 2 true)}}</span>
                             </br>
-                            <span class="stat-details unit">DCR</span>
+                            <span class="stat-details unit">EXCC</span>
                             {{if .TotalSupplyPercentage}}
                             </br>
                             <span class="stat-details no-decimal">{{printf "%.2f" .TotalSupplyPercentage}}% mined of {{template "decimalParts" (amountAsDecimalParts .UltimateSupply true)}}</span>
@@ -34,17 +34,6 @@
                             <span class="stat-data">{{printf "%.2f" .HashRate}}</span>
                         </br>
                         <span class="stat-details">PHash/s</span>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header network-statistics">Project Fund</div>
-                        <div class="card-body card-body-padding-top">
-                            <span id="project-fund-card"
-                                  class="stat-data">{{ template "decimalParts" (amountAsDecimalPartsTrimmed .ProjectFunds 2 true)}}</span>
-                            </br>
-                            <span class="stat-details unit">DCR</span>
-                            </br>
-                            <span class="stat-link"><a href="/address/{{.ProjectAddress}}">show address</a></span>
                         </div>
                     </div>
                 </div>
@@ -74,9 +63,9 @@
                                ({{remaining .IdxInRewardWindow .RewardWindowSize .BlockTime}})</span>
                             </br>
                             <div style="text-align:left;margin-left:33px;">
-                              <span class="stat-details">Curent {{template "decimalParts" (amountAsDecimalParts .BlockReward true)}} DCR</span>
+                              <span class="stat-details">Curent {{template "decimalParts" (amountAsDecimalParts .BlockReward true)}} EXCC</span>
                               </br>
-                              <span class="stat-details">Next  (est.) {{template "decimalParts" (amountAsDecimalParts .NextBlockReward true)}} DCR</span>
+                              <span class="stat-details">Next  (est.) {{template "decimalParts" (amountAsDecimalParts .NextBlockReward true)}} EXCC</span>
                             </div>
                         </div>
                     </div>
@@ -85,7 +74,7 @@
                         <div class="card-body card-body-padding-top">
                             <span class="stat-data">{{template "decimalParts" (amountAsDecimalParts .BlockReward true)}}</span>
                             </br>
-                            <span class="stat-details unit">DCR</span>
+                            <span class="stat-details unit">EXCC</span>
                         </div>
                     </div>
                     <div class="card">
@@ -93,18 +82,10 @@
                         <div class="card-body card-body-padding-top">
                             <span class="stat-data">{{template "decimalParts" (amountAsDecimalParts .PoWReward true)}}</span>
                             </br>
-                            <span class="stat-details unit">DCR per block</span>
+                            <span class="stat-details unit">EXCC per block</span>
                             </br>
                             <span class="stat-details unit" style="margin-left: 10px;">can be lower if less than 5 votes are mined
                             </span>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header block-rewards">Project Fund Subsidy</div>
-                        <div class="card-body card-body-padding-top">
-                            <span class="stat-data">{{template "decimalParts" (amountAsDecimalParts .ProjectFundReward true)}}</span>
-                            </br>
-                            <span class="stat-details unit">DCR per block</span>
                         </div>
                     </div>
                 </div>
@@ -132,7 +113,7 @@
                         <div class="card-body card-body-padding-top">
                             <span  class="stat-data">{{template "decimalParts" (float64AsDecimalParts .TicketPrice 8 false)}}</span>
                             </br>
-                            <span class="stat-details unit">DCR</span>
+                            <span class="stat-details unit">EXCC</span>
                         </div>
                     </div>
                     <div width="45%" class="card">
@@ -158,9 +139,9 @@
                               ({{remaining .IdxBlockInWindow .WindowSize .BlockTime}})</span>
                             </br>
                             <div style="text-align:left;margin-left:34px;">
-                              <span class="stat-details">Curent: {{template "decimalParts" (float64AsDecimalParts .TicketPrice 8 false)}} DCR</span>
+                              <span class="stat-details">Curent: {{template "decimalParts" (float64AsDecimalParts .TicketPrice 8 false)}} EXCC</span>
                               </br>
-                              <span class="stat-details">Next: {{template "decimalParts" (float64AsDecimalParts .NextEstimatedTicketPrice 8 false)}} DCR</span>
+                              <span class="stat-details">Next: {{template "decimalParts" (float64AsDecimalParts .NextEstimatedTicketPrice 8 false)}} EXCC</span>
                             </div>
                         </div>
                     </div>
@@ -169,7 +150,7 @@
                         <div class="card-body card-body-padding-top">
                             <span class="stat-data">{{template "decimalParts" (amountAsDecimalParts ( divide .PoSReward 5) true)}}</span>
                             </br>
-                            <span class="stat-details unit">DCR per ticket</span>
+                            <span class="stat-details unit">EXCC per ticket</span>
                         </div>
                     </div>
                     <div width="45%" class="card">
@@ -209,7 +190,7 @@
                         <div class="card-body card-body-padding-top">
                             <span class="stat-data no-decimal">{{template "decimalParts" (float64AsDecimalParts  .TicketPoolValue 8 true)}}</span>
                             </br>
-                            <span class="stat-details unit">DCR</span>
+                            <span class="stat-details unit">EXCC</span>
                             </br>
                             <span class="stat-details">{{printf "%.2f" .TPVOfTotalSupplyPeecentage}}% of total supply</span>
                         </div>

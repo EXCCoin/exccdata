@@ -1,7 +1,7 @@
 {{define "tx"}}
 <!DOCTYPE html>
 <html lang="en">
-{{template "html-head" headData .CommonPageData (printf "Decred Transaction %.20s..." .Data.TxID)}}
+{{template "html-head" headData .CommonPageData (printf "ExchangeCoin Transaction %.20s..." .Data.TxID)}}
 {{template "navbar" . }}
 {{$conv := .Conversions}}
 {{with .Data}}
@@ -39,7 +39,7 @@
                 {{end}}
               </div>
               {{if gt .MixCount 0}}
-              <div class="d-inline-block mix-box mx-2 fs14">Mix: {{.MixCount}} outputs of {{template "decimalParts" (amountAsDecimalParts .MixDenom false)}} DCR
+              <div class="d-inline-block mix-box mx-2 fs14">Mix: {{.MixCount}} outputs of {{template "decimalParts" (amountAsDecimalParts .MixDenom false)}} EXCC
               </div>
               {{- end}}
               {{if $.SwapsFound}}
@@ -58,7 +58,7 @@
                 <span class="text-secondary fs13">Total Sent</span>
                 <br>
                 <span class="lh1rem d-inline-block pt-1"
-                  ><span class="fs18 fs14-decimal fw-bold">{{template "decimalParts" (float64AsDecimalParts .Total 8 true 2)}}</span><span class="text-secondary fs14">DCR</span>
+                  ><span class="fs18 fs14-decimal fw-bold">{{template "decimalParts" (float64AsDecimalParts .Total 8 true 2)}}</span><span class="text-secondary fs14">EXCC</span>
                 </span>
                 {{if $conv.Total}}
                 <br>
@@ -99,7 +99,7 @@
                 <span class="text-secondary fs13">Fee</span>
                 <br>
                 <span class="lh1rem d-inline-block pt-1"
-                  ><span class="fs18 fs14-decimal fw-bold">{{template "decimalParts" (float64AsDecimalParts .Fee.ToCoin 8 true 2)}}</span><span class="text-secondary fs14">DCR</span>
+                  ><span class="fs18 fs14-decimal fw-bold">{{template "decimalParts" (float64AsDecimalParts .Fee.ToCoin 8 true 2)}}</span><span class="text-secondary fs14">EXCC</span>
                 </span>
                 {{if $conv.Fees}}
                 <br>
@@ -328,7 +328,7 @@
                       <span class="text-danger">Rejected</span>
                     {{end}}
                   </div>
-                {{end}}              
+                {{end}}
                 <div class="d-flex w-100 justify-content-start p-2 my-2 secondary-card rounded">
                   <div class="col-auto lilbox px-2">
                     <div
@@ -395,7 +395,7 @@
                  </tr>
                  <tr>
                    <td class="text-end medium-sans text-nowrap pe-2 py-2">Votes Cast:</td>
-                   <td class="text-start py-1 text-secondary"> {{.TotalVotes}} 
+                   <td class="text-start py-1 text-secondary"> {{.TotalVotes}}
                     ({{printf "%.0f" (percentage .TotalVotes .EligibleVotes)}}% turnout)
                    </td>
                  {{if not .Approved}}
@@ -410,12 +410,12 @@
                     <td class="text-start py-1 text-secondary">{{formatDateTime .VoteEndDate}}</td>
                    {{else}}
                     <td class="text-end medium-sans text-nowrap pe-2 py-2" >Voting Ended:</td>
-                    <td class="text-start py-1 text-secondary" data-tx-target="formattedAge">{{$.Data.Time.String}}</td>  
+                    <td class="text-start py-1 text-secondary" data-tx-target="formattedAge">{{$.Data.Time.String}}</td>
                   {{end}}
                  {{end}}
                  </tr>
                  <tr>
-                 {{if not .Approved}} 
+                 {{if not .Approved}}
                    <td class="text-end medium-sans text-nowrap pe-2 py-2" >Yes Votes Still Needed:</td>
                    <td class="text-start py-1 text-secondary">
                      {{$remainingYesVotes := subtract .RequiredYesVotes .YesVotes}}
@@ -423,7 +423,7 @@
                        {{$remainingYesVotes}}
                      {{end}}
                    </td>
-                 {{end}}  
+                 {{end}}
                    <td class="text-end medium-sans text-nowrap pe-2 py-2">Voting Period:</td>
                    <td class="text-start py-1 text-secondary">
                  {{if $votingStarted}}
@@ -465,7 +465,7 @@
                     <th class="text-nowrap">Previous Outpoint</th>
                     <th class="addr-hash-column">Addresses</th>
                     <th class="text-center shrink-to-fit">Block</th>
-                    <th class="text-end shrink-to-fit">DCR</th>
+                    <th class="text-end shrink-to-fit">EXCC</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -522,7 +522,7 @@
                     <th class="text-start shrink-to-fit">Type</th>
                     <th class="text-start shrink-to-fit"><span class="d-none d-sm-inline">Version</span><span class="d-sm-none">Ver</span></th>
                     <th class="text-start shrink-to-fit">Spent</th>
-                    <th class="text-end shrink-to-fit">DCR</th>
+                    <th class="text-end shrink-to-fit">EXCC</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -546,10 +546,6 @@
                                     <span class="break-word">{{.OP_RETURN}}</span>
                                 </div>
                                 {{end}}
-                            {{else if .OP_TADD}}
-                              <div>
-                                <span class="break-word"><a href="/treasury">Treasury</a></span>
-                              </div>
                             {{end}}
                         </td>
                         <td class="fs13 break-word shrink-to-fit">
@@ -562,11 +558,7 @@
                               {{if $spending.Hash}}
                                  <a href="/tx/{{$spending.Hash}}/in/{{$spending.Index}}">{{$v.Spent}}</a>
                               {{else}}
-                                {{if or $v.OP_TADD (le $v.Amount 0.0)}}
-                                  n/a
-                                {{else if gt $v.Amount 0.0}}
-                                  {{$v.Spent}}
-                                {{end}}
+                                {{$v.Spent}}
                               {{end}}
                             {{end}}
                         </td>
@@ -579,7 +571,7 @@
             </table>
         </div>
     </div>
-   
+
     {{if .VoteInfo}}
     {{with .VoteInfo}}
     <div class="row mb-3">
@@ -614,27 +606,6 @@
             </table>
             {{else}}
             <br>No recognized agenda votes in this transaction.
-            {{end}}
-            <h5>Treasury Spend Choices</h5>
-            {{if gt (len .TSpends) 0}}
-            <table class="table">
-                <thead>
-                  <tr>
-                    <th>Treasury Spend Transaction</th>
-                    <th>Choice</th>
-                  </tr>
-                </thead>
-                <tbody>
-                    {{range .TSpends}}
-                    <tr>
-                        <td><a href="/tx/{{.TSpend}}">{{.TSpend}}</a></td>
-                        <td>{{.Choice}}</td>
-                    </tr>
-                    {{end}}
-                </tbody>
-            </table>
-            {{else}}
-            No treasury spend choices in this transaction.
             {{end}}
         </div>
     </div>

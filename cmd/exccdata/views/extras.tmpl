@@ -3,50 +3,35 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	{{/* The above meta tags *must* come first in the head */ -}}
-	<meta name="description" content="dcrdata, an original Decred block explorer powered by Go">
-	<meta name="author" content="The Decred developers">
-	<meta name="application-name"           content="dcrdata - The Decred Block Explorer">
-	<meta name="apple-mobile-web-app-title" content="dcrdata - The Decred Block Explorer">
+	<meta name="description" content="exccdata, an original ExchangeCoin block explorer powered by Go">
+	<meta name="author" content="The Decred developers | The ExchangeCoin Team">
+	<meta name="application-name"           content="exccdata - The ExchangeCoin Block Explorer">
+	<meta name="apple-mobile-web-app-title" content="exccdata - The ExchangeCoin Block Explorer">
 
 	<meta name="twitter:card" content="summary"/>
-	<meta name="twitter:title" content="dcrdata - The Decred Block Explorer"/>
+	<meta name="twitter:title" content="exccdata - The ExchangeCoin Block Explorer"/>
 	<meta name="twitter:description" content="{{ .Title }}"/>
 	<meta name="twitter:image" content="{{ .Data.BaseURL }}/images/dcrdata400x348.png"/>
 
-	<meta property="og:site_name"   content="dcrdata" />
-	<meta property="og:title"       content="dcrdata - The Decred Block Explorer" />
+	<meta property="og:site_name"   content="exccdata" />
+	<meta property="og:title"       content="exccdata - The ExchangeCoin Block Explorer" />
 	<meta property="og:description" content="{{ .Title }}" />
 	<meta property="og:type"        content="website" />
 	<meta property="og:url"         content="{{ .Data.CanonicalURL }}" />
 	<meta property="og:image"       content="{{ .Data.BaseURL }}/images/dcrdata400x348.png" />
 
 	<!--  Custom favicon  -->
-		<!-- Apple PWA -->
-		<link rel="apple-touch-icon" sizes="57x57"   href="/images/favicon/apple-touch-icon-57x57.png?v=yHh3NA">
-		<link rel="apple-touch-icon" sizes="60x60"   href="/images/favicon/apple-touch-icon-60x60.png?v=yHh3NA">
-		<link rel="apple-touch-icon" sizes="72x72"   href="/images/favicon/apple-touch-icon-72x72.png?v=yHh3NA">
-		<link rel="apple-touch-icon" sizes="76x76"   href="/images/favicon/apple-touch-icon-76x76.png?v=yHh3NA">
-		<link rel="apple-touch-icon" sizes="114x114" href="/images/favicon/apple-touch-icon-114x114.png?v=yHh3NA">
-		<link rel="apple-touch-icon" sizes="120x120" href="/images/favicon/apple-touch-icon-120x120.png?v=yHh3NA">
-		<link rel="apple-touch-icon" sizes="144x144" href="/images/favicon/apple-touch-icon-144x144.png?v=yHh3NA">
-		<link rel="apple-touch-icon" sizes="152x152" href="/images/favicon/apple-touch-icon-152x152.png?v=yHh3NA">
-		<link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon-180x180.png?v=yHh3NA">
-
-		<!-- Browser -->
-		<link rel="icon" href="/images/favicon/favicon.ico?v=yHh3NA">
-		<link rel="icon" href="/images/favicon/favicon-32x32.png?v=yHh3NA" type="image/png" sizes="32x32">
-		<link rel="icon" href="/images/favicon/favicon-16x16.png?v=yHh3NA" type="image/png" sizes="16x16">
-
-		<!-- Android PWA -->
-		<link rel="manifest" href="/images/favicon/site.webmanifest?v=yHh3NA">
-
-		<!-- Safari -->
-		<link rel="mask-icon" href="/images/favicon/safari-pinned-tab.svg?v=yHh3NA" color="#091440">
-
-		<!-- Windows PWA -->
-		<meta name="msapplication-TileColor" content="#091440">
-		<meta name="msapplication-TileImage" content="/images/favicon/mstile-144x144.png?v=65tv3">
-		<meta name="msapplication-config" content="/images/favicon/browserconfig.xml?v=65tv3">
+	<link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+	<link rel="manifest" href="/images/favicon/site.webmanifest">
+	<link rel="mask-icon" href="/images/favicon/safari-pinned-tab.svg" color="#5bbad5">
+	<link rel="shortcut icon" href="/images/favicon/favicon.ico">
+	<meta name="apple-mobile-web-app-title" content="ExchangeCoin">
+	<meta name="application-name" content="ExchangeCoin">
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="msapplication-config" content="/images/favicon/browserconfig.xml">
+	<meta name="theme-color" content="#ffffff">
 	<!-- End custom favicon -->
 
 	<meta name="turbolinks-cache-control" content="no-cache">
@@ -61,7 +46,7 @@
 	<link rel="preload" href="/images/connected.svg?x=65tv3" as="image" type="image/svg+xml" />
 	<link rel="preload" href="/images/disconnected.svg?x=65tv3" as="image" type="image/svg+xml" />
 
-	<link href="/dist/css/style.d8a442444300a678.css" rel="stylesheet">
+	<link href="/dist/css/style.f5fcd26618fd862a.css" rel="stylesheet">
 
 	<script src="/js/vendor/turbolinks.min.js?v=65DCG"></script>
 </head>
@@ -71,7 +56,20 @@
 <body class="{{ theme }}{{if .Cookies.DarkMode}} darkBG{{end}}">
 <header class="top-nav d-flex align-items-center" id="navBar" data-blocktime="{{.BlockTimeUnix}}">
 	<div class="container d-flex justify-content-between align-items-center">
-		<a class="no-underline d-block home-link dcrdata-logo" href="/"></a>
+		<a class="py-1 border-0 d-flex justify-content-start align-items-center" href="/">
+			<div class="logo">
+				<svg data-name="exccLogo" width="32" height="36.375" xmlns="http://www.w3.org/2000/svg">
+					<path fill="#fff"
+						  d="m1.182 35.025 13.12-15.637L28.62 36.375l1.182-.992L15.31 18.187 29.802.992 28.62 0 14.303 16.987 1.183 1.35 0 2.342l13.296 15.845L0 34.033z"/>
+					<path fill="#c1272d"
+						  d="M18.975 18.187 32 2.727l-1.181-.991-12.851 15.251-1.007 1.2 1.007 1.2 12.85 15.252L32 33.647z"/>
+				</svg>
+			</div>
+			<div class="logo-text">
+				ExchangeCoin<br />
+				<b>Block Explorer</b>
+			</div>
+		</a>
 		<form
 			class="search-form"
 			role="search"
@@ -100,16 +98,15 @@
 				<span class="patty short"></span>
 				<div id="menu">
 					<a class="menu-item" data-keynav-skip href="/" title="Home">Home</a>
-					<a class="menu-item" data-keynav-skip href="/blocks" title="Decred blocks">Blocks</a>
-					<a class="menu-item" data-keynav-skip href="/mempool" title="Decred mempool">Mempool</a>
-					<a class="menu-item" data-keynav-skip href="/ticketpool" title="Decred ticket pool">Ticket Pool</a>
-					<a class="menu-item jsonly" data-keynav-skip href="/charts" title="Decred charts">Charts</a>
+					<a class="menu-item" data-keynav-skip href="/blocks" title="ExchangeCoin blocks">Blocks</a>
+					<a class="menu-item" data-keynav-skip href="/mempool" title="ExchangeCoin mempool">Mempool</a>
+					<a class="menu-item" data-keynav-skip href="/ticketpool" title="ExchangeCoin ticket pool">Ticket Pool</a>
+					<a class="menu-item jsonly" data-keynav-skip href="/charts" title="ExchangeCoin charts">Charts</a>
+					<a class="menu-item" data-keynav-skip href="/stats" title="Network Statistics">Network Statistics</a>
 					<a class="menu-item" data-keynav-skip href="/agendas" title="Agendas">Agendas</a>
-					<a class="menu-item" data-keynav-skip href="/proposals" title="Proposals">Proposals</a>
 					<a class="menu-item" data-keynav-skip href="/market" title="Market">Market</a>
-					<a class="menu-item" data-keynav-skip href="/attack-cost" title="Decred Attack Cost">Attack Cost</a>
+					<a class="menu-item" data-keynav-skip href="/attack-cost" title="ExchangeCoin Attack Cost">Attack Cost</a>
 					<a class="menu-item" data-keynav-skip href="/parameters" title="Chain Parameters">Parameters</a>
-					<a class="menu-item" data-keynav-skip href="/treasury" title="Decred Treasury">Treasury</a>
 					<a class="menu-item" data-keynav-skip href="/decodetx" title="Decode or send a raw transaction">Decode/Broadcast Tx</a>
 					<a class="menu-item" data-keynav-skip href="/verify-message" title="Verify Message">Verify Message</a>
 				{{- if eq .NetName "Mainnet"}}
@@ -150,15 +147,15 @@
 			<a
 				class="text-nowrap d-none d-md-inline-block pe-3"
 				href="{{.Links.Github}}"
-				title="dcrdata on GitHub"
+				title="exccdata on GitHub"
 				target="_blank"
 				rel="noopener noreferrer"
-			>dcrdata v{{.Version}}</a>
+			>exccdata v{{.Version}}</a>
 			{{- if ne .Links.OnionURL "" }}
 			<a
 				class="text-nowrap d-none d-md-inline-block pe-3"
 				href="{{.Links.OnionURL}}"
-				title="Access dcrdata over Tor"
+				title="Access exccdata over Tor"
 				target="_blank"
 				rel="noopener noreferrer"
 			>Tor site</a>
@@ -168,7 +165,7 @@
 				href="{{.Links.License}}"
 				target="_blank"
 				rel="noopener noreferrer"
-			>© 2022 The Decred developers (ISC)</a>
+			>© 2022 The Decred developers (ISC) | © 2023 ExchangeCoin Team (ISC)</a>
 		</span>
 		<span
 			id="connection"
@@ -182,14 +179,14 @@
 		</span>
 	</div>
 	<script
-		src="/dist/js/4.ff06ad625d5f1157.bundle.js"
-		data-turbolinks-eval="false"
-		data-turbolinks-suppress-warning
+			src="/dist/js/4.9062bb15b3ab5dc7.bundle.js"
+			data-turbolinks-eval="false"
+			data-turbolinks-suppress-warning
 	></script>
 	<script
-		src="/dist/js/app.ba2620d5445760b1.bundle.js"
-		data-turbolinks-eval="false"
-		data-turbolinks-suppress-warning
+			src="/dist/js/app.57855f11246ac865.bundle.js"
+			data-turbolinks-eval="false"
+			data-turbolinks-suppress-warning
 	></script>
 </footer>
 {{end}}
@@ -246,21 +243,21 @@
 		<th class="text-end"><span class="d-sm-none position-relative" data-tooltip="merged input count">Cnt</span
 			><span class="d-none d-sm-inline">Inputs</span>
 		</th>
-		<th class="text-end">Debit DCR</th>
+		<th class="text-end">Debit EXCC</th>
 	{{- else if eq $txType "merged_credit" }}
 		<th class="text-end"><span class="d-sm-none position-relative" data-tooltip="merged output count">Cnt</span
 			><span class="d-none d-sm-inline">Outputs</span>
 		</th>
-		<th class="text-end">Credit DCR</th>
+		<th class="text-end">Credit EXCC</th>
 	{{- else if eq $txType "merged" }}
 		<th title="Count of address's inputs and outputs in the transaction." class="text-end"><span class="d-none d-sm-inline-block">I/O Count</span><span class="d-sm-none position-relative" data-tooltip="# of inputs and outputs">#</span></th>
-		<th class="text-end">Credit DCR</th>
-		<th class="text-end">Debit DCR</th>
+		<th class="text-end">Credit EXCC</th>
+		<th class="text-end">Debit EXCC</th>
 	{{- else if eq $txType "unspent" }}
-		<th class="text-end">Credit DCR</th>
+		<th class="text-end">Credit EXCC</th>
 	{{- else}}
-		<th class="text-end">Credit DCR</th>
-		<th class="text-end">Debit DCR</th>
+		<th class="text-end">Credit EXCC</th>
+		<th class="text-end">Debit EXCC</th>
 	{{- end}}
 		<th class="d-none d-sm-table-cell text-end">Time (UTC)</th>
 		<th class="text-end">Age</th>

@@ -1,7 +1,7 @@
 {{define "mempool" -}}
 <!DOCTYPE html>
 <html lang="en">
-{{template "html-head" headData .CommonPageData "Decred Mempool"}}
+{{template "html-head" headData .CommonPageData "ExchangeCoin Mempool"}}
     {{template "navbar" . }}
         {{with .Mempool -}}
         <div class="container main"
@@ -25,7 +25,7 @@
                                 <div class="d-inline-block text-center text-md-start text-lg-center text-xl-start">
                                     <span class="text-secondary fs13">Total Sent</span>
                                     <br>
-                                    <span class="h4" data-mempool-target="likelyTotal">{{threeSigFigs .LikelyMineable.Total}}</span> <span class="text-secondary">DCR</span>
+                                    <span class="h4" data-mempool-target="likelyTotal">{{threeSigFigs .LikelyMineable.Total}}</span> <span class="text-secondary">EXCC</span>
                                 </div>
                             </div>
                             <div class="col-12 text-center">
@@ -66,14 +66,14 @@
                                 <div class="text-center text-secondary fs13">Regular</div>
                                 <div class="text-center h4 mb-0" data-mempool-target="regCount">{{.NumRegular}}</div>
                                 <div class="text-center fs13">
-                                    <span data-mempool-target="regTotal">{{threeSigFigs .LikelyMineable.RegularTotal}}</span> DCR
+                                    <span data-mempool-target="regTotal">{{threeSigFigs .LikelyMineable.RegularTotal}}</span> EXCC
                                 </div>
                             </div><!-- add treasury count here -->
                             <div class="col-12">
                                 <div class="text-center text-secondary fs13">Tickets</div>
                                 <div class="text-center h4 mb-0" data-mempool-target="ticketCount">{{.NumTickets}}</div>
                                 <div class="text-center fs13">
-                                    <span data-mempool-target="ticketTotal">{{threeSigFigs .LikelyMineable.TicketTotal}}</span> DCR
+                                    <span data-mempool-target="ticketTotal">{{threeSigFigs .LikelyMineable.TicketTotal}}</span> EXCC
                                 </div>
                             </div>
                         </div>
@@ -95,14 +95,14 @@
                                     {{- end}}
                                 </div>
                                 <div class="text-center fs13">
-                                    <span data-mempool-target="voteTotal">{{threeSigFigs .LikelyMineable.VoteTotal}}</span> DCR
+                                    <span data-mempool-target="voteTotal">{{threeSigFigs .LikelyMineable.VoteTotal}}</span> EXCC
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="text-center text-secondary fs13">Revocations</div>
                                 <div class="text-center h4 mb-0" data-mempool-target="revCount">{{.NumRevokes}}</div>
                                 <div class="text-center fs13">
-                                    <span data-mempool-target="revTotal">{{threeSigFigs .LikelyMineable.RevokeTotal}}</span> DCR
+                                    <span data-mempool-target="revTotal">{{threeSigFigs .LikelyMineable.RevokeTotal}}</span> EXCC
                                 </div>
                             </div>
                         </div>
@@ -118,7 +118,7 @@
                           <thead>
                             <tr>
                               <th>Transaction ID</th>
-                              <th class="text-end">Total DCR</th>
+                              <th class="text-end">Total EXCC</th>
                               <th class="text-end">Time in Mempool</th>
                             </tr>
                           </thead>
@@ -153,7 +153,7 @@
                           <thead>
                             <tr>
                               <th>Transaction ID</th>
-                              <th class="text-end">Total DCR</th>
+                              <th class="text-end">Total EXCC</th>
                               <th class="text-end">Time in Mempool</th>
                             </tr>
                           </thead>
@@ -186,7 +186,7 @@
                               <th>Voting On</th>
                               <th class="text-end"><div class="inline-block position-relative"><span class="d-none d-sm-inline">Validator ID</span><span class="d-inline d-sm-none" data-tooltip="Validator ID">VID</span></div></th>
                               <th class="text-end"><div class="inline-block position-relative"><span class="d-none d-sm-inline">Vote Version</span><span class="d-inline d-sm-none" data-tooltip="Vote Version">Ver</span></div></th>
-                              <th class="text-end d-none d-sm-table-cell">Total DCR</th>
+                              <th class="text-end d-none d-sm-table-cell">Total EXCC</th>
                               <th class="text-end">Size</th>
                               <th class="text-end d-none d-sm-table-cell jsonly">Time in Mempool</th>
                             </tr>
@@ -230,7 +230,7 @@
                           <thead>
                             <tr>
                               <th>Transaction ID</th>
-                              <th class="text-end">Total DCR</th>
+                              <th class="text-end">Total EXCC</th>
                               <th class="text-end">Size</th>
                               <th class="text-end">Fee Rate</th>
                               <th class="text-end">Time in Mempool</th>
@@ -248,7 +248,7 @@
                                     {{template "decimalParts" (float64AsDecimalParts .TotalOut 8 false)}}
                                   </td>
                                   <td class="mono fs15 text-end">{{.Size}} B</td>
-                                  <td class="mono fs15 text-end">{{printf "%.8f" (.FeeRate)}} DCR/kB</td>
+                                  <td class="mono fs15 text-end">{{printf "%.8f" (.FeeRate)}} EXCC/kB</td>
                                   <td class="mono fs15 text-end" data-time-target="age" data-age="{{.Time}}"></td>
                               </tr>
                               {{- end -}}
@@ -269,7 +269,7 @@
                           <thead>
                             <tr>
                               <th>Transaction ID</th>
-                              <th class="text-end">Total DCR</th>
+                              <th class="text-end">Total EXCC</th>
                               <th class="text-end">Size</th>
                               <th class="text-end">Time in Mempool</th>
                             </tr>
@@ -306,7 +306,7 @@
                           <thead>
                             <tr>
                               <th>Transaction ID</th>
-                              <th class="text-end">Total DCR</th>
+                              <th class="text-end">Total EXCC</th>
                               <th class="text-end">Size</th>
                               <th class="text-end">Fee Rate</th>
                               <th class="text-end">Time in Mempool</th>
@@ -324,7 +324,7 @@
                                     {{template "decimalParts" (float64AsDecimalParts .TotalOut 8 false)}}
                                   </td>
                                   <td class="mono fs15 text-end">{{.Size}} B</td>
-                                  <td class="mono fs15 text-end">{{printf "%.8f" (.FeeRate)}} DCR/kB</td>
+                                  <td class="mono fs15 text-end">{{printf "%.8f" (.FeeRate)}} EXCC/kB</td>
                                   <td class="mono fs15 text-end" data-time-target="age" data-age="{{.Time}}"></td>
                               </tr>
                               {{- end -}}

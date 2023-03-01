@@ -20,7 +20,7 @@
         var sio = io(window.location.origin, { path: '/insight/socket.io', transports: ['websocket'], upgrade: false });
 
         sio.on('connect', function () {
-            update('Connected to dcrdata\'s Insight socket.io server. Updates will be shown below.')
+            update('Connected to exccdata\'s Insight socket.io server. Updates will be shown below.')
             sio.emit('subscribe', 'inv', (data) => {
                 update('subscribe "inv": ' + data);
             })

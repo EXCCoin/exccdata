@@ -51,7 +51,7 @@ function rateCalculation (y) {
   // (6x⁵-15x⁴ +10x³) / (6y⁵-15y⁴ +10y³) where y = this.value and x = 1-y
   return ((6 * Math.pow(x, 5)) - (15 * Math.pow(x, 4)) + (10 * Math.pow(x, 3))) / ((6 * Math.pow(y, 5)) - (15 * Math.pow(y, 4)) + (10 * Math.pow(y, 3)))
 }
-
+// TODO: Put GFX cards with proper data from lolminer
 const deviceList = {
   0: {
     hashrate: 34, // Th/s

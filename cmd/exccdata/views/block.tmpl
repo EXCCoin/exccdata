@@ -1,7 +1,7 @@
 {{define "block" -}}
 <!DOCTYPE html>
 <html lang="en">
-{{template "html-head" headData .CommonPageData (printf "Decred Block %d" .Data.Height)}}
+{{template "html-head" headData .CommonPageData (printf "ExchangeCoin Block %d" .Data.Height)}}
 {{ template "navbar" . }}
 <div class="container main" data-controller="time">
 {{- with .Data -}}
@@ -72,7 +72,7 @@
 					<span class="text-secondary fs13">Total Sent</span>
 					<br>
 					<span class="lh1rem d-inline-block pt-1"
-						><span class="fs18 fs14-decimal fw-bold">{{template "decimalParts" (float64AsDecimalParts .TotalSent 8 true 2)}}</span><span class="text-secondary fs14"> DCR</span>
+						><span class="fs18 fs14-decimal fw-bold">{{template "decimalParts" (float64AsDecimalParts .TotalSent 8 true 2)}}</span><span class="text-secondary fs14"> EXCC</span>
 					</span>
 					{{if $.FiatConversion}}
 					<br>
@@ -83,7 +83,7 @@
 					{{end}}
 					<br>
 					<span class="lh1rem d-inline-block pt-1"
-						><span class="fs14 fs14-decimal">Mixed: {{template "decimalParts" (amountAsDecimalParts .TotalMixed true)}}</span><span class="text-secondary fs14"> DCR</span>
+						><span class="fs14 fs14-decimal">Mixed: {{template "decimalParts" (amountAsDecimalParts .TotalMixed true)}}</span><span class="text-secondary fs14"> EXCC</span>
 					</span>
 				</div>
 				<div class="col-7 col-sm-8 text-start">
@@ -175,7 +175,7 @@
 			<thead>
 				<tr>
 					<th>Transaction ID</th>
-					<th class="text-end">Total DCR</th>
+					<th class="text-end">Total EXCC</th>
 					<th class="text-end">Size</th>
 				</tr>
 			</thead>
@@ -207,7 +207,7 @@
 				<tr>
 					<th>Transaction ID</th>
 					<th class="text-end">Type</th>
-					<th class="text-end">Total DCR</th>
+					<th class="text-end">Total EXCC</th>
 					<th class="text-end">Fee</th>
 					<th class="text-end">Size</th>
 				</tr>
@@ -248,7 +248,7 @@
 					<th>Transaction ID</th>
 					<th class="text-end">Vote Version</th>
 					<th class="text-end">Last Block</th>
-					<th class="text-end">Total DCR</th>
+					<th class="text-end">Total EXCC</th>
 					<th class="text-end">Size</th>
 				</tr>
 			</thead>
@@ -304,7 +304,7 @@
 			<thead>
 				<tr>
 					<th>Transaction ID</th>
-					<th class="text-end">Total DCR</th>
+					<th class="text-end">Total EXCC</th>
 					<th class="text-end">Fee</th>
 					<th class="text-end">Size</th>
 				</tr>
@@ -332,7 +332,7 @@
 			<thead>
 				<tr>
 					<th>Transaction ID</th>
-					<th class="text-end">Total DCR</th>
+					<th class="text-end">Total EXCC</th>
 					<th class="text-end">Fee</th>
 					<th class="text-end">Size</th>
 				</tr>
@@ -366,7 +366,7 @@
 			<thead>
 				<tr>
 					<th>Transaction ID</th>
-					<th class="text-end">Total DCR</th>
+					<th class="text-end">Total EXCC</th>
 					<th class="text-end">Mixed</th>
 					<th class="text-end">Fee</th>
 					<th class="text-end">Fee Rate</th>

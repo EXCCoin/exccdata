@@ -3,7 +3,7 @@
 <html lang="en">
 {{$lastGrouping := 1}}
 {{$oldest := 0}}
-{{template "html-head" headData .CommonPageData (printf "Decred %s List" .TimeGrouping)}}
+{{template "html-head" headData .CommonPageData (printf "ExchangeCoin %s List" .TimeGrouping)}}
     {{template "navbar" . }}
     {{template "blocksBanner" .}}
     <div class="container main" data-controller="time pagenavigation">
@@ -19,7 +19,7 @@
                 {{if gt $lastGrouping 200}}{{$dropVal = 200}}{{end}}
                 <span class="h2 d-flex pt-4 pb-1 pe-2">
                     {{.TimeGrouping}}
-                    <span class="dcricon-info fs14 ms-2 mt-2" title="Decred Blocks Grouped By {{.TimeGrouping}}"></span>
+                    <span class="dcricon-info fs14 ms-2 mt-2" title="ExchangeCoin Blocks Grouped By {{.TimeGrouping}}"></span>
                 </span>
 
                 <div class="pb-1 d-flex justify-content-end align-items-center flex-wrap">

@@ -24,7 +24,7 @@ document.addEventListener('turbolinks:load', function (e) {
 export function notifyNewBlock (newBlock) {
   if (window.Notification.permission !== 'granted') return
   const block = newBlock.block
-  const newBlockNtfn = new window.Notification('New Decred Block Mined', {
+  const newBlockNtfn = new window.Notification('New ExchangeCoin Block Mined', {
     body: `Block mined at height <b>${block.height}</b>`,
     icon: '/images/dcrdata144x128.png',
     notifyError: (e) => console.error('Error showing notification:', e)

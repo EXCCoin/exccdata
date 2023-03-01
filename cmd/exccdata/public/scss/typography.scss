@@ -48,11 +48,11 @@
 .unstyled-link:hover,
 .unstyled-link:visited {
   text-decoration: none;
-  color: #052f4b;
+  color: rgba(255 255 255 / 80%);
 }
 
 .block-banner .text-secondary:hover {
-  color: #052f4b !important;
+  color: rgb(255 255 255);
 }
 
 .elidedhash {
@@ -144,6 +144,7 @@ a.grayed {
 }
 
 /* content */
+
 .dcr-total .dcr {
   font-size: 28px;
 }

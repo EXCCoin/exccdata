@@ -8,7 +8,7 @@
                 <div class="col-sm-lg-14 col-sm-12 d-flex">
                     <h4 class="mb-2">
                         Politeia Proposals
-                        <span class="mb-0 fs11 text-black-50 nowrap">
+                        <span class="mb-0 fs11  nowrap">
                             &nbsp;(<span class="me-2">Proposals Sync:&nbsp;
                                 <span data-controller="time" data-time-target="age" data-age="{{$.LastPropSync}}"></span>
                             &nbsp;ago)
@@ -18,7 +18,7 @@
                 </div>
             </div>
             <div class="mb-1 fs13">
-                <h6><a href="{{.PoliteiaURL}}">Politeia</a> is Decred's blockchain-anchored proposal system used for Decred's operational initiatives that don't affect consensus.</h6>
+                <h6><a href="{{.PoliteiaURL}}">Politeia</a> is ExchangeCoin's blockchain-anchored proposal system used for ExchangeCoin's operational initiatives that don't affect consensus.</h6>
                 {{if not .Proposals }}
                     {{block  "voteStatusWidget" .}}
                         <div class="fs12 nowrap text-start" style="margin:auto auto auto 0px;">
@@ -174,13 +174,13 @@
                                             {{if gt $blocksRemaining 0}}
                                                 <span class="text-progress position-relative" data-tooltip="Voting in progress">
                                                     In Progress
-                                                    <span class="fs12 text-black-50">({{printf "%.0f" ($votesPercent)}}%
+                                                    <span class="fs12 ">({{printf "%.0f" ($votesPercent)}}%
                                                         <span class="d-none d-sm-inline">approval)</span>
                                                         <span class="d-sm-none">yes)</span>
                                                     </span>
                                                 </span>
                                                 <div class="fs12 mt-1 d-none d-sm-block">{{secondsToShortDurationString (multiply $blocksRemaining $.TimePerBlock)}} left
-                                                    <span class="text-black-50">({{printf "%.0f" (floor (percentage (subtract 2016 $blocksRemaining) 2016))}}% completed)</span>
+                                                    <span class="">({{printf "%.0f" (floor (percentage (subtract 2016 $blocksRemaining) 2016))}}% completed)</span>
                                                 </div>
                                             {{else if lt $votesTotalPercent (toFloat64 $v.QuorumPercentage)}}
                                                 <span class="text-no-quorum position-relative" data-tooltip="Votes did not attain quorum">
@@ -190,7 +190,7 @@
                                                 {{if lt $votesPercent (toFloat64 $v.PassPercentage)}}
                                                     <span class="text-failed position-relative" data-tooltip="Proposal rejected">
                                                         Rejected
-                                                        <span class="fs12 text-black-50">({{printf "%.0f" ($votesPercent)}}%
+                                                        <span class="fs12 ">({{printf "%.0f" ($votesPercent)}}%
                                                             <span class="d-none d-sm-inline">approval)</span>
                                                             <span class="d-sm-none">yes)</span>
                                                         </span>
@@ -198,7 +198,7 @@
                                                 {{else}}
                                                     <span class="text-green position-relative" data-tooltip="Proposal approved">
                                                         Approved
-                                                        <span class="fs12 text-black-50">({{printf "%.0f" ($votesPercent)}}%
+                                                        <span class="fs12 ">({{printf "%.0f" ($votesPercent)}}%
                                                             <span class="d-none d-sm-inline">approval)</span>
                                                             <span class="d-sm-none">yes)</span>
                                                         </span>
@@ -217,7 +217,7 @@
                         <td class="text-end">
                             {{if and .VoteStatus (ne (index $.VotesStatus .VoteStatus) "Unauthorized")}}
                                 {{.TotalVotes}}
-                                <span class="fs12 text-black-50">
+                                <span class="fs12 ">
                                     (
                                     {{- if eq $v.EligibleTickets 0 -}}
                                         0%

@@ -1,8 +1,20 @@
 /**  testnet theme  **/
 body.theme-testnet {
+  color: rgba(255 255 255 / 90%);
+
+  a,
+  a:hover {
+    color: rgba(255 255 255 / 90%);
+    text-decoration: none;
+  }
+
+  .h1 .h2 .h3 .h4 .h5 .h6 {
+    color: rgba(255 255 255 / 90%) !important;
+  }
+
   .top-nav,
   .navbar-fixed-bottom {
-    background: #116466;
+    background: #000;
     color: #fff;
   }
 
@@ -43,11 +55,6 @@ body.darkBG {
 
   .grayed {
     color: rgba(253 253 253 / 50%);
-  }
-
-  a,
-  a:hover {
-    color: $dark-link-hover-color;
   }
 
   a.elidedhash,

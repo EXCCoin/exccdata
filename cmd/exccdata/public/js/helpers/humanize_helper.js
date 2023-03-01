@@ -102,7 +102,7 @@ const humanize = {
     return parseFloat(v).toFixed(2)
   },
   subsidyToString: function (x, y = 1) {
-    return (x / 100000000 / y) + ' DCR'
+    return (x / 100000000 / y) + ' EXCC'
   },
   bytes: function (s) { // from go-humanize
     const sizes = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB']

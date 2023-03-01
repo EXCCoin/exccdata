@@ -10,7 +10,19 @@
   top: 0;
   background: #fff;
   border-bottom: 1px solid #00000017;
-  box-shadow: 0 0 10px #dcdcdc;
+  box-shadow: 0 0 2px rgba(0 0 0 / 60%);
+}
+
+.top-nav .logo {
+  padding-right: 5px;
+  border-right: 1px solid rgba(255 255 255 / 80%);
+}
+
+.top-nav .logo-text {
+  padding: 0 5px;
+  font-size: 15px;
+  line-height: 1;
+  color: #fff;
 }
 
 .navbar-fixed-bottom {
@@ -265,9 +277,9 @@ body.darkBG {
 #menu {
   position: absolute;
   width: 273px;
-  margin: -42px 0 0 -243px;
+  margin: -43px 0 0 -243px;
   padding: 10px 0;
-  background: #fff;
+  background: rgba(0 0 0 / 80%);
   list-style-type: none;
   -webkit-font-smoothing: antialiased;
   transform-origin: 0% 0%;
@@ -282,7 +294,7 @@ body.darkBG {
     cursor: pointer;
     display: block;
     text-decoration: none;
-    color: #232323;
+    color: rgba (255 255 255 / 80%);
     transition: color 0.3s ease;
 
     &:hover,

@@ -28,7 +28,7 @@ function txTableRow (tx) {
         </td>
         <td class="mono fs15 text-end">${humanize.decimalParts(tx.total, false, 8)}</td>
         <td class="mono fs15 text-end">${tx.size} B</td>
-        <td class="mono fs15 text-end">${tx.fee_rate} DCR/kB</td>
+        <td class="mono fs15 text-end">${tx.fee_rate} EXCC/kB</td>
         <td class="mono fs15 text-end" data-time-target="age" data-age="${tx.time}">${humanize.timeSince(tx.time)}</td>
     </tr>`)
 }

@@ -21,7 +21,7 @@ table {
   }
 
   thead tr {
-    background: #fff;
+    background: rgba(0 0 0 / 40%);
     font-family: "source-sans-pro-semibold", sans-serif;
   }
 }
@@ -31,11 +31,11 @@ tr.hover-row {
 }
 
 tr.hover-row:hover {
-  background-color: #2970ff77;
+  background-color: rgba(0 0 0 / 90%);
 }
 
 tr.sum-row {
-  border-top: 1px solid #7777;
+  border-top: 1px solid #777;
 }
 
 .table-mono-cells td {
@@ -47,7 +47,7 @@ table.table {
   tr,
   th,
   td {
-    color: #052f4b; // Setting explicitly so bootstrap > 4.3.1 won't override.
+    color: rgba(255 255 255 / 80%); // Setting explicitly so bootstrap > 4.3.1 won't override.
     border-top: none;
     border-bottom: 1px solid #e4e4e4 !important;
     padding: 0.75em 0.5em;

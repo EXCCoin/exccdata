@@ -1,7 +1,7 @@
 {{define "visualblocks"}}
 <!DOCTYPE html>
 <html lang="en">
-{{ template "html-head" headData .CommonPageData "Decred Block Explorer by dcrdata.org"}}
+{{ template "html-head" headData .CommonPageData "EXCC Block Explorer by explorer.excc.co"}}
     {{ template "navbar" . }}
 
     <div
@@ -31,7 +31,7 @@
                         <a class="color-code" href="/mempool">Mempool</a>
                         <div class="mono amount" style="line-height: 1;">
                                 <span>{{template "decimalParts" (float64AsDecimalParts .Total 0 false)}}</span>
-                            <span class="unit"> DCR</span>
+                            <span class="unit"> EXCC</span>
                         </div>
                         <span class="timespan">
                             <span data-time-target="age" data-age="{{.Time}}"></span>&nbsp;ago
@@ -139,7 +139,7 @@
                         <a class="color-code" href="/block/{{.Height}}">{{.Height}}</a>
                         <div class="mono amount" style="line-height: 1;">
                             <span>{{template "decimalParts" (float64AsDecimalParts .Total 0 false)}}</span>
-                            <span class="unit"> DCR</span>
+                            <span class="unit"> EXCC</span>
                         </div>
                         <span class="timespan">
                             <span data-time-target="age" data-age="{{.Time.UNIX}}"></span>&nbsp;ago

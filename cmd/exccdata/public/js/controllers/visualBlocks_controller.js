@@ -21,7 +21,7 @@ function makeMempoolBlock (block) {
   return makeNode(`<div class="block visible">
                 <div class="block-info">
                     <a class="color-code" href="/mempool">Mempool</a>
-                    <div class="mono" style="line-height: 1;">${Math.floor(block.Total)} DCR</div>
+                    <div class="mono" style="line-height: 1;">${Math.floor(block.Total)} EXCC</div>
                     <span class="timespan">
                         <span data-time-target="age" data-age="${block.Time}"></span>
                     </span>
@@ -60,7 +60,7 @@ function newBlockHtmlElement (block) {
 function makeBlockSummary (blockHeight, totalSent, time) {
   return `<div class="block-info">
                 <a class="color-code" href="/block/${blockHeight}">${blockHeight}</a>
-                <div class="mono" style="line-height: 1;">${Math.floor(totalSent)} DCR</div>
+                <div class="mono" style="line-height: 1;">${Math.floor(totalSent)} EXCC</div>
                 <span class="timespan">
                     <span data-time-target="age" data-age="${time}"></span>&nbsp;ago
                 </span>
@@ -333,7 +333,7 @@ export default class extends Controller {
         if (data.object === 'Vote') {
           newContent = `<b>${data.object} (${data.voteValid ? 'Yes' : 'No'})</b>`
         } else {
-          newContent = `<b>${data.object}</b><br>${data.total} DCR`
+          newContent = `<b>${data.object}</b><br>${data.total} EXCC`
         }
 
         if (data.vin && data.vout) {

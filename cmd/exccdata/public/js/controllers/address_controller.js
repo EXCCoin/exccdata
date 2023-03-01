@@ -81,7 +81,7 @@ function customizedFormatter (data) {
     if (series.y === 0) return ''
     const l = '<span style="color: ' + series.color + ';"> ' + series.labelHTML
     html = '<span style="color:#2d2d2d;">' + html + '</span>'
-    html += '<br>' + series.dashHTML + l + ': ' + (isNaN(series.y) ? '' : series.y + ' DCR') + '</span> '
+    html += '<br>' + series.dashHTML + l + ': ' + (isNaN(series.y) ? '' : series.y + ' EXCC') + '</span> '
   })
   return html
 }
@@ -127,7 +127,7 @@ function createOptions () {
   amountFlowGraphOptions = {
     labels: ['Date', 'Received', 'Spent', 'Net Received', 'Net Spent'],
     colors: ['#2971FF', '#2ED6A1', '#41BF53', '#FF0090'],
-    ylabel: 'Total (DCR)',
+    ylabel: 'Total (EXCC)',
     visibility: [true, false, false, false],
     legendFormatter: customizedFormatter,
     stackedGraph: true,
@@ -137,7 +137,7 @@ function createOptions () {
   balanceGraphOptions = {
     labels: ['Date', 'Balance'],
     colors: ['#41BF53'],
-    ylabel: 'Balance (DCR)',
+    ylabel: 'Balance (EXCC)',
     plotter: [Dygraph.Plotters.linePlotter, Dygraph.Plotters.fillPlotter],
     legendFormatter: customizedFormatter,
     stackedGraph: false,

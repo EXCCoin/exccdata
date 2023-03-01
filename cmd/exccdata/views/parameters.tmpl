@@ -1,12 +1,12 @@
 {{define "parameters"}}
 <!DOCTYPE html>
 <html lang="en">
-    {{ template "html-head" headData .CommonPageData "Decred Chain Parameters"}}
+    {{ template "html-head" headData .CommonPageData "ExchangeCoin Chain Parameters"}}
         {{template "navbar" . }}
         <div class="container main">
             <div class="row justify-content-between">
                 <div class="col-lg-14 col-sm-12 d-flex">
-                    <h4 class="mb-2">Parameters for Decred {{.ChainParams.Name}}
+                    <h4 class="mb-2">Parameters for ExchangeCoin {{.ChainParams.Name}}
                       <span class="fs12" >
                         from <a href="{{.Links.NetParams}}">chaincfg/params.go</a>
                       </span>
@@ -117,7 +117,7 @@
                                 <td class="mono text-start pe-2 nowrap p03rem0">BaseSubsidy</td>
                                 <td>
                                     {{template "decimalParts" (amountAsDecimalParts .ChainParams.BaseSubsidy true)}}
-                                    <span class="ps-1 unit lh15rem">DCR</span>
+                                    <span class="ps-1 unit lh15rem">EXCC</span>
                                 </td>
                                 <td>Starting subsidy amount for mined blocks</td>
                             </tr>
@@ -146,11 +146,6 @@
                                 <td class="mono">{{uint16Mul .ChainParams.StakeRewardProportion 10}}%</td>
                                 <td>Comparative amount of the subsidy given for casting stake votes (collectively, per block)</td>
                             </tr>
-                            <tr>
-                                <td class="mono text-start pe-2 nowrap p03rem0">BlockTaxProportion</td>
-                                <td class="mono">{{uint16Mul .ChainParams.BlockTaxProportion 10}}%</td>
-                                <td>Inverse of the percentage of funds for each block to allocate to the developer organization</td>
-                            </tr>
                         </tbody>
                     </table>
                     <h4><span>Stake parameters</span></h4>
@@ -165,7 +160,7 @@
                         <tbody>
                             <tr>
                                 <td class="mono text-start pe-2 nowrap p03rem0">MinimumStakeDiff</td>
-                                <td class="mono">{{template "decimalParts" (amountAsDecimalParts .ChainParams.MinimumStakeDiff true)}} DCR</td>
+                                <td class="mono">{{template "decimalParts" (amountAsDecimalParts .ChainParams.MinimumStakeDiff true)}} EXCC</td>
                                 <td>Minimum amount of Atoms required to purchase a stake ticket</td>
                             </tr>
                             <tr>
@@ -176,7 +171,7 @@
                             <tr>
                                 <td class="mono text-start pe-2 nowrap p03rem0">TicketsPerBlock</td>
                                 <td class="mono">{{.ChainParams.TicketsPerBlock}}</td>
-                                <td>Average number of tickets per block for Decred PoS</td>
+                                <td>Average number of tickets per block for ExchangeCoin PoS</td>
                             </tr>
                             <tr>
                                 <td class="mono text-start pe-2 nowrap p03rem0">TicketMaturity</td>
@@ -252,63 +247,6 @@
                                 <td class="mono text-start pe-2 nowrap p03rem0">StakeMajorityDivisor</td>
                                 <td class="mono">{{.ChainParams.StakeMajorityDivisor}}</td>
                                 <td>Calculate the super majority of stake votes using integer math</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <h4><span>Treasury parameters</span></h4>
-                    <table class="table table-mono-cells table-sm f15">
-                        <thead>
-                          <tr>
-                            <th width="20%">Parameter</th>
-                            <th>Value</th>
-                            <th width="60%">Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="mono text-start pe-2 nowrap p03rem0">TreasuryVoteInterval</td>
-                                <td class="mono">{{.ChainParams.TreasuryVoteInterval}}</td>
-                                <td>How frequently a TSpend transaction is allowed in a block (see standalone.IsTreasuryVoteInterval)</td>
-                            </tr>
-                            <tr>
-                                <td class="mono text-start pe-2 nowrap p03rem0">TreasuryVoteIntervalMultiplier</td>
-                                <td class="mono">{{.ChainParams.TreasuryVoteIntervalMultiplier}}</td>
-                                <td>Multiplier to TreasuryVoteInterval to calculate Expiry (see standalone.CalcTSpendWindow)</td>
-                            </tr>
-                            <tr>
-                                <td class="mono text-start pe-2 nowrap p03rem0">TreasuryVoteQuorumMultiplier</td>
-                                <td class="mono">{{.ChainParams.TreasuryVoteQuorumMultiplier}}</td>
-                                <td>Numerator of the TSpend vote quorum percentage (see CheckTSpendHasVotes)</td>
-                            </tr>
-                            <tr>
-                                <td class="mono text-start pe-2 nowrap p03rem0">TreasuryVoteQuorumDivisor</td>
-                                <td class="mono">{{.ChainParams.TreasuryVoteQuorumDivisor}}</td>
-                                <td>Divisor of the TSpend vote quorum percentage (see CheckTSpendHasVotes)</td>
-                            </tr>
-                            <tr>
-                                <td class="mono text-start pe-2 nowrap p03rem0">TreasuryVoteRequiredMultiplier</td>
-                                <td class="mono">{{.ChainParams.TreasuryVoteRequiredMultiplier}}</td>
-                                <td>Numerator of the required votes percentage (see CheckTSpendHasVotes)</td>
-                            </tr>
-                            <tr>
-                                <td class="mono text-start pe-2 nowrap p03rem0">TreasuryVoteRequiredDivisor</td>
-                                <td class="mono">{{.ChainParams.TreasuryVoteRequiredDivisor}}</td>
-                                <td>Divisor of the required votes vote quorum percentage (see CheckTSpendHasVotes)</td>
-                            </tr>
-                            <tr>
-                                <td class="mono text-start pe-2 nowrap p03rem0">TreasuryExpenditureWindow</td>
-                                <td class="mono">{{.ChainParams.TreasuryExpenditureWindow}}</td>
-                                <td>The number of TreasuryVoteInterval*TreasuryVoteIntervalMultiplier windows that define a single expenditure window (see maxTreasuryExpenditure)</td>
-                            </tr>
-                            <tr>
-                                <td class="mono text-start pe-2 nowrap p03rem0">TreasuryExpenditurePolicy</td>
-                                <td class="mono">{{.ChainParams.TreasuryExpenditurePolicy}}</td>
-                                <td>The number of previous TreasuryExpenditureWindows that defines how far back to calculate the average expenditure of the treasury for an expenditure policy check (see maxTreasuryExpenditure)</td>
-                            </tr>
-                            <tr>
-                                <td class="mono text-start pe-2 nowrap p03rem0">TreasuryExpenditureBootstrap</td>
-                                <td class="mono">{{.ChainParams.TreasuryExpenditureBootstrap}}</td>
-                                <td>Default previous average expenditure when there are no treasury spends inside the entire window defined by TreasuryExpenditurePolicy</td>
                             </tr>
                         </tbody>
                     </table>

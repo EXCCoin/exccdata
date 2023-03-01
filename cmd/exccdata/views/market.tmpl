@@ -2,7 +2,7 @@
 {{- $botState := .XcState -}}
 <!DOCTYPE html>
 <html lang="en">
-{{template "html-head" headData .CommonPageData "Decred Market Data"}}
+{{template "html-head" headData .CommonPageData "ExchangeCoin Market Data"}}
 <body class="{{ theme }}" style="background-color: #3d5873;">
 
 {{- template "navbar" . -}}
@@ -18,7 +18,7 @@
 
         {{- /* PRICE */ -}}
         <div class="ms-4 me-2 my-4 p-2 p-lg-4 bg-white text-center">
-            <div class="text-center fs18 text-secondary">1 DCR =</div>
+            <div class="text-center fs18 text-secondary">1 EXCC =</div>
             {{if eq $botState.BtcIndex "USD"}}
                 <span class="fs22 fw-bold d-inline-block">$</span>
             {{end}}
@@ -26,14 +26,14 @@
         </div>
 
 
-        {{- /* DCR/BTC MARKETS */ -}}
+        {{- /* EXCC/BTC MARKETS */ -}}
         <div class="ms-4 me-2 my-4 p-2 p-lg-4 bg-white">
-            <div colspan="4" class="fs24 text-center pb-4"><span class="dcricon-coin-negative fs24 me-2"></span> Decred Markets</div>
+            <div colspan="4" class="fs24 text-center pb-4"><span class="dcricon-coin-negative fs24 me-2"></span> ExchangeCoin Markets</div>
             <table class="mx-auto mx-lg-3">
                 <tbody>
                     <tr class="fs14 lh1rem">
                       <td></td>
-                      <td class="text-end fw-bold">DCR Vol.</td>
+                      <td class="text-end fw-bold">EXCC Vol.</td>
                       <td class="text-end fw-bold">BTC</td>
                       <td></td>
                       <td class="text-end fw-bold">{{$botState.BtcIndex}}</td>
@@ -235,7 +235,7 @@
 
             {{- /* TODO: Test this data controller (time & market) */ -}}
             <div class="text-center py-2 py-lg-0 text-lg-end px-4 fs13 d-hide" data-market-target="age">updated <span data-controller="time" data-time-target="age" data-market-target="ageSpan" data-age="0"></span> ago</div>
-        
+
         </div>
     </div>
 </div>

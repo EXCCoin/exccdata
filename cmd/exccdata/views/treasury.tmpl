@@ -1,7 +1,7 @@
 {{define "treasury"}}
 <!DOCTYPE html>
 <html lang="en">
-{{template "html-head" headData .CommonPageData "Decred Decentralized Treasury"}}
+{{template "html-head" headData .CommonPageData "ExchangeCoin Decentralized Treasury"}}
   {{template "navbar" . }}
   {{- with .Data}}
   {{- $bal := .Balance -}}
@@ -19,16 +19,16 @@
     </div>
     <div class="row pb-4 px-2">
       <div class="col-24 col-xl-10 bg-white px-3 py-3 position-relative">
-        <div class="fs22 pb-3">Decred Treasury</div>
+        <div class="fs22 pb-3">ExchangeCoin Treasury</div>
         <div class="position-relative d-flex justify-content-between align-items-start flex-wrap">
           <div class="d-inline-block text-start pe-2 pb-3">
             <span class="text-secondary fs13">Balance</span>
             <br>
             <span class="lh1rem d-inline-block pt-1 fs18 fs14-decimal fw-bold">
             {{- if $bal.Balance}}
-              {{template "decimalParts" (amountAsDecimalParts $bal.Balance true)}} <span class="text-secondary fs14">DCR</span><br>
+              {{template "decimalParts" (amountAsDecimalParts $bal.Balance true)}} <span class="text-secondary fs14">EXCC</span><br>
             {{- else}}
-              <span class="fs18">0</span> <span class="text-secondary fs14">DCR</span>
+              <span class="fs18">0</span> <span class="text-secondary fs14">EXCC</span>
             {{- end}}
             </span>
             {{if .ConvertedBalance}}
@@ -45,9 +45,9 @@
             <span class="lh1rem d-inline-block pt-1 fs18 fs14-decimal fw-bold">
             {{- if or $bal.Added $bal.TBase}}
               {{- $received := add $bal.Added $bal.TBase}}
-              {{- template "decimalParts" (amountAsDecimalParts $received true)}} <span class="text-secondary fs14">DCR</span>
+              {{- template "decimalParts" (amountAsDecimalParts $received true)}} <span class="text-secondary fs14">EXCC</span>
             {{- else}}
-              <span class="fs18">0</span> <span class="text-secondary fs14">DCR</span>
+              <span class="fs18">0</span> <span class="text-secondary fs14">EXCC</span>
             {{- end}}
             </span>
             <br>
@@ -58,9 +58,9 @@
             <br>
             <span class="lh1rem d-inline-block pt-1 fs18 fs14-decimal fw-bold">
             {{- if $bal.Spent}}
-              {{- template "decimalParts" (amountAsDecimalParts $bal.Spent true)}} <span class="text-secondary fs14">DCR</span>
+              {{- template "decimalParts" (amountAsDecimalParts $bal.Spent true)}} <span class="text-secondary fs14">EXCC</span>
             {{- else}}
-              <span class="fs18">0</span> <span class="text-secondary fs14">DCR</span>
+              <span class="fs18">0</span> <span class="text-secondary fs14">EXCC</span>
             {{- end}}
             </span>
             <br>
@@ -144,7 +144,7 @@
         </div>
       </div>
     </div>
-    
+
     <div class="position-relative" data-address-target="listbox">
       <div class="row align-items-center">
         <div class="me-auto mb-0 h4 col-24 col-sm-6">Transactions</div>
