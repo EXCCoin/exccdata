@@ -1088,7 +1088,6 @@ func _main(ctx context.Context) error {
 
 		// Update the current chain state in the ChainDB.
 		chainDB.UpdateChainState(blockData.BlockchainInfo)
-		log.Infof("Current DCP0010 activation height is %d.", chainDB.DCP0010ActivationHeight())
 
 		if err = explore.Store(blockData, msgBlock); err != nil {
 			return fmt.Errorf("Failed to store initial block data for explorer pages: %w", err)

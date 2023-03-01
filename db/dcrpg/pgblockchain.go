@@ -2648,7 +2648,6 @@ func (pgb *ChainDB) Store(blockData *blockdata.BlockData, msgBlock *wire.MsgBloc
 
 	// update blockchain state
 	pgb.UpdateChainState(blockData.BlockchainInfo)
-	log.Infof("Current DCP0010 activation height is %d.", pgb.DCP0010ActivationHeight())
 
 	// New blocks stored this way are considered valid and part of mainchain,
 	// warranting updates to existing records. When adding side chain blocks
@@ -4638,31 +4637,13 @@ func (pgb *ChainDB) GetPool(idx int64) ([]string, error) {
 // DCP0010ActivationHeight indicates the height at which the changesubsidysplit
 // agenda will activate, or -1 if it is not determined yet.
 func (pgb *ChainDB) DCP0010ActivationHeight() int64 {
-	if _, ok := txhelpers.SubsidySplitStakeVer(pgb.chainParams); !ok {
-		return 0 // activate at genesis if no deployment defined in chaincfg.Params
-	}
-
-	agendaInfo, found := pgb.ChainInfo().AgendaMileStones[chaincfg.VoteIDChangeSubsidySplit]
-	if !found {
-		log.Warn("The changesubsidysplit agenda is missing.")
-		return 0
-	}
-
-	switch agendaInfo.Status {
-	case dbtypes.ActivatedAgendaStatus, dbtypes.LockedInAgendaStatus:
-		return agendaInfo.Activated // rci already added for lockedin
-	}
 	return -1 // not activated, and no future activation height known
 }
 
 // IsDCP0010Active indicates if the "changesubsidysplit" consensus deployment is
 // active at the given height according to the current status of the agendas.
 func (pgb *ChainDB) IsDCP0010Active(height int64) bool {
-	activeHeight := pgb.DCP0010ActivationHeight()
-	if activeHeight == -1 {
-		return false
-	}
-	return height >= activeHeight
+	return false
 }
 
 // CurrentCoinSupply gets the current coin supply as an *apitypes.CoinSupply,
