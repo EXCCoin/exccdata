@@ -126,11 +126,11 @@ type config struct {
 	AgendasDBFileName string `long:"agendadbfile" description:"Agendas DB file name (default is agendas.db)." env:"EXCCDATA_AGENDAS_DB_FILE_NAME"`
 
 	// Caching and optimization.
-	AddrCacheCap     int    `long:"addr-cache-cap" description:"Address cache capacity in bytes." env:"DCRDATA_ADDR_CACHE_CAP"`
-	AddrCacheLimit   int    `long:"addr-cache-address-limit" description:"Maximum number of addresses allowed in the address cache." env:"DCRDATA_ADDR_CACHE_LIMIT"`
-	AddrCacheUXTOCap int    `long:"addr-cache-utxo-cap" description:"UTXO cache capacity in bytes." env:"DCRDATA_ADDR_CASH_UTXO_CAP"`
-	NoDevPrefetch    bool   `long:"no-dev-prefetch" description:"Disable automatic dev fund balance query on new blocks. When true, the query will still be run on demand, but not automatically after new blocks are connected." env:"DCRDATA_DISABLE_DEV_PREFETCH"`
-	ChartsCacheDump  string `long:"chartscache" description:"Defines the file name that holds the charts cache data on system exit." env:"DCRDATA_CHARTS_CACHE"`
+	AddrCacheCap     int    `long:"addr-cache-cap" description:"Address cache capacity in bytes." env:"EXCCDATA_ADDR_CACHE_CAP"`
+	AddrCacheLimit   int    `long:"addr-cache-address-limit" description:"Maximum number of addresses allowed in the address cache." env:"EXCCDATA_ADDR_CACHE_LIMIT"`
+	AddrCacheUXTOCap int    `long:"addr-cache-utxo-cap" description:"UTXO cache capacity in bytes." env:"EXCCDATA_ADDR_CASH_UTXO_CAP"`
+	NoDevPrefetch    bool   `long:"no-dev-prefetch" description:"Disable automatic dev fund balance query on new blocks. When true, the query will still be run on demand, but not automatically after new blocks are connected." env:"EXCCDATA_DISABLE_DEV_PREFETCH"`
+	ChartsCacheDump  string `long:"chartscache" description:"Defines the file name that holds the charts cache data on system exit." env:"EXCCDATA_CHARTS_CACHE"`
 
 	// DB backend
 	PGDBName         string        `long:"pgdbname" description:"PostgreSQL DB name." env:"EXCCDATA_PG_DB_NAME"`

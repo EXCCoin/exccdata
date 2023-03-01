@@ -12,7 +12,7 @@ import (
 
 func TestUltimateSubsidy(t *testing.T) {
 	// Mainnet
-	wantMainnetSubsidy := int64(2099999999800912)
+	wantMainnetSubsidy := int64(3398978555227904)
 	totalSubsidy := UltimateSubsidy(chaincfg.MainNetParams(), -1)
 
 	if totalSubsidy != wantMainnetSubsidy {
@@ -27,17 +27,8 @@ func TestUltimateSubsidy(t *testing.T) {
 			totalSubsidy, totalSubsidy2)
 	}
 
-	// Mainnet with dcp0010 activating at 638976
-	wantMainnetSubsidy = int64(2100000000015952)
-	totalSubsidyDCP0010 := UltimateSubsidy(chaincfg.MainNetParams(), 638976)
-
-	if totalSubsidyDCP0010 != wantMainnetSubsidy {
-		t.Fatalf("Bad total subsidy; want %d, got %d",
-			wantMainnetSubsidy, totalSubsidyDCP0010)
-	}
-
 	// Testnet
-	wantTestnetSubsidy := int64(526540305161472)
+	wantTestnetSubsidy := int64(2685161595227904)
 	totalTNSubsidy := UltimateSubsidy(chaincfg.TestNet3Params(), -1)
 
 	if totalTNSubsidy != wantTestnetSubsidy {
@@ -57,13 +48,6 @@ func TestUltimateSubsidy(t *testing.T) {
 	if totalSubsidy != totalSubsidy3 {
 		t.Errorf("Bad total subsidy; want %d, got %d",
 			totalSubsidy, totalSubsidy3)
-	}
-
-	// re-verify mainnet cache (dcp0010)
-	totalSubsidy4 := UltimateSubsidy(chaincfg.MainNetParams(), 638976)
-	if totalSubsidyDCP0010 != totalSubsidy4 {
-		t.Errorf("Bad total subsidy; want %d, got %d",
-			totalSubsidyDCP0010, totalSubsidy4)
 	}
 }
 

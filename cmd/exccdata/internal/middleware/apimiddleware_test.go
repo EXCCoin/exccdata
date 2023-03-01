@@ -30,19 +30,19 @@ func TestGetAddressCtx(t *testing.T) {
 	}{
 		{
 			testName: "ok2",
-			args:     args{2, []string{"Dcur2mcGjmENx4DhNqDctW5wJCVyT3Qeqkx"}},
-			want:     []string{"Dcur2mcGjmENx4DhNqDctW5wJCVyT3Qeqkx"},
+			args:     args{2, []string{"22u4yVXyXzZjqpXwvnmNBf1J8vQVvF6xZu5S"}},
+			want:     []string{"22u4yVXyXzZjqpXwvnmNBf1J8vQVvF6xZu5S"},
 			wantErr:  false,
 		},
 		{
 			testName: "ok1",
-			args:     args{1, []string{"Dcur2mcGjmENx4DhNqDctW5wJCVyT3Qeqkx"}},
-			want:     []string{"Dcur2mcGjmENx4DhNqDctW5wJCVyT3Qeqkx"},
+			args:     args{1, []string{"22u4yVXyXzZjqpXwvnmNBf1J8vQVvF6xZu5S"}},
+			want:     []string{"22u4yVXyXzZjqpXwvnmNBf1J8vQVvF6xZu5S"},
 			wantErr:  false,
 		},
 		{
 			testName: "bad0",
-			args:     args{0, []string{"Dcur2mcGjmENx4DhNqDctW5wJCVyT3Qeqkx"}},
+			args:     args{0, []string{"22u4yVXyXzZjqpXwvnmNBf1J8vQVvF6xZu5S"}},
 			want:     nil, // not []string{}
 			wantErr:  true,
 			errMsg:   "maximum of 0 addresses allowed",
@@ -50,9 +50,9 @@ func TestGetAddressCtx(t *testing.T) {
 		},
 		{
 			testName: "bad3",
-			args: args{2, []string{"Dcur2mcGjmENx4DhNqDctW5wJCVyT3Qeqkx",
-				"DseXBL6g6GxvfYAnKqdao2f7WkXDmYTYW87",
-				"Dsi8hhDzr3SvcGcv4NEGvRqFkwZ2ncRhukk"}},
+			args: args{2, []string{"22u4yVXyXzZjqpXwvnmNBf1J8vQVvF6xZu5S",
+				"22tki4qR9DjPEKdmT8wEjuE4YxexWPrZS3TH",
+				"22u38ScQ2df45ppzQ4CrNbxjMsDZrbWK3SKh"}},
 			want:     nil,
 			wantErr:  true,
 			errMsg:   "maximum of 2 addresses allowed",
@@ -61,9 +61,9 @@ func TestGetAddressCtx(t *testing.T) {
 		{
 			// This tests that the middleware counts before removing dups.
 			testName: "bad_dup3",
-			args: args{2, []string{"Dsi8hhDzr3SvcGcv4NEGvRqFkwZ2ncRhukk",
-				"DseXBL6g6GxvfYAnKqdao2f7WkXDmYTYW87",
-				"Dsi8hhDzr3SvcGcv4NEGvRqFkwZ2ncRhukk"}},
+			args: args{2, []string{"22u38ScQ2df45ppzQ4CrNbxjMsDZrbWK3SKh",
+				"22tki4qR9DjPEKdmT8wEjuE4YxexWPrZS3TH",
+				"22u38ScQ2df45ppzQ4CrNbxjMsDZrbWK3SKh"}},
 			want:     nil,
 			wantErr:  true,
 			errMsg:   "maximum of 2 addresses allowed",
@@ -72,25 +72,25 @@ func TestGetAddressCtx(t *testing.T) {
 		{
 			// This tests that the middleware counts removes dups.
 			testName: "ok_dup3",
-			args: args{3, []string{"Dsi8hhDzr3SvcGcv4NEGvRqFkwZ2ncRhukk",
-				"DseXBL6g6GxvfYAnKqdao2f7WkXDmYTYW87",
-				"Dsi8hhDzr3SvcGcv4NEGvRqFkwZ2ncRhukk"}},
-			want: []string{"Dsi8hhDzr3SvcGcv4NEGvRqFkwZ2ncRhukk",
-				"DseXBL6g6GxvfYAnKqdao2f7WkXDmYTYW87"},
+			args: args{3, []string{"22u38ScQ2df45ppzQ4CrNbxjMsDZrbWK3SKh",
+				"22tki4qR9DjPEKdmT8wEjuE4YxexWPrZS3TH",
+				"22u38ScQ2df45ppzQ4CrNbxjMsDZrbWK3SKh"}},
+			want: []string{"22u38ScQ2df45ppzQ4CrNbxjMsDZrbWK3SKh",
+				"22tki4qR9DjPEKdmT8wEjuE4YxexWPrZS3TH"},
 			wantErr: false,
 		},
 		{
 			testName: "invalid",
-			args:     args{2, []string{"DcxxxxcGjmENx4DhNqDctW5wJCVyT3Qeqkx"}},
+			args:     args{2, []string{"22xxxxxxxxjPEKdmT8wEjuE4YxexWPrZS3TH"}},
 			want:     nil,
 			wantErr:  true,
-			errMsg:   `invalid address "DcxxxxcGjmENx4DhNqDctW5wJCVyT3Qeqkx" for this network: failed to decoded address "DcxxxxcGjmENx4DhNqDctW5wJCVyT3Qeqkx": checksum error`},
+			errMsg:   `invalid address "22xxxxxxxxjPEKdmT8wEjuE4YxexWPrZS3TH" for this network: failed to decoded address "22xxxxxxxxjPEKdmT8wEjuE4YxexWPrZS3TH": checksum error`},
 		{
 			testName: "wrong_net",
-			args:     args{2, []string{"TsWmwignm9Q6iBQMSHw9WhBeR5wgUPpD14Q"}},
+			args:     args{2, []string{"TsbTSs4HZXkNo1MRXFEQqTwgCdPdp2Cy2bZ"}},
 			want:     nil,
 			wantErr:  true,
-			errMsg:   `invalid address "TsWmwignm9Q6iBQMSHw9WhBeR5wgUPpD14Q" for this network: address "TsWmwignm9Q6iBQMSHw9WhBeR5wgUPpD14Q" is not a supported type`,
+			errMsg:   `invalid address "TsbTSs4HZXkNo1MRXFEQqTwgCdPdp2Cy2bZ" for this network: address "TsbTSs4HZXkNo1MRXFEQqTwgCdPdp2Cy2bZ" is not a supported type`,
 		},
 	}
 	for _, tt := range tests {

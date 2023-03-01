@@ -1265,7 +1265,7 @@ func GenesisTxHash(params *chaincfg.Params) chainhash.Hash {
 // hash) address. See https://github.com/EXCCoin/exccdata/issues/358 for details.
 func IsZeroHashP2PHKAddress(checkAddressString string, params *chaincfg.Params) bool {
 	zeroed := [20]byte{}
-	// expecting DsQxuVRvS4eaJ42dhQEsCXauMWjvopWgrVg address for mainnet
+	// expecting 22tjqHKSFCVRNyDsesHrVPKRmhVrESX26D6u address for mainnet
 	address, err := stdaddr.NewAddressPubKeyHashEcdsaSecp256k1V0(zeroed[:], params)
 	if err != nil {
 		return false

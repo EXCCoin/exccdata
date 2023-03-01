@@ -17,7 +17,7 @@ func TestMain(m *testing.M) {
 	// from previously set env variables or default config files.
 	tempConfigFile, _ = os.CreateTemp("", "dcrdata_test_file.cfg")
 	defer os.Remove(tempConfigFile.Name())
-	os.Setenv("DCRDATA_CONFIG_FILE", tempConfigFile.Name())
+	os.Setenv("EXCCDATA_CONFIG_FILE", tempConfigFile.Name())
 
 	// Make an empty folder for appdata tests.
 	tempAppDataDir, _ = os.MkdirTemp("", "dcrdata_test_appdata")
@@ -29,19 +29,19 @@ func TestMain(m *testing.M) {
 	os.Args = os.Args[:1]
 	// Run the tests now that the testing package flags have been parsed.
 	retCode := m.Run()
-	os.Unsetenv("DCRDATA_CONFIG_FILE")
+	os.Unsetenv("EXCCDATA_CONFIG_FILE")
 
 	os.Exit(retCode)
 }
 
-// disableConfigFileEnv checks if the DCRDATA_CONFIG_FILE environment variable
+// disableConfigFileEnv checks if the EXCCDATA_CONFIG_FILE environment variable
 // is set, unsets it, and returns a function that will return
-// DCRDATA_CONFIG_FILE to its state before calling disableConfigFileEnv.
+// EXCCDATA_CONFIG_FILE to its state before calling disableConfigFileEnv.
 func disableConfigFileEnv() func() {
-	loc, wasSet := os.LookupEnv("DCRDATA_CONFIG_FILE")
+	loc, wasSet := os.LookupEnv("EXCCDATA_CONFIG_FILE")
 	if wasSet {
-		os.Unsetenv("DCRDATA_CONFIG_FILE")
-		return func() { os.Setenv("DCRDATA_CONFIG_FILE", loc) }
+		os.Unsetenv("EXCCDATA_CONFIG_FILE")
+		return func() { os.Setenv("EXCCDATA_CONFIG_FILE", loc) }
 	}
 	return func() {}
 }
@@ -61,8 +61,8 @@ func TestLoadDefaultConfigMissing(t *testing.T) {
 	defer restoreConfigFileLoc()
 
 	// Use the empty appdata dir.
-	os.Setenv("DCRDATA_APPDATA_DIR", tempAppDataDir)
-	defer os.Unsetenv("DCRDATA_APPDATA_DIR")
+	os.Setenv("EXCCDATA_APPDATA_DIR", tempAppDataDir)
+	defer os.Unsetenv("EXCCDATA_APPDATA_DIR")
 
 	// Load using the the empty appdata directory (with no config file). Since
 	// this is the default config file, it should not cause an error.
@@ -81,7 +81,7 @@ func TestLoadCustomConfigMissing(t *testing.T) {
 	// to guarantee the file does not exist.
 	goneFile, _ := os.CreateTemp("", "blah")
 	os.Remove(goneFile.Name())
-	os.Setenv("DCRDATA_CONFIG_FILE", goneFile.Name())
+	os.Setenv("EXCCDATA_CONFIG_FILE", goneFile.Name())
 
 	// Attempt to load using the non-existent non-default config file, which
 	// should return an error.
@@ -102,8 +102,8 @@ func TestLoadDefaultConfigPathCustomAppdata(t *testing.T) {
 	defer restoreConfigFileLoc()
 
 	// Use the empty appdata dir.
-	os.Setenv("DCRDATA_APPDATA_DIR", tempAppDataDir)
-	defer os.Unsetenv("DCRDATA_APPDATA_DIR")
+	os.Setenv("EXCCDATA_APPDATA_DIR", tempAppDataDir)
+	defer os.Unsetenv("EXCCDATA_APPDATA_DIR")
 
 	// Load using the the empty appdata directory (with no config file). Since
 	// this is the default config file, it should not cause an error.
@@ -134,7 +134,7 @@ func TestDefaultConfigAPIListen(t *testing.T) {
 
 func TestDefaultConfigAPIListenWithEnv(t *testing.T) {
 	customListenPath := "0.0.0.0:7777"
-	os.Setenv("DCRDATA_LISTEN_URL", customListenPath)
+	os.Setenv("EXCCDATA_LISTEN_URL", customListenPath)
 
 	cfg, err := loadConfig()
 	if err != nil {
@@ -147,7 +147,7 @@ func TestDefaultConfigAPIListenWithEnv(t *testing.T) {
 }
 
 func TestDefaultConfigAppDataDir(t *testing.T) {
-	expected := dcrutil.AppDataDir("dcrdata", false)
+	expected := dcrutil.AppDataDir("exccdata", false)
 	cfg, err := loadConfig()
 	if err != nil {
 		t.Fatalf("Failed to load dcrdata config: %v", err)
@@ -164,8 +164,8 @@ func TestCustomHomeDirWithEnv(t *testing.T) {
 	defer restoreConfigFileLoc()
 
 	// Use the empty appdata dir made for the tests.
-	os.Setenv("DCRDATA_APPDATA_DIR", tempAppDataDir)
-	defer os.Unsetenv("DCRDATA_APPDATA_DIR")
+	os.Setenv("EXCCDATA_APPDATA_DIR", tempAppDataDir)
+	defer os.Unsetenv("EXCCDATA_APPDATA_DIR")
 
 	cfg, err := loadConfig()
 	if err != nil {
@@ -187,8 +187,8 @@ func TestDefaultConfigHomeDirWithEnvAndFlag(t *testing.T) {
 	defer os.RemoveAll(cliOverride)
 	os.Args = append(os.Args, "--appdata="+cliOverride)
 
-	os.Setenv("DCRDATA_APPDATA_DIR", cliOverride)
-	defer os.Unsetenv("DCRDATA_APPDATA_DIR")
+	os.Setenv("EXCCDATA_APPDATA_DIR", cliOverride)
+	defer os.Unsetenv("EXCCDATA_APPDATA_DIR")
 
 	cfg, err := loadConfig()
 	if err != nil {
@@ -212,8 +212,8 @@ func TestDefaultConfigNetwork(t *testing.T) {
 }
 
 func TestDefaultConfigTestNetWithEnv(t *testing.T) {
-	os.Setenv("DCRDATA_USE_TESTNET", "true")
-	defer os.Unsetenv("DCRDATA_USE_TESTNET")
+	os.Setenv("EXCCDATA_USE_TESTNET", "true")
+	defer os.Unsetenv("EXCCDATA_USE_TESTNET")
 
 	cfg, err := loadConfig()
 	if err != nil {
@@ -225,12 +225,12 @@ func TestDefaultConfigTestNetWithEnv(t *testing.T) {
 }
 
 func TestDefaultConfigTestNetWithEnvAndBadValue(t *testing.T) {
-	os.Setenv("DCRDATA_USE_TESTNET", "no")
-	defer os.Unsetenv("DCRDATA_USE_TESTNET")
+	os.Setenv("EXCCDATA_USE_TESTNET", "no")
+	defer os.Unsetenv("EXCCDATA_USE_TESTNET")
 
 	_, err := loadConfig()
 	if err == nil {
-		t.Errorf("Invalid boolean value for DCRDATA_USE_TESTNET did not cause an error.")
+		t.Errorf("Invalid boolean value for EXCCDATA_USE_TESTNET did not cause an error.")
 	}
 }
 

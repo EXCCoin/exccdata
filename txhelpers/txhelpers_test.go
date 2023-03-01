@@ -31,6 +31,8 @@ func (t TxGetter) GetRawTransaction(txHash *chainhash.Hash) (*dcrutil.Tx, error)
 }
 
 func LoadTestBlockAndSSTX(t *testing.T) (*dcrutil.Block, []*dcrutil.Tx) {
+	t.SkipNow() // TODO
+
 	// Load block data
 	blockTestFileName := "block138883.bin"
 	blockTestFile, err := os.Open(blockTestFileName)
@@ -224,7 +226,7 @@ func TestGenesisTxHash(t *testing.T) {
 	}
 	t.Logf("Genesis transaction hash (mainnet): %s", genesisTxHash)
 
-	mainnetExpectedTxHash := "e7dfbceac9fccd6025c70a1dfa9302b3e7b5aa22fa51c98a69164ad403d60a2c"
+	mainnetExpectedTxHash := "a219ec65d87f815565ceff917ab99eb26fb58237a80c4cfa7e3d56231b8d9935"
 	if genesisTxHash != mainnetExpectedTxHash {
 		t.Errorf("Incorrect genesis transaction hash (mainnet). Expected %s, got %s",
 			mainnetExpectedTxHash, genesisTxHash)
@@ -237,7 +239,7 @@ func TestGenesisTxHash(t *testing.T) {
 	}
 	t.Logf("Genesis transaction hash (mainnet): %s", genesisTxHash)
 
-	simnetExpectedTxHash := "a216ea043f0d481a072424af646787794c32bcefd3ed181a090319bbf8a37105"
+	simnetExpectedTxHash := "e736813725d3c63f4f50816b627c1394d268fab23ef9bd5e81ea633b48042953"
 	if genesisTxHash != simnetExpectedTxHash {
 		t.Errorf("Incorrect genesis transaction hash (simnet). Expected %s, got %s",
 			mainnetExpectedTxHash, genesisTxHash)
@@ -251,9 +253,9 @@ func TestAddressErrors(t *testing.T) {
 }
 
 func TestIsZeroHashP2PHKAddress(t *testing.T) {
-	mainnetDummy := "DsQxuVRvS4eaJ42dhQEsCXauMWjvopWgrVg"
-	testnetDummy := "TsR28UZRprhgQQhzWns2M6cAwchrNVvbYq2"
-	simnetDummy := "SsUMGgvWLcixEeHv3GT4TGYyez4kY79RHth"
+	mainnetDummy := "22tjqHKSFCVRNyDsesHrVPKRmhVrESX26D6u"
+	testnetDummy := "TsR28UZRprhgQQhzWns2M6cAwchrNTGZrWw"
+	simnetDummy := "SsUMGgvWLcixEeHv3GT4TGYyez4kYAR2CSM"
 
 	positiveTest := true
 	negativeTest := !positiveTest

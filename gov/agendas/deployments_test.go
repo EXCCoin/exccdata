@@ -8,10 +8,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/asdine/storm/v3"
 	"github.com/EXCCoin/exccd/dcrjson/v4"
 	chainjson "github.com/EXCCoin/exccd/rpc/jsonrpc/types/v3"
 	"github.com/EXCCoin/exccdata/v8/db/dbtypes"
+	"github.com/asdine/storm/v3"
 )
 
 var db *storm.DB

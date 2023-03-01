@@ -19,13 +19,13 @@ var networkRewardPeriods = []networkRewardPeriod{
 		chaincfg.MainNetParams(),
 		7860,
 		8372,
-		2511600000000000,
+		1255800000000000,
 	},
 	{
 		chaincfg.TestNet3Params(),
 		1006,
 		1038,
-		124560000000000,
+		155700000000000,
 	},
 	{
 		chaincfg.SimNetParams(),
