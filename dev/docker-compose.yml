@@ -1,0 +1,13 @@
+version: '3.1'
+
+services:
+
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - 127.0.0.1:5432:5432
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_USER: exccdata
+      POSGRES_DB: exccdata
