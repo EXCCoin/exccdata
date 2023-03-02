@@ -461,8 +461,9 @@ func _main(ctx context.Context) error {
 	// A vote tracker tracks current block and stake versions and votes. Only
 	// initialize the vote tracker if not on simnet. nil tracker is a sentinel
 	// value throughout.
+	disableForExcc := true
 	var tracker *agendas.VoteTracker
-	if !cfg.SimNet {
+	if !cfg.SimNet && !disableForExcc {
 		tracker, err = agendas.NewVoteTracker(activeChain, dcrdClient,
 			chainDB.AgendaVoteCounts)
 		if err != nil {
