@@ -1,18 +1,18 @@
-# dcrdata
+# exccdata
 
-[![Build Status](https://github.com/decred/dcrdata/workflows/Build%20and%20Test/badge.svg)](https://github.com/decred/dcrdata/actions)
-[![Latest tag](https://img.shields.io/github/tag/decred/dcrdata.svg)](https://github.com/decred/dcrdata/tags)
-[![Go Report Card](https://goreportcard.com/badge/github.com/decred/dcrdata)](https://goreportcard.com/report/github.com/decred/dcrdata)
+[![Build Status](https://github.com/EXCCoin/exccdata/workflows/Build%20and%20Test/badge.svg)](https://github.com/EXCCoin/exccdata/actions)
+[![Latest tag](https://img.shields.io/github/tag/EXCCoin/exccdata.svg)](https://github.com/EXCCoin/exccdata/tags)
+[![Go Report Card](https://goreportcard.com/badge/github.com/EXCCoin/exccdata)](https://goreportcard.com/report/github.com/EXCCoin/exccdata)
 [![ISC License](https://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
 
 ## Overview
 
-dcrdata is an original [Decred](https://www.decred.org/) block explorer, with
+exccdata is an original [ExchangeCoin](https://excc.co) block explorer, with
 packages and apps for data collection, presentation, and storage. The backend
 and middleware are written in Go. On the front end, Webpack enables the use of
 modern javascript features, as well as SCSS for styling.
 
-- [dcrdata](#dcrdata)
+- [exccdata](#exccdata)
   - [Overview](#overview)
   - [Release Status](#release-status)
   - [Repository Overview](#repository-overview)
@@ -21,7 +21,7 @@ modern javascript features, as well as SCSS for styling.
   - [Building](#building)
     - [Preparation](#preparation)
     - [Package the Static Web Assets](#package-the-static-web-assets)
-    - [Building dcrdata with Go](#building-dcrdata-with-go)
+    - [Building exccdata with Go](#building-exccdata-with-go)
     - [Setting build version flags](#setting-build-version-flags)
     - [Runtime Resources](#runtime-resources)
   - [Updating](#updating)
@@ -30,20 +30,20 @@ modern javascript features, as well as SCSS for styling.
     - [From v2.x or earlier](#from-v2x-or-earlier)
   - [Getting Started](#getting-started)
     - [Configuring PostgreSQL (**IMPORTANT!** Seriously, read this.)](#configuring-postgresql-important-seriously-read-this)
-    - [Creating the dcrdata Configuration File](#creating-the-dcrdata-configuration-file)
+    - [Creating the exccdata Configuration File](#creating-the-exccdata-configuration-file)
     - [Using Environment Variables for Configuration](#using-environment-variables-for-configuration)
     - [Indexing the Blockchain](#indexing-the-blockchain)
-    - [Starting dcrdata](#starting-dcrdata)
+    - [Starting exccdata](#starting-exccdata)
     - [Hiding the PostgreSQL Settings Table](#hiding-the-postgresql-settings-table)
     - [Running the Web Interface During Synchronization](#running-the-web-interface-during-synchronization)
   - [System Hardware Requirements](#system-hardware-requirements)
-    - [dcrdata only (PostgreSQL on other host)](#dcrdata-only-postgresql-on-other-host)
-    - [dcrdata and PostgreSQL on same host](#dcrdata-and-postgresql-on-same-host)
-  - [dcrdata Daemon](#dcrdata-daemon)
+    - [exccdata only (PostgreSQL on other host)](#exccdata-only-postgresql-on-other-host)
+    - [exccdata and PostgreSQL on same host](#exccdata-and-postgresql-on-same-host)
+  - [exccdata Daemon](#exccdata-daemon)
     - [Block Explorer](#block-explorer)
   - [APIs](#apis)
     - [Insight API](#insight-api)
-    - [dcrdata API](#dcrdata-api)
+    - [exccdata API](#exccdata-api)
       - [Endpoint List](#endpoint-list)
   - [Important Note About Mempool](#important-note-about-mempool)
   - [Command Line Utilities](#command-line-utilities)
@@ -64,25 +64,25 @@ modern javascript features, as well as SCSS for styling.
 
 Always run the Current release or on the Current stable branch. Do not use `master` in production.
 
-|             | Series  | Branch       | Latest release tag | `dcrd` RPC server version required |
+|             | Series  | Branch       | Latest release tag | `exccd` RPC server version required |
 | ----------- | ------- | ------------ | ------------------ | ---------------------------------- |
-| Development | 6.1     | `master`     | N/A                | ^7.0.0 (dcrd v1.7 release)         |
-| Current     | 6.0     | `6.0-stable` | `release-v6.0`     | ^6.2.0 (dcrd v1.6 release)         |
+| Development | 6.1     | `master`     | N/A                | ^7.0.0 (exccd v1.7 release)         |
+| Current     | 6.0     | `6.0-stable` | `release-v6.0`     | ^6.2.0 (exccd v1.6 release)         |
 
 ## Repository Overview
 
 ```none
-../dcrdata                The main Go MODULE. See cmd/dcrdata for the explorer executable.
-├── api/types             The exported structures used by the dcrdata and Insight APIs.
+../exccdata                The main Go MODULE. See cmd/exccdata for the explorer executable.
+├── api/types             The exported structures used by the exccdata and Insight APIs.
 ├── blockdata             Package blockdata is the primary data collection and
 |                           storage hub, and chain monitor.
 ├── cmd
-│   └── dcrdata           MODULE for the dcrdata explorer executable.
-│       ├── api           dcrdata's own HTTP API
+│   └── exccdata           MODULE for the exccdata explorer executable.
+│       ├── api           exccdata's own HTTP API
 │       │   └── insight   The Insight API
 │       ├── explorer      Powers the block explorer pages.
 │       ├── middleware    HTTP router middleware used by the explorer
-│       ├── notification  Manages dcrd notifications synchronous data collection.
+│       ├── notification  Manages exccd notifications synchronous data collection.
 │       ├── public        Public resources for block explorer (css, js, etc.)
 │       └── views         HTML templates for block explorer
 ├── db
@@ -94,7 +94,7 @@ Always run the Current release or on the Current stable branch. Do not use `mast
 ├── exchanges             MODULE and package for gathering data from public exchange APIs
 │   ├── rateserver        rateserver app, which runs an exchange bot for collecting
 │   |                       exchange rate data, and a gRPC server for providing this
-│   |                       data to multiple clients like dcrdata.
+│   |                       data to multiple clients like exccdata.
 |   └── ratesproto        Package dcrrates implementing a gRPC protobuf service for
 |                           communicating exchange rate data with a rateserver.
 ├── explorer/types        Types used primarily by the explorer pages.
@@ -132,23 +132,23 @@ Always run the Current release or on the Current stable branch. Do not use `mast
 - [Go](https://golang.org) 1.18 or 1.19
 - [Node.js](https://nodejs.org/en/download/) 16.x or 18.x. Node.js is only used
   as a build tool, and is **not used at runtime**.
-- Running `dcrd` running with `--txindex`, and synchronized to the current best
-  block on the network. On startup, dcrdata will verify that the dcrd version is
+- Running `exccd` running with `--txindex`, and synchronized to the current best
+  block on the network. On startup, exccdata will verify that the exccd version is
   compatible.
 - PostgreSQL 11+
 
 ## Docker Support
 
 Dockerfiles are provided for convenience, but NOT SUPPORTED. See [the Docker
-documentation](docs/docker.md) for more information. The supported dcrdata build
+documentation](docs/docker.md) for more information. The supported exccdata build
 instructions are described below.
 
 ## Building
 
-The dcrdata build process comprises two general steps:
+The exccdata build process comprises two general steps:
 
 1. Bundle the static web page assets with Webpack (via the `npm` tool).
-2. Build the `dcrdata` executable from the Go source files.
+2. Build the `exccdata` executable from the Go source files.
 
 These steps are described in detail in the following sections.
 
@@ -166,11 +166,11 @@ NOTE: The following instructions assume a Unix-like shell (e.g. bash).
 
 - Ensure `$GOPATH/bin` is on your `$PATH`.
 
-- Clone the dcrdata repository. It is conventional to put it under `GOPATH`, but
+- Clone the exccdata repository. It is conventional to put it under `GOPATH`, but
   this is no longer necessary (or recommend) with Go modules. For example:
 
   ```sh
-  git clone https://github.com/decred/dcrdata $HOME/go-work/github/decred/dcrdata
+  git clone https://github.com/EXCCoin/exccdata $HOME/go-work/github/EXCCoin/exccdata
   ```
 
 - [Install Node.js](https://nodejs.org/en/download/), which is required to lint
@@ -181,14 +181,14 @@ Note that none of the above is required at runtime.
 ### Package the Static Web Assets
 
 [Webpack](https://webpack.js.org/), a JavaScript module bundler, is used to
-compile and package the static assets in the `cmd/dcrdata/public` folder.
+compile and package the static assets in the `cmd/exccdata/public` folder.
 Node.js' `npm` tool is used to install the required Node.js dependencies and
 build the bundled JavaScript distribution for deployment.
 
 First, install the build dependencies:
 
 ```sh
-cd cmd/dcrdata
+cd cmd/exccdata
 npm clean-install # creates node_modules folder fresh
 ```
 
@@ -207,12 +207,12 @@ npm run watch
 
 See [Front End Development](#front-end-development) for more information.
 
-### Building dcrdata with Go
+### Building exccdata with Go
 
-Change to the `cmd/dcrdata` folder and build:
+Change to the `cmd/exccdata` folder and build:
 
 ```sh
-cd cmd/dcrdata
+cd cmd/exccdata
 go build -v
 ```
 
@@ -229,7 +229,7 @@ script to mostly automate the build steps.
 ### Setting build version flags
 
 By default, the version string will be postfixed with "-pre+dev".  For example,
-`dcrdata version 5.1.0-pre+dev (Go version go1.12.7)`.  However, it may be
+`exccdata version 5.1.0-pre+dev (Go version go1.12.7)`.  However, it may be
 desirable to set the "pre" and "dev" values to different strings, such as
 "beta" or the actual commit hash.  To set these values, build with the
 `-ldflags` switch as follows:
@@ -239,7 +239,7 @@ go build -v -ldflags \
   "-X main.appPreRelease=beta -X main.appBuild=`git rev-parse --short HEAD`"
 ```
 
-This produces a string like `dcrdata version 6.0.0-beta+750fd6c2 (Go version go1.16.2)`.
+This produces a string like `exccdata version 6.0.0-beta+750fd6c2 (Go version go1.16.2)`.
 
 ### Runtime Resources
 
@@ -248,9 +248,9 @@ which may be specified via the `-A/--appdata` and `-b/--datadir` settings.
 However, the location of the config file may also be set with `-C/--configfile`.
 The default paths for your system are shown in the `--help` description.
 If encountering errors involving file system paths, check the permissions on these
-folders to ensure that _the user running dcrdata_ is able to access these paths.
+folders to ensure that _the user running exccdata_ is able to access these paths.
 
-The "public" and "views" folders _must_ be in the same folder as the `dcrdata`
+The "public" and "views" folders _must_ be in the same folder as the `exccdata`
 executable. Set read-only permissions as appropriate.
 
 ## Updating
@@ -258,17 +258,17 @@ executable. Set read-only permissions as appropriate.
 Update the repository (assuming you have `master` checked out in `GOPATH`):
 
 ```sh
-cd $HOME/go-work/github/decred/dcrdata
+cd $HOME/go-work/github/EXCCoin/exccdata
 git pull origin master
 ```
 
 Look carefully for errors with `git pull`, and reset locally modified files if
 necessary.
 
-Next, build `dcrdata` and bundle the web assets:
+Next, build `exccdata` and bundle the web assets:
 
 ```sh
-cd cmd/dcrdata
+cd cmd/exccdata
 go build -v
 npm clean-install
 npm run build # or npm run watch
@@ -281,32 +281,32 @@ within `$GOPATH` may require setting `GO111MODULE=on`.
 
 ### From v3.x or later
 
-No special actions are required. Simply start the new dcrdata and automatic
+No special actions are required. Simply start the new exccdata and automatic
 database schema upgrades and table data patches will begin.
 
 ### From v2.x or earlier
 
-The database scheme change from dcrdata v2.x to v3.x does not permit an
+The database scheme change from exccdata v2.x to v3.x does not permit an
 automatic migration. The tables must be rebuilt from scratch:
 
-1. Drop the old dcrdata database, and create a new empty dcrdata database.
+1. Drop the old exccdata database, and create a new empty exccdata database.
 
    ```sql
    -- Drop the old database.
-   DROP DATABASE dcrdata;
+   DROP DATABASE exccdata;
 
-   -- Create a new database with the same "pguser" set in the dcrdata.conf.
-   CREATE DATABASE dcrdata OWNER dcrdata;
+   -- Create a new database with the same "pguser" set in the exccdata.conf.
+   CREATE DATABASE exccdata OWNER exccdata;
    ```
 
-2. Delete the dcrdata data folder (i.e. corresponding to the `datadir` setting).
+2. Delete the exccdata data folder (i.e. corresponding to the `datadir` setting).
    By default, `datadir` is in `{appdata}/data`:
 
-   - Linux: `~/.dcrdata/data`
-   - Mac: `~/Library/Application Support/Dcrdata/data`
-   - Windows: `C:\Users\<your-username>\AppData\Local\Dcrdata\data` (`%localappdata%\Dcrdata\data`)
+   - Linux: `~/.exccdata/data`
+   - Mac: `~/Library/Application Support/exccdata/data`
+   - Windows: `C:\Users\<your-username>\AppData\Local\Exccdata\data` (`%localappdata%\Exccdata\data`)
 
-3. With dcrd synchronized to the network's best block, start dcrdata to begin
+3. With exccd synchronized to the network's best block, start exccdata to begin
    the initial block data sync.
 
 ## Getting Started
@@ -314,13 +314,13 @@ automatic migration. The tables must be rebuilt from scratch:
 ### Configuring PostgreSQL (**IMPORTANT!** Seriously, read this.)
 
 It is crucial that you configure your PostgreSQL server for your hardware and
-the dcrdata workload.
+the exccdata workload.
 
 Read [postgresql-tuning.conf](./db/dcrpg/postgresql-tuning.conf) carefully for
 details on how to make the necessary changes to your system. A helpful online
 tool for determining good settings for your system is called
 [PGTune](https://pgtune.leopard.in.ua/). Note that when using this tool,
-subtract 1.5-2GB from your system RAM so dcrdata itself will have plenty of
+subtract 1.5-2GB from your system RAM so exccdata itself will have plenty of
 memory. **DO NOT** simply use this file in place of your existing
 postgresql.conf. **DO NOT** simply copy and paste these settings into the
 existing postgresql.conf. It is necessary to *edit the existing
@@ -329,9 +329,9 @@ parameters are not set in two different places in the file (postgres will not
 complain).
 
 If you tune PostgreSQL to fully utilize remaining RAM, you are limiting
-the RAM available to the dcrdata process, which will increase as request
+the RAM available to the exccdata process, which will increase as request
 volume increases and its cache becomes fully utilized. Allocate sufficient
-memory to dcrdata for your application, and use a reverse proxy such as nginx
+memory to exccdata for your application, and use a reverse proxy such as nginx
 with cache locking features to prevent simultaneous requests to the same
 resource.
 
@@ -339,43 +339,43 @@ On Linux, you may wish to use a unix domain socket instead of a TCP connection.
 The path to the socket depends on the system, but it is commonly
 `/var/run/postgresql`. Just set this path in `pghost`.
 
-### Creating the dcrdata Configuration File
+### Creating the exccdata Configuration File
 
 Begin with the sample configuration file. With the default `appdata` directory
 for the current user on Linux:
 
 ```sh
-cp sample-dcrdata.conf ~/.dcrdata/dcrdata.conf
+cp sample-exccdata.conf ~/.exccdata/exccdata.conf
 ```
 
-Then edit dcrdata.conf with your dcrd RPC settings. See the output of `dcrdata
+Then edit exccdata.conf with your exccd RPC settings. See the output of `exccdata
 --help` for a list of all options and their default values.
 
 ### Indexing the Blockchain
 
-If dcrdata has not previously been run with the PostgreSQL database backend, it
+If exccdata has not previously been run with the PostgreSQL database backend, it
 is necessary to perform a bulk import of blockchain data and generate table
-indexes. _This will be done automatically by `dcrdata`_ on a fresh startup.
+indexes. _This will be done automatically by `exccdata`_ on a fresh startup.
 **Do NOT interrupt the initial sync or use the browser interface until it is
 completed.**
 
-Note that dcrdata requires that
-[dcrd](https://docs.decred.org/wallets/cli/dcrd-setup/) is
+Note that exccdata requires that
+[exccd](https://docs.excc.co/wallets/cli/exccd-setup/) is
 running with some optional indexes enabled. By default, these indexes are not
-turned on when dcrd is installed. To enable them, set the following in
-dcrd.conf:
+turned on when exccd is installed. To enable them, set the following in
+exccd.conf:
 
 ```ini
 txindex=1
 ```
 
-If these parameters are not set, dcrdata will be unable to retrieve transaction
+If these parameters are not set, exccdata will be unable to retrieve transaction
 details and perform address searches, and will exit with an error mentioning
 these indexes.
 
-### Starting dcrdata
+### Starting exccdata
 
-Launch the dcrdata daemon and allow the databases to process new blocks.
+Launch the exccdata daemon and allow the databases to process new blocks.
 Concurrent synchronization of both stake and PostgreSQL databases is performed,
 typically requiring between 1.5 to 8 hours. See [System Hardware
 Requirements](#System-Hardware-Requirements) for more information. Please reread
@@ -383,16 +383,16 @@ Requirements](#System-Hardware-Requirements) for more information. Please reread
 this.)](#configuring-postgresql-important-seriously-read-this) of you have
 performance issues.
 
-On subsequent launches, only blocks new to dcrdata are processed.
+On subsequent launches, only blocks new to exccdata are processed.
 
 ```sh
-./dcrdata    # don't forget to configure dcrdata.conf in the appdata folder!
+./exccdata    # don't forget to configure exccdata.conf in the appdata folder!
 ```
 
 **Do NOT interrupt the initial sync or use the browser interface until it is
 completed.** Follow the messages carefully, and if you are uncertain of the
 current sync status, check system resource utilization. Interrupting the
-initial sync can leave dcrdata and it's databases in an unrecoverable or
+initial sync can leave exccdata and it's databases in an unrecoverable or
 suboptimal state. The main steps of the initial sync process are:
 
 1. Initial block data import
@@ -405,9 +405,9 @@ suboptimal state. The main steps of the initial sync process are:
 8. Final catch-up and UTXO cache pre-warming
 9. Update project fund data and then idle
 
-Unlike dcrdata.conf, which must be placed in the `appdata` folder or explicitly
+Unlike exccdata.conf, which must be placed in the `appdata` folder or explicitly
 set with `-C`, the "public" and "views" folders _must_ be in the same folder as
-the `dcrdata` executable.
+the `exccdata` executable.
 
 ## System Hardware Requirements
 
@@ -418,17 +418,17 @@ operations are extremely disk intensive, especially during the initial
 synchronization process. Both high throughput and low latencies for fast
 random accesses are essential.
 
-### dcrdata only (PostgreSQL on other host)
+### exccdata only (PostgreSQL on other host)
 
-Without PostgreSQL, the dcrdata process can get by with:
+Without PostgreSQL, the exccdata process can get by with:
 
 - 1 CPU core
 - 2 GB RAM
 - HDD with 8GB free space
 
-### dcrdata and PostgreSQL on same host
+### exccdata and PostgreSQL on same host
 
-These specifications assume dcrdata and postgres are running on the same machine.
+These specifications assume exccdata and postgres are running on the same machine.
 
 Minimum:
 
@@ -442,9 +442,9 @@ Recommend:
 - 12+ GB RAM
 - NVMe SSD with 120 GB free space
 
-## dcrdata Daemon
+## exccdata Daemon
 
-The `cmd/dcrdata` folder contains the `main` package for the `dcrdata` app, which
+The `cmd/exccdata` folder contains the `main` package for the `exccdata` app, which
 has several components including:
 
 1. Block explorer (web interface).
@@ -457,22 +457,22 @@ has several components including:
 
 ### Block Explorer
 
-After dcrdata syncs with the blockchain server via RPC, by default it will begin
+After exccdata syncs with the blockchain server via RPC, by default it will begin
 listening for HTTP connections on `http://127.0.0.1:7777/`. This means it starts
 a web server listening on IPv4 localhost, port 7777. Both the interface and port
 are configurable. The block explorer and the JSON APIs are both provided by the
 server on this port.
 
-Note that while dcrdata can be started with HTTPS support, it is recommended to
+Note that while exccdata can be started with HTTPS support, it is recommended to
 employ a reverse proxy such as Nginx ("engine x"). See sample-nginx.conf for an
 example Nginx configuration.
 
 ## APIs
 
-The dcrdata block explorer is exposed by two APIs: a Decred implementation of
+The exccdata block explorer is exposed by two APIs: a ExchangeCoin implementation of
 the [Insight API](https://github.com/bitpay/insight-api), and its
 own JSON HTTP API. The Insight API uses the path prefix `/insight/api`. The
-dcrdata API uses the path prefix `/api`.
+exccdata API uses the path prefix `/api`.
 File downloads are served from the `/download` path.
 
 ### Insight API
@@ -483,9 +483,9 @@ via REST or WebSocket.
 See the [Insight API documentation](docs/Insight_API_documentation.md) for
 further details.
 
-### dcrdata API
+### exccdata API
 
-The dcrdata API is a REST API accessible via HTTP. To call the dcrdata API, use
+The exccdata API is a REST API accessible via HTTP. To call the exccdata API, use
 the `/api` path prefix.
 
 #### Endpoint List
@@ -636,10 +636,10 @@ option.
 ## Important Note About Mempool
 
 Although there is mempool data collection and serving, it is **very important**
-to keep in mind that the mempool in your node (dcrd) is not likely to be exactly
+to keep in mind that the mempool in your node (exccd) is not likely to be exactly
 the same as other nodes' mempool. Also, your mempool is cleared out when you
-shutdown dcrd. So, if you have recently (e.g. after the start of the current
-ticket price window) started dcrd, your mempool _will_ be missing transactions
+shutdown exccd. So, if you have recently (e.g. after the start of the current
+ticket price window) started exccd, your mempool _will_ be missing transactions
 that other nodes have.
 
 ## Front End Development
@@ -647,7 +647,7 @@ that other nodes have.
 Make sure you have a recent version of [node and npm](https://nodejs.org/en/download/)
 installed.
 
-From the cmd/dcrdata directory, run the following command to install the node
+From the cmd/exccdata directory, run the following command to install the node
 modules.
 
 `npm clean-install`
@@ -688,13 +688,13 @@ background as well.
 
 ### HTML
 
-The core functionality of dcrdata is server-side rendered in Go and designed to
+The core functionality of exccdata is server-side rendered in Go and designed to
 work well with javascript disabled. For users with javascript enabled,
 [Turbolinks](https://github.com/turbolinks/turbolinks) creates a persistent
 single page application that handles all HTML rendering.
 
 .tmpl files are cached by the backend, and can be reloaded via running
-`killall -USR1 dcrdata` from the command line.
+`killall -USR1 exccdata` from the command line.
 
 ### Javascript
 
@@ -708,7 +708,7 @@ when they get removed from the DOM.
 
 ### Web Performance
 
-The core functionality of dcrdata should perform well in low power device / high
+The core functionality of exccdata should perform well in low power device / high
 latency scenarios (eg. a cheap smart phone with poor reception). This means that
 heavy assets should be lazy loaded when they are actually needed. Simple tasks
 like checking a transaction or address should have a very fast initial page
@@ -718,7 +718,7 @@ load.
 
 `package dbtypes` defines the data types used by the DB backends to model the
 block, transaction, and related blockchain data structures. Functions for
-converting from standard Decred data types (e.g. `wire.MsgBlock`) are also
+converting from standard ExchangeCoin data types (e.g. `wire.MsgBlock`) are also
 provided.
 
 `package rpcutils` includes helper functions for interacting with a
@@ -727,11 +727,11 @@ provided.
 `package stakedb` defines the `StakeDatabase` and `ChainMonitor` types for
 efficiently tracking live tickets, with the primary purpose of computing ticket
 pool value quickly. It uses the `database.DB` type from
-`github.com/decred/dcrd/database` with an ffldb storage backend from
-`github.com/decred/dcrd/database/ffldb`. It also makes use of the `stake.Node`
-type from `github.com/decred/dcrd/blockchain/stake`. The `ChainMonitor` type
+`github.com/EXCCoin/exccd/database` with an ffldb storage backend from
+`github.com/EXCCoin/exccd/database/ffldb`. It also makes use of the `stake.Node`
+type from `github.com/EXCCoin/exccd/blockchain/stake`. The `ChainMonitor` type
 handles connecting new blocks and chain reorganization in response to notifications
-from dcrd.
+from exccd.
 
 `package txhelpers` includes helper functions for working with the common types
 `dcrutil.Tx`, `dcrutil.Block`, `chainhash.Hash`, and others.
@@ -739,7 +739,7 @@ from dcrd.
 ## Internal-use Packages
 
 Some packages are currently designed only for internal
-use by other dcrdata packages, but may be of general value in
+use by other exccdata packages, but may be of general value in
 the future.
 
 `blockdata` defines:
@@ -769,8 +769,8 @@ of objects implementing the `MempoolDataSaver` interface.
 
 ## Plans
 
-See the GitHub [issue trackers](https://github.com/decred/dcrdata/issues) and
-the [project milestones](https://github.com/decred/dcrdata/milestones).
+See the GitHub [issue trackers](https://github.com/EXCCoin/exccdata/issues) and
+the [project milestones](https://github.com/EXCCoin/exccdata/milestones).
 
 ## Contributing
 
@@ -781,12 +781,9 @@ here's the gist of it:
 2. Create a branch for your work (`git checkout -b cool-stuff`).
 3. Code something great.
 4. Commit and push to your repo.
-5. Create a [pull request](https://github.com/decred/dcrdata/compare).
+5. Create a [pull request](https://github.com/EXCCoin/exccdata/compare).
 
 **DO NOT merge from master to your feature branch; rebase.**
-
-Also, [come chat with us on Matrix](https://chat.decred.org/) in the
-dcrdata channel!
 
 ## License
 

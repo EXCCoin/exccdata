@@ -39,6 +39,7 @@ Below are the implemented Insight API endpoints and associated methods.
     + [/status](#status)
     + [/estimatefee](#estimatefee)
 
+// TODO: update examples and request with EXCC data
 
 ## Blocks 
 
@@ -496,7 +497,7 @@ Methods that work with transactions.
 
 ```
 curl -X POST \
- https://alpha.dcrdata.org/insight/api/tx/send \
+ https://explorer.excc.co/insight/api/tx/send \
  -H 'Cache-Control: no-cache' \
  -H 'Content-Type: application/json' \
  -H 'Postman-Token: bf2e16a1-b6d2-4b2f-b6e5-9ea7bd3df5b1' \
@@ -557,7 +558,7 @@ Methods that work with addresses.
 
 **URL:**  ```GET /addr/{address}/balance```
 
-**Description:** Retrieves address balance in atoms (the smallest unit of Decred; 1 DCR = 100,000,000 atoms).
+**Description:** Retrieves address balance in atoms (the smallest unit of ExchangeCoin; 1 DCR = 100,000,000 atoms).
 
 **Parameters:**
 
@@ -581,7 +582,7 @@ Methods that work with addresses.
 
 **URL:**  ```GET /addr/{address}/totalSent```
 
-**Description:** Retrieves total amount sent from an address in atoms (the smallest unit of Decred; 1 DCR = 100,000,000 atoms)
+**Description:** Retrieves total amount sent from an address in atoms (the smallest unit of ExchangeCoin; 1 DCR = 100,000,000 atoms)
 
 **Parameters:**
 
@@ -746,7 +747,7 @@ Methods that work with addresses.
 
 ```
 curl -X POST \
-https://alpha.dcrdata.org/insight/api/addrs/utxo \
+https://explorer.excc.co/insight/api/addrs/utxo \
  -H 'Cache-Control: no-cache' \
  -H 'Content-Type: application/json' \
  -H 'Postman-Token: bf2e16a1-b6d2-4b2f-b6e5-9ea7bd3df5b1' \
@@ -987,7 +988,7 @@ https://alpha.dcrdata.org/insight/api/addrs/utxo \
 
 ```
 curl -X POST \
-https://alpha.dcrdata.org/insight/api/addrs/txs\
+https://excplorer.excc.co/insight/api/addrs/txs\
  -H 'Cache-Control: no-cache' \
  -H 'Content-Type: application/json' \
  -H 'Postman-Token: bf2e16a1-b6d2-4b2f-b6e5-9ea7bd3df5b1' \
@@ -1102,7 +1103,7 @@ Methods that provide utilities or relay network status.
 
 **URL:**  ```GET /sync```
 
-**Description:** Retrieves status of dcrdata's synchronization with the connected node (dcrd).
+**Description:** Retrieves status of exccdata's synchronization with the connected node (exccd).
 
 
 **Request Example:**
@@ -1150,7 +1151,7 @@ Methods that provide utilities or relay network status.
 
 **URL:**  ```GET /status```
 
-**Description:** Retrieves status of Decred network. If `q` is set to a parameter from the table below, only that parameter is returned. If `q` is not specified, all status parameters are returned. 
+**Description:** Retrieves status of ExchangeCoin network. If `q` is set to a parameter from the table below, only that parameter is returned. If `q` is not specified, all status parameters are returned. 
 
 
 | Parameter           | Type                   |  Description                   | 

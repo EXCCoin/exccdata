@@ -65,14 +65,14 @@ Only submit a PR once the intended edits are either done or nearing completion. 
 
 ### Git Workflow
 
-1. Fork the repository on GitHub.  Just click the little Fork button at https://github.com/decred/dcrdata
+1. Fork the repository on GitHub.  Just click the little Fork button at https://github.com/EXCCoin/exccdata
 
 ![image](https://user-images.githubusercontent.com/6109680/47858277-b8910480-ddb9-11e8-9088-a4d1c7b0805d.png)
 
-2. Clone your newly forked dcrdata repository
+2. Clone your newly forked exccdata repository
 
 ```sh
-git clone git@github.com:my-user-name/dcrdata.git
+git clone git@github.com:my-user-name/exccdata.git
 ```
 
 ###### recommended
@@ -81,7 +81,7 @@ Setting your master branch to track this repository makes keeping everything up-
 The rest of this workflow guide will assume that you have completed this step.
 
 ```sh
-git remote add upstream https://github.com/decred/dcrdata.git
+git remote add upstream https://github.com/EXCCoin/exccdata.git
 git fetch upstream
 git branch -u upstream/master master
 ```
@@ -114,7 +114,7 @@ git commit # type a good commit message
 
 6. Bring master up-to-date and rebase
 
-Since the Decred repo may have changes that you do not have locally, you'll want to pull in any changes and rebase.
+Since the ExchangeCoin repo may have changes that you do not have locally, you'll want to pull in any changes and rebase.
 Read [this](https://www.atlassian.com/git/tutorials/rewriting-history/git-rebase) if you need a primer on rebasing.
 
 ```sh
@@ -164,7 +164,7 @@ Excellent [PR guidelines](https://github.com/kubernetes/community/blob/master/co
 10. Receive feedback and make changes
 
 You will typically receive feedback from other developers. Before responding, take a moment to review the
-[Code Contribution Guidelines](https://github.com/decred/dcrd/blob/master/docs/code_contribution_guidelines.md).
+[Code Contribution Guidelines](https://github.com/EXCCoin/exccd/blob/master/docs/code_contribution_guidelines.md).
 
 Work through the comments and resolve any confusion with others. Make whatever revisions are necessary.
 
@@ -231,4 +231,4 @@ You can use the script at
 
 ### Further reading
 
-[Code Contribution Guidelines](https://github.com/decred/dcrd/blob/master/docs/code_contribution_guidelines.md) (dcrd repo)
+[Code Contribution Guidelines](https://github.com/EXCCoin/exccd/blob/master/docs/code_contribution_guidelines.md) (dcrd repo)
