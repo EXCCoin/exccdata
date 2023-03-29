@@ -150,13 +150,13 @@ type links struct {
 
 var explorerLinks = &links{
 	CoinbaseComment: "https://github.com/EXCCoin/exccd/blob/2a18beb4d56fe59d614a7309308d84891a0cba96/chaincfg/genesis.go#L17-L53",
-	POSExplanation:  "https://docs.decred.org/proof-of-stake/overview/",
+	POSExplanation:  "https://docs.excc.co/proof-of-stake/overview/",
 	APIDocs:         "https://github.com/EXCCoin/exccdata#apis",
 	InsightAPIDocs:  "https://github.com/EXCCoin/exccdata/blob/master/docs/Insight_API_documentation.md",
 	Github:          "https://github.com/EXCCoin/exccdata",
 	License:         "https://github.com/EXCCoin/exccdata/blob/master/LICENSE",
 	NetParams:       "https://github.com/EXCCoin/exccd/blob/master/chaincfg/params.go",
-	DownloadLink:    "https://decred.org/wallets/",
+	DownloadLink:    "https://excc.co/wallets/",
 }
 
 // TicketStatusText generates the text to display on the explorer's transaction
