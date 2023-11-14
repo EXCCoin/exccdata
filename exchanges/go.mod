@@ -2,8 +2,6 @@ module github.com/EXCCoin/exccdata/exchanges/v3
 
 go 1.21
 
-toolchain go1.21.4
-
 require (
 	decred.org/dcrdex v0.6.3
 	github.com/EXCCoin/exccd/dcrutil/v4 v4.0.0-20230329171406-0c77daae7811

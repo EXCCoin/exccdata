@@ -2,8 +2,6 @@ module github.com/EXCCoin/exccdata/exchanges/rateserver
 
 go 1.21
 
-toolchain go1.21.4
-
 replace github.com/EXCCoin/exccdata/exchanges/v3 => ../
 
 require (
