@@ -1,6 +1,6 @@
 module github.com/EXCCoin/exccdata/exchanges/v3
 
-go 1.21
+go 1.19
 
 require (
 	decred.org/dcrdex v0.6.3

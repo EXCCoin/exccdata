@@ -1,6 +1,6 @@
 module github.com/EXCCoin/exccdata/exchanges/rateserver
 
-go 1.21
+go 1.19
 
 replace github.com/EXCCoin/exccdata/exchanges/v3 => ../
 

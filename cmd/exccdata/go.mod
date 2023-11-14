@@ -1,6 +1,6 @@
 module github.com/EXCCoin/exccdata/cmd/exccdata
 
-go 1.21
+go 1.19
 
 replace (
 	github.com/EXCCoin/exccdata/db/dcrpg/v8 => ../../db/dcrpg/
