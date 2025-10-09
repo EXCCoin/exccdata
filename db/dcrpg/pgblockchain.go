@@ -306,7 +306,7 @@ func (pgb *ChainDB) timeoutError() string {
 // replaces a sql.ErrNoRows with a dbtypes.ErrNoResult.
 func (pgb *ChainDB) replaceCancelError(err error) error {
 	if err == nil {
-		return err
+		return nil
 	}
 
 	if errors.Is(err, sql.ErrNoRows) {
@@ -4935,7 +4935,7 @@ func (pgb *ChainDB) GetVoteInfo(txhash *chainhash.Hash) (*apitypes.VoteInfo, err
 	tx, err := pgb.Client.GetRawTransaction(context.TODO(), txhash)
 	if err != nil {
 		log.Errorf("GetRawTransaction failed for: %v", txhash)
-		return nil, nil
+		return nil, err
 	}
 
 	validation, version, bits, choices, tspendVotes, err := txhelpers.SSGenVoteChoices(tx.MsgTx(), pgb.chainParams)
@@ -5517,7 +5517,6 @@ func (pgb *ChainDB) GetAddressTransactionsRawWithSkip(addr string, count, skip i
 		log.Errorf("GetAddressTransactionsRawWithSkip: SelectVinsForAddress %s: %v", addr, err)
 		return nil
 	}
-	defer rows.Close()
 
 	type vinIndexed struct {
 		*apitypes.VinShort
@@ -5532,6 +5531,7 @@ func (pgb *ChainDB) GetAddressTransactionsRawWithSkip(addr string, count, skip i
 		if err = rows.Scan(&txid, &idx, &vin.Txid, &vin.Vout, &vin.Tree, &val,
 			&vin.BlockHeight, &vin.BlockIndex); err != nil {
 			log.Errorf("GetAddressTransactionsRawWithSkip: SelectVinsForAddress %s: %v", addr, err)
+			rows.Close()
 			return nil
 		}
 
@@ -5541,6 +5541,14 @@ func (pgb *ChainDB) GetAddressTransactionsRawWithSkip(addr string, count, skip i
 		// Coinbase, Stakebase, etc. booleans are set on TxType detection below.
 		vins[txid] = append(vins[txid], &vinIndexed{&vin, idx})
 	}
+	if err = rows.Err(); err != nil {
+		log.Errorf("GetAddressTransactionsRawWithSkip: %v", err)
+		return nil
+	}
+	if err = rows.Close(); err != nil {
+		log.Errorf("GetAddressTransactionsRawWithSkip: %v", err)
+		return nil
+	}
 
 	// tx
 	rows, err = pgb.db.QueryContext(ctx, internal.SelectAddressTxns, addr, count, skip)
@@ -5548,7 +5556,6 @@ func (pgb *ChainDB) GetAddressTransactionsRawWithSkip(addr string, count, skip i
 		log.Errorf("GetAddressTransactionsRawWithSkip: SelectAddressTxns %s: %v", addr, err)
 		return nil
 	}
-	defer rows.Close()
 
 	txns := make(map[string]*apitypes.AddressTxRaw)
 
@@ -5560,6 +5567,7 @@ func (pgb *ChainDB) GetAddressTransactionsRawWithSkip(addr string, count, skip i
 		if err = rows.Scan(&tx.TxID, &tx.BlockHash, &blockHeight,
 			&tx.Time.S, &tx.Version, &tx.Locktime, &tx.Size, &tx.Type, &numVins, &numVouts /*, &vinDbIDs, &voutDbIDs*/); err != nil {
 			log.Errorf("GetAddressTransactionsRawWithSkip: Scan %s: %v", addr, err)
+			rows.Close()
 			return nil
 		}
 		tx.Blocktime = &tx.Time
@@ -5596,6 +5604,14 @@ func (pgb *ChainDB) GetAddressTransactionsRawWithSkip(addr string, count, skip i
 
 		txs = append(txs, &tx)
 	}
+	if err = rows.Err(); err != nil {
+		log.Errorf("GetAddressTransactionsRawWithSkip: %v", err)
+		return nil
+	}
+	if err = rows.Close(); err != nil {
+		log.Errorf("GetAddressTransactionsRawWithSkip: %v", err)
+		return nil
+	}
 
 	// vouts
 	rows, err = pgb.db.QueryContext(ctx, internal.SelectVoutsForAddress, addr, count, skip)
@@ -5603,7 +5619,6 @@ func (pgb *ChainDB) GetAddressTransactionsRawWithSkip(addr string, count, skip i
 		log.Errorf("GetAddressTransactionsRawWithSkip: SelectVoutsForAddress %s: %v", addr, err)
 		return nil
 	}
-	defer rows.Close()
 
 	for rows.Next() {
 		var txid string // funding tx
@@ -5612,6 +5627,7 @@ func (pgb *ChainDB) GetAddressTransactionsRawWithSkip(addr string, count, skip i
 		var pkScript []byte
 		if err = rows.Scan(&val, &txid, &vout.N, &vout.Version, &pkScript); err != nil {
 			log.Errorf("GetAddressTransactionsRawWithSkip: SelectVoutsForAddress %s: %v", addr, err)
+			rows.Close()
 			return nil
 		}
 
@@ -5628,6 +5644,14 @@ func (pgb *ChainDB) GetAddressTransactionsRawWithSkip(addr string, count, skip i
 		isTicketCommit := stake.TxType(tx.Type) == stake.TxTypeSStx && (vout.N%2 != 0)
 		vout.ScriptPubKeyDecoded = decPkScript(vout.Version, pkScript, isTicketCommit, pgb.chainParams)
 		tx.Vout = append(tx.Vout, vout)
+	}
+	if err = rows.Err(); err != nil {
+		log.Errorf("GetAddressTransactionsRawWithSkip: %v", err)
+		return nil
+	}
+	if err = rows.Close(); err != nil {
+		log.Errorf("GetAddressTransactionsRawWithSkip: %v", err)
+		return nil
 	}
 
 	for _, tx := range txs {

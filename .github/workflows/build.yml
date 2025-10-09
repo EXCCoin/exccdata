@@ -6,45 +6,37 @@ jobs:
   build-go:
     name: Go Build and Test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go: [1.19]
     steps:
-    - uses: actions/checkout@v3
-
+    - name: Check out source
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Set up Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
       with:
-        go-version: ${{ matrix.go }}
-
+        go-version-file: go.mod
+        cache: true
+    - name: Install Linters
+      run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2
     - name: Go Build exccdata
-      env:
-        GO111MODULE: "on"
       run: go build -v ./...
       working-directory: ./cmd/exccdata
-
-    - name: Install Linters
-      run: "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.48.0"
-
     - name: Go Tests
-      env:
-        GO111MODULE: "on"
-      run: |
-        ./run_tests.sh
+      run: ./run_tests.sh
 
   build-js:
     name: Build JS
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [16.x, 18.x]
+        node-version: ['lts/*']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Use nodejs ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: cmd/exccdata/package-lock.json
 
       - name: npm clean-install
         run: npm clean-install
