@@ -7,6 +7,7 @@
 package explorer
 
 import (
+	"crypto/rand"
 	"fmt"
 	"math"
 	"net/http"
@@ -187,6 +188,8 @@ type pageData struct {
 	BlockInfo      *types.BlockInfo
 	BlockchainInfo *chainjson.GetBlockChainInfoResult
 	HomeInfo       *types.HomeInfo
+	eTag           string
+	lastModified   time.Time
 }
 
 type explorerUI struct {
@@ -329,6 +332,7 @@ func New(cfg *ExplorerConfig) *explorerUI {
 			},
 		},
 	}
+	exp.resetETagAndLastModified()
 
 	log.Infof("Mean Voting Blocks calculated: %d", exp.pageData.HomeInfo.Params.MeanVotingBlocks)
 
@@ -417,6 +421,9 @@ func (exp *explorerUI) StoreMPData(_ *mempool.StakeData, _ []types.MempoolTx, in
 	exp.invsMtx.Lock()
 	exp.invs = inv
 	exp.invsMtx.Unlock()
+
+	exp.resetETagAndLastModified()
+
 	log.Debugf("Updated mempool details for the explorerUI.")
 }
 
@@ -558,6 +565,8 @@ func (exp *explorerUI) Store(blockData *blockdata.BlockData, msgBlock *wire.MsgB
 		}()
 	}
 
+	exp.resetETagAndLastModified()
+
 	return nil
 }
 
@@ -569,6 +578,21 @@ func (exp *explorerUI) ChartsUpdated() {
 		exp.pageData.HomeInfo.MixedPercent = float64(anonSet) / float64(exp.pageData.HomeInfo.CoinSupply) * 100
 	}
 	exp.pageData.Unlock()
+}
+
+// resetETagAndLastModified resets the eTag and last modified time to new
+// values and is protected by the exp.pageData mutex.
+func (exp *explorerUI) resetETagAndLastModified() {
+	exp.pageData.Lock()
+	exp.pageData.eTag = generateRandomString()
+	exp.pageData.lastModified = time.Now()
+	exp.pageData.Unlock()
+}
+
+func (exp *explorerUI) eTagAndLastModified() (eTag string, lastModified time.Time) {
+	exp.pageData.RLock()
+	defer exp.pageData.RUnlock()
+	return exp.pageData.eTag, exp.pageData.lastModified
 }
 
 type loggerFunc func(string, ...interface{})
@@ -776,4 +800,9 @@ func (exp *explorerUI) mempoolTime(txid string) types.TimeDef {
 		return types.NewTimeDefFromUNIX(0)
 	}
 	return types.NewTimeDefFromUNIX(tx.Time)
+}
+
+// generateRandomString creates a random string suitable for an ETag.
+func generateRandomString() string {
+	return rand.Text()
 }
