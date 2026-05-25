@@ -8,7 +8,6 @@ require (
 )
 
 require (
-	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/influxdata/tdigest v0.0.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect

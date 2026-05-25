@@ -1,6 +1,6 @@
 module github.com/EXCCoin/exccdata/testutil/dbload
 
-go 1.18
+go 1.25.0
 
 replace github.com/EXCCoin/exccdata/v8 => ../../
 

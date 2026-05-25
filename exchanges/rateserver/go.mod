@@ -1,6 +1,6 @@
 module github.com/EXCCoin/exccdata/exchanges/rateserver
 
-go 1.19
+go 1.21
 
 replace github.com/EXCCoin/exccdata/exchanges/v3 => ../
 
@@ -17,7 +17,6 @@ require (
 require (
 	decred.org/cspp/v2 v2.1.0 // indirect
 	decred.org/dcrdex v0.6.3 // indirect
-	decred.org/dcrwallet/v2 v2.2.0 // indirect
 	decred.org/dcrwallet/v3 v3.1.0 // indirect
 	github.com/AndreasBriese/bbloom v0.0.0-20190825152654-46b345b51c96 // indirect
 	github.com/DataDog/zstd v1.5.5 // indirect
@@ -32,7 +31,6 @@ require (
 	github.com/EXCCoin/exccd/txscript/v4 v4.0.0-20231114094815-cf10ea2807e7 // indirect
 	github.com/EXCCoin/exccd/wire v0.0.0-20231114094815-cf10ea2807e7 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
-	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/VictoriaMetrics/fastcache v1.12.1 // indirect
 	github.com/aead/siphash v1.0.1 // indirect
 	github.com/agl/ed25519 v0.0.0-20170116200512-5312a6153412 // indirect
@@ -71,14 +69,11 @@ require (
 	github.com/dchest/siphash v1.2.3 // indirect
 	github.com/dcrlabs/neutrino-bch v0.0.0-20221031001408-f296bfa9bd1c // indirect
 	github.com/dcrlabs/neutrino-ltc v0.0.0-20221031001456-55ef06cefead // indirect
-	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/deckarep/golang-set/v2 v2.3.1 // indirect
 	github.com/decred/base58 v1.0.5 // indirect
 	github.com/decred/dcrd/addrmgr/v2 v2.0.2 // indirect
-	github.com/decred/dcrd/blockchain/stake/v4 v4.0.1 // indirect
 	github.com/decred/dcrd/blockchain/stake/v5 v5.0.0 // indirect
 	github.com/decred/dcrd/blockchain/standalone/v2 v2.2.0 // indirect
-	github.com/decred/dcrd/blockchain/v4 v4.1.1 // indirect
 	github.com/decred/dcrd/certgen v1.1.2 // indirect
 	github.com/decred/dcrd/chaincfg/chainhash v1.0.4 // indirect
 	github.com/decred/dcrd/chaincfg/v3 v3.2.0 // indirect
@@ -91,13 +86,10 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/decred/dcrd/dcrjson/v4 v4.0.1 // indirect
 	github.com/decred/dcrd/dcrutil/v4 v4.0.1 // indirect
-	github.com/decred/dcrd/gcs/v3 v3.0.1 // indirect
 	github.com/decred/dcrd/gcs/v4 v4.0.0 // indirect
 	github.com/decred/dcrd/hdkeychain/v3 v3.1.1 // indirect
 	github.com/decred/dcrd/lru v1.1.2 // indirect
-	github.com/decred/dcrd/rpc/jsonrpc/types/v3 v3.0.1 // indirect
 	github.com/decred/dcrd/rpc/jsonrpc/types/v4 v4.1.0 // indirect
-	github.com/decred/dcrd/rpcclient/v7 v7.0.1 // indirect
 	github.com/decred/dcrd/rpcclient/v8 v8.0.0 // indirect
 	github.com/decred/dcrd/txscript/v4 v4.1.0 // indirect
 	github.com/decred/dcrd/wire v1.6.0 // indirect
@@ -105,7 +97,6 @@ require (
 	github.com/dgraph-io/badger v1.6.2 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/edsrzf/mmap-go v1.1.0 // indirect
 	github.com/ethereum/c-kzg-4844/bindings/go v0.0.0-20230126171313-363c7d7593b4 // indirect
 	github.com/ethereum/go-ethereum v1.13.4 // indirect
 	github.com/fjl/memsize v0.0.2 // indirect
@@ -130,7 +121,6 @@ require (
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/hashicorp/go-bexpr v0.1.13 // indirect
-	github.com/hashicorp/golang-lru v1.0.2 // indirect
 	github.com/holiman/billy v0.0.0-20230718173358-1c7e68d277a7 // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
 	github.com/holiman/uint256 v1.2.3 // indirect
@@ -178,9 +168,7 @@ require (
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
-	github.com/prometheus/tsdb v0.10.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	github.com/rjeczalik/notify v0.9.3 // indirect
 	github.com/robertkrimen/otto v0.2.1 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/rs/cors v1.10.1 // indirect
@@ -207,12 +195,10 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.4.0 // indirect
 	golang.org/x/tools v0.15.0 // indirect
-	google.golang.org/genproto v0.0.0-20231030173426-d783a09b4405 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231106174013-bbf56f31fb17 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
-	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect

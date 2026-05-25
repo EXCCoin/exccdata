@@ -1,6 +1,6 @@
 module github.com/EXCCoin/exccdata/v8
 
-go 1.18
+go 1.25.0
 
 require (
 	github.com/EXCCoin/base58 v0.0.0-20180515090142-e1a805ee5d9f
@@ -17,7 +17,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/decred/slog v1.2.0
 	github.com/dgraph-io/badger v1.6.2
-	golang.org/x/net v0.8.0
+	golang.org/x/net v0.55.0
 )
 
 require (
@@ -44,7 +44,7 @@ require (
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/stretchr/testify v1.8.1 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 // indirect
-	golang.org/x/crypto v0.7.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 )
