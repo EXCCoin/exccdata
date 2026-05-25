@@ -2124,7 +2124,7 @@ type AddressTx struct {
 func (a *AddressTx) IOID(txType ...string) string {
 	// If transaction is of type merged_debit, return unformatted transaction ID
 	if len(txType) > 0 && AddrTxnViewTypeFromStr(txType[0]) == AddrMergedTxnDebit {
-		return a.TxID
+		return a.TxID.String()
 	}
 	// When AddressTx is used properly, at least one of ReceivedTotal or
 	// SentTotal should be zero.
@@ -2274,12 +2274,16 @@ func ReduceAddressHistory(addrHist []*AddressRow) (*AddressInfo, float64, float6
 		}
 		coin := dcrutil.Amount(addrOut.Value).ToCoin()
 		txType := txhelpers.TxTypeToString(int(addrOut.TxType))
+		var matchedTx string
+		if addrOut.MatchingTxHash != nil {
+			matchedTx = addrOut.MatchingTxHash.String()
+		}
 		tx := AddressTx{
 			Time:           addrOut.TxBlockTime,
 			InOutID:        addrOut.TxVinVoutIndex,
 			TxID:           addrOut.TxHash,
 			TxType:         txType,
-			MatchedTx:      addrOut.MatchingTxHash,
+			MatchedTx:      matchedTx,
 			IsFunding:      addrOut.IsFunding,
 			MergedTxnCount: addrOut.MergedCount,
 		}

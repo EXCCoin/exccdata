@@ -17,6 +17,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/decred/slog v1.2.0
 	github.com/dgraph-io/badger v1.6.2
+	github.com/lib/pq v1.12.3
 	golang.org/x/net v0.55.0
 )
 

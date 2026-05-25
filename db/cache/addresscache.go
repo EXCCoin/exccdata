@@ -16,7 +16,6 @@ import (
 
 	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 	"github.com/EXCCoin/exccdata/v8/db/dbtypes"
-	"github.com/EXCCoin/exccdata/v8/txhelpers"
 )
 
 const (
@@ -96,7 +95,7 @@ func CountCreditDebitRowsCompact(rows []*dbtypes.AddressRowCompact) (numCredit, 
 // in a []dbtypes.AddressRowCompact.
 func CountUnspentCreditRowsCompact(rows []*dbtypes.AddressRowCompact) (numCredit int) {
 	for _, row := range rows {
-		if row.IsFunding && txhelpers.IsZeroHash(row.MatchingTxHash) {
+		if row.IsFunding && row.MatchingTxHash == nil {
 			numCredit++
 		}
 	}
@@ -324,7 +323,7 @@ func unspentCreditAddressRows(rows []*dbtypes.AddressRowCompact, N, offset int) 
 	var skipped int
 	out := make([]*dbtypes.AddressRowCompact, 0, N)
 	for _, row := range rows {
-		if !row.IsFunding || !txhelpers.IsZeroHash(row.MatchingTxHash) {
+		if !row.IsFunding || row.MatchingTxHash != nil {
 			continue
 		}
 
