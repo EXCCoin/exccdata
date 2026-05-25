@@ -238,6 +238,6 @@ const (
 		RETURNING prev_hash;`
 
 	ClearBlockChainNextHash = `UPDATE block_chain
-		SET next_hash=''
+		SET next_hash=NULL
 		WHERE next_hash=$1;`
 )

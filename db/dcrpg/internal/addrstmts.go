@@ -7,13 +7,13 @@ const (
 	CreateAddressTable = `CREATE TABLE IF NOT EXISTS addresses (
 		id SERIAL8 PRIMARY KEY,
 		address TEXT,
-		tx_hash TEXT,
+		tx_hash BYTEA,
 		valid_mainchain BOOLEAN,
-		matching_tx_hash TEXT,
+		matching_tx_hash BYTEA, -- the funder if is_funding is FALSE, otherwise any known spender (may be NULL)
 		value INT8,
-		block_time TIMESTAMPTZ NOT NULL,
+		block_time TIMESTAMPTZ NOT NULL, -- ugh, so much dup
 		is_funding BOOLEAN,
-		tx_vin_vout_index INT4,
+		tx_vin_vout_index INT4, -- vout if is_funding is TRUE, vin if FALSE
 		tx_vin_vout_row_id INT8,
 		tx_type INT4
 	);`
@@ -90,12 +90,7 @@ const (
 		ORDER BY MAX(block_time) DESC
 		LIMIT $2 OFFSET $3`
 
-	// need random table name? does lib/pq share sessions?
-	CreateTempAddrTxnsTable = `CREATE TEMPORARY TABLE address_transactions
-		ON COMMIT DROP -- do in a txn!
-		AS (` + addressTxnsSubQuery + `);`
-
-	SelectVinsForAddress0 = `SELECT vins.tx_hash, vins.tx_index, vins.prev_tx_hash, vins.prev_tx_index,
+	SelectVinsForAddressAlt = `SELECT vins.tx_hash, vins.tx_index, vins.prev_tx_hash, vins.prev_tx_index,
 			vins.prev_tx_tree, vins.value_in -- no block height or block index
 		FROM (` + addressTxnsSubQuery + `) atxs
 		-- JOIN transactions txs ON txs.tx_hash=atxs.tx_hash
@@ -106,11 +101,11 @@ const (
 			vins.prev_tx_tree, vins.value_in, prevtxs.block_height, prevtxs.block_index
 		FROM (` + addressTxnsSubQuery + `) atxs
 		JOIN vins ON vins.tx_hash = atxs.tx_hash   -- JOIN vins on vins.id = any(txs.vin_db_ids)
-		LEFT JOIN transactions prevtxs ON vins.prev_tx_hash=prevtxs.tx_hash;`  // LEFT JOIN because prev_tx_hash may be coinbase
+		LEFT JOIN transactions prevtxs ON vins.prev_tx_hash=prevtxs.tx_hash;` // LEFT JOIN because prev_tx_hash may be coinbase
 
-	SelectVoutsForAddress = `SELECT vouts.value, vouts.tx_hash, vouts.tx_index, vouts.version, vouts.pkscript
+	SelectVoutsForAddress = `SELECT vouts.value, vouts.tx_hash, vouts.tx_index, vouts.version
 		FROM (` + addressTxnsSubQuery + `) atxs
-		JOIN vouts ON vouts.tx_hash = atxs.tx_hash;`  //    -- vouts.id = any(transactions.vout_db_ids)
+		JOIN vouts ON vouts.tx_hash = atxs.tx_hash;` //    -- vouts.id = any(transactions.vout_db_ids)
 
 	// select distinct tx_hash, block_time
 	// from addresses
@@ -168,10 +163,10 @@ const (
 	selectAddressTimeGroupingCount = `SELECT COUNT(DISTINCT %s) FROM addresses WHERE address=$1;`
 
 	SelectAddressUnspentCountANDValue = `SELECT COUNT(*), SUM(value) FROM addresses
-	    WHERE address = $1 AND is_funding = TRUE AND matching_tx_hash = '' AND valid_mainchain;`
+	    WHERE address = $1 AND is_funding = TRUE AND matching_tx_hash IS NULL AND valid_mainchain;`
 
 	SelectAddressSpentCountANDValue = `SELECT COUNT(*), SUM(value) FROM addresses
-		WHERE address = $1 AND is_funding = FALSE AND matching_tx_hash != '' AND valid_mainchain;`
+		WHERE address = $1 AND is_funding = FALSE AND matching_tx_hash IS NOT NULL AND valid_mainchain;`
 
 	SelectAddressesMergedSpentCount = `SELECT COUNT( DISTINCT tx_hash ) FROM addresses
 		WHERE address = $1 AND is_funding = FALSE AND valid_mainchain;`
@@ -184,8 +179,8 @@ const (
 
 	// SelectAddressSpentUnspentCountAndValue gets the number and combined spent
 	// and unspent outpoints for the given address. The key is the "GROUP BY
-	// is_funding, matching_tx_hash=''" part of the statement that gets the data
-	// for the combinations of is_funding (boolean) and matching_tx_hash=''
+	// is_funding, matching_tx_hash IS NULL" part of the statement that gets the data
+	// for the combinations of is_funding (boolean) and matching_tx_hash IS NULL
 	// (boolean). There should never be any with is_funding=true where
 	// matching_tx_hash is empty, thus there are three rows in the output. For
 	// example, the first row is the spending transactions that must have
@@ -201,19 +196,19 @@ const (
 	//  229145 | 55875634749104 | t          | t                  | f
 	// (3 rows)
 	//
-	// Since part of the grouping is on "matching_tx_hash = ''", what is
+	// Since part of the grouping is on "matching_tx_hash IS NULL", what is
 	// logically "any" empty matching is actually no_empty_matching.
 	SelectAddressSpentUnspentCountAndValue = `SELECT
 			(tx_type = 0) AS is_regular,
 			COUNT(*),
 			SUM(value),
 			is_funding,
-			(matching_tx_hash = '') AS all_empty_matching
-			-- NOT BOOL_AND(matching_tx_hash = '') AS no_empty_matching
+			(matching_tx_hash IS NULL) AS all_empty_matching
+			-- NOT BOOL_AND(matching_tx_hash IS NULL) AS no_empty_matching
 		FROM addresses
 		WHERE address = $1 AND valid_mainchain
 		GROUP BY tx_type=0, is_funding, 
-			matching_tx_hash=''  -- separate spent and unspent
+			matching_tx_hash IS NULL  -- separate spent and unspent
 		ORDER BY count, is_funding;`
 
 	SelectAddressUnspentWithTxn = `SELECT
@@ -222,13 +217,12 @@ const (
 			addresses.value,
 			transactions.block_height,
 			addresses.block_time,
-			addresses.tx_vin_vout_index,
-			vouts.pkscript
+			addresses.tx_vin_vout_index
 		FROM addresses
 		JOIN transactions ON
 			addresses.tx_hash = transactions.tx_hash
 		JOIN vouts ON addresses.tx_vin_vout_row_id = vouts.id
-		WHERE addresses.address=$1 AND addresses.is_funding AND addresses.matching_tx_hash = '' AND valid_mainchain
+		WHERE addresses.address=$1 AND addresses.is_funding AND addresses.matching_tx_hash IS NULL AND valid_mainchain
 		ORDER BY addresses.block_time DESC;`
 	// Since tx_vin_vout_row_id is the vouts table primary key (id) when
 	// is_funding=true, there is no need to join vouts on tx_hash and tx_index.
@@ -351,12 +345,12 @@ const (
 	// transaction) for the addresses rows corresponding to the specified
 	// outpoint (tx_hash:tx_vin_vout_index), a funding tx row.
 	SetAddressMatchingTxHashForOutpoint = `UPDATE addresses SET matching_tx_hash=$1
-		WHERE tx_hash=$2 AND is_funding AND tx_vin_vout_index=$3 AND valid_mainchain = $4 `  // not terminated with ;
+		WHERE tx_hash=$2 AND is_funding AND tx_vin_vout_index=$3 AND valid_mainchain = $4 ` // not terminated with ;
 
 	// AssignMatchingTxHashForOutpoint is like
 	// SetAddressMatchingTxHashForOutpoint except that it only updates rows
 	// where matching_tx_hash is not already set.
-	AssignMatchingTxHashForOutpoint = SetAddressMatchingTxHashForOutpoint + ` AND matching_tx_hash='';`
+	AssignMatchingTxHashForOutpoint = SetAddressMatchingTxHashForOutpoint + ` AND matching_tx_hash IS NULL;`
 
 	SetAddressMainchainForVoutIDs = `UPDATE addresses SET valid_mainchain=$1
 		WHERE is_funding = TRUE AND tx_vin_vout_row_id=$2

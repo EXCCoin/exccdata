@@ -129,20 +129,20 @@ func UpdateTicketPoolData(interval dbtypes.TimeBasedGrouping, timeGraph *dbtypes
 // utxoStore provides a UTXOData cache with thread-safe get/set methods.
 type utxoStore struct {
 	sync.Mutex
-	c map[string]map[uint32]*dbtypes.UTXOData
+	c map[dbtypes.ChainHash]map[uint32]*dbtypes.UTXOData
 }
 
 // newUtxoStore constructs a new utxoStore.
 func newUtxoStore(prealloc int) utxoStore {
 	return utxoStore{
-		c: make(map[string]map[uint32]*dbtypes.UTXOData, prealloc),
+		c: make(map[dbtypes.ChainHash]map[uint32]*dbtypes.UTXOData, prealloc),
 	}
 }
 
 // Get attempts to locate UTXOData for the specified outpoint. If the data is
 // not in the cache, a nil pointer and false are returned. If the data is
 // located, the data and true are returned, and the data is evicted from cache.
-func (u *utxoStore) Get(txHash string, txIndex uint32) (*dbtypes.UTXOData, bool) {
+func (u *utxoStore) Get(txHash dbtypes.ChainHash, txIndex uint32) (*dbtypes.UTXOData, bool) {
 	u.Lock()
 	defer u.Unlock()
 	utxoData, ok := u.c[txHash][txIndex]
@@ -156,7 +156,7 @@ func (u *utxoStore) Get(txHash string, txIndex uint32) (*dbtypes.UTXOData, bool)
 	return utxoData, ok
 }
 
-func (u *utxoStore) Peek(txHash string, txIndex uint32) *dbtypes.UTXOData {
+func (u *utxoStore) Peek(txHash dbtypes.ChainHash, txIndex uint32) *dbtypes.UTXOData {
 	u.Lock()
 	defer u.Unlock()
 	txVals, ok := u.c[txHash]
@@ -166,7 +166,7 @@ func (u *utxoStore) Peek(txHash string, txIndex uint32) *dbtypes.UTXOData {
 	return txVals[txIndex]
 }
 
-func (u *utxoStore) set(txHash string, txIndex uint32, voutDbID int64, addrs []string, val int64, mixed bool) {
+func (u *utxoStore) set(txHash dbtypes.ChainHash, txIndex uint32, voutDbID int64, addrs []string, val int64, mixed bool) {
 	txUTXOVals, ok := u.c[txHash]
 	if !ok {
 		u.c[txHash] = map[uint32]*dbtypes.UTXOData{
@@ -189,7 +189,7 @@ func (u *utxoStore) set(txHash string, txIndex uint32, voutDbID int64, addrs []s
 
 // Set stores the addresses and amount in a UTXOData entry in the cache for the
 // given outpoint.
-func (u *utxoStore) Set(txHash string, txIndex uint32, voutDbID int64, addrs []string, val int64, mixed bool) {
+func (u *utxoStore) Set(txHash dbtypes.ChainHash, txIndex uint32, voutDbID int64, addrs []string, val int64, mixed bool) {
 	u.Lock()
 	defer u.Unlock()
 	u.set(txHash, txIndex, voutDbID, addrs, val, mixed)
@@ -205,7 +205,7 @@ func (u *utxoStore) Reinit(utxos []dbtypes.UTXO) {
 	// Pre-allocate the transaction hash map assuming the number of unique
 	// transaction hashes in input is roughly 2/3 of the number of UTXOs.
 	prealloc := 2 * len(utxos) / 3
-	u.c = make(map[string]map[uint32]*dbtypes.UTXOData, prealloc)
+	u.c = make(map[dbtypes.ChainHash]map[uint32]*dbtypes.UTXOData, prealloc)
 	for i := range utxos {
 		u.set(utxos[i].TxHash, utxos[i].TxIndex, utxos[i].VoutDbID, utxos[i].Addresses, utxos[i].Value, utxos[i].Mixed)
 	}
@@ -4384,7 +4384,7 @@ func (pgb *ChainDB) UpdateSpendingInfoInAllTickets() (int64, error) {
 		return 0, err
 	}
 
-	revokedTicketHashes := make([]string, len(vinDbIDs))
+	revokedTicketHashes := make([]dbtypes.ChainHash, len(vinDbIDs))
 	for i, vinDbID := range vinDbIDs {
 		revokedTicketHashes[i], err = RetrieveFundingTxByVinDbID(ctx, pgb.db, vinDbID)
 		if err != nil {
@@ -4402,7 +4402,7 @@ func (pgb *ChainDB) UpdateSpendingInfoInAllTickets() (int64, error) {
 	poolStatuses = ticketpoolStatusSlice(dbtypes.PoolStatusMissed, len(revokedTicketHashes))
 	pgb.stakeDB.LockStakeNode()
 	for ih := range revokedTicketHashes {
-		rh, _ := chainhash.NewHashFromStr(revokedTicketHashes[ih])
+		rh := (*chainhash.Hash)(&revokedTicketHashes[ih])
 		if pgb.stakeDB.BestNode.ExistsExpiredTicket(*rh) {
 			poolStatuses[ih] = dbtypes.PoolStatusExpired
 		}
@@ -4583,11 +4583,7 @@ func (pgb *ChainDB) ChargePoolInfoCache(startHeight int64) error {
 	log.Debugf("Pre-loading pool info for %d blocks ([%d, %d]) into cache.",
 		len(tpis), startHeight, endHeight)
 	for i := range tpis {
-		hash, err := chainhash.NewHashFromStr(blockHashes[i])
-		if err != nil {
-			log.Warnf("Invalid block hash: %s", blockHashes[i])
-		}
-		pgb.stakeDB.SetPoolInfo(*hash, &tpis[i])
+		pgb.stakeDB.SetPoolInfo(chainhash.Hash(blockHashes[i]), &tpis[i])
 	}
 	return nil
 }

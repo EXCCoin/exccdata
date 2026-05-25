@@ -14,14 +14,13 @@ import (
 const (
 	CreateTransactionTable = `CREATE TABLE IF NOT EXISTS transactions (
 		id SERIAL8 PRIMARY KEY,
-		block_hash TEXT,
+		block_hash BYTEA, -- consider removing and using a blocks_txns table
 		block_height INT8,
 		block_time TIMESTAMPTZ,
-		time TIMESTAMPTZ,  -- TODO: REMOVE!
 		tx_type INT4,
 		version INT4,
 		tree INT2,
-		tx_hash TEXT,
+		tx_hash BYTEA,
 		block_index INT4,
 		lock_time INT4,
 		expiry INT4,
@@ -41,19 +40,19 @@ const (
 
 	// insertTxRow is the basis for several tx insert/upsert statements.
 	insertTxRow = `INSERT INTO transactions (
-		block_hash, block_height, block_time, time,
+		block_hash, block_height, block_time,
 		tx_type, version, tree, tx_hash, block_index,
 		lock_time, expiry, size, spent, sent, fees,
 		mix_count, mix_denom,
 		num_vin, vin_db_ids, num_vout, vout_db_ids,
 		is_valid, is_mainchain)
 	VALUES (
-		$1, $2, $3, $4,
-		$5, $6, $7, $8, $9,
-		$10, $11, $12, $13, $14, $15,
-		$16, $17,
-		$18, $19, $20, $21,
-		$22, $23) `
+		$1, $2, $3,
+		$4, $5, $6, $7, $8,
+		$9, $10, $11, $12, $13, $14,
+		$15, $16,
+		$17, $18, $19, $20,
+		$21, $22) `
 
 	// InsertTxRow inserts a new transaction row without checking for unique
 	// index conflicts. This should only be used before the unique indexes are
@@ -63,7 +62,7 @@ const (
 	// UpsertTxRow is an upsert (insert or update on conflict), returning the
 	// inserted/updated transaction row id.
 	UpsertTxRow = insertTxRow + `ON CONFLICT (tx_hash, block_hash) DO UPDATE
-		SET is_valid = $22, is_mainchain = $23 RETURNING id;`
+		SET is_valid = $21, is_mainchain = $22 RETURNING id;`
 
 	// InsertTxRowOnConflictDoNothing allows an INSERT with a DO NOTHING on
 	// conflict with transactions' unique tx index, while returning the row id
@@ -78,7 +77,7 @@ const (
 		SELECT id FROM ins
 		UNION  ALL
 		SELECT id FROM transactions
-		WHERE  tx_hash = $8 AND block_hash = $1 -- only executed if no INSERT
+		WHERE  tx_hash = $7 AND block_hash = $1 -- only executed if no INSERT
 		LIMIT  1;`
 
 	// DeleteTxDuplicateRows removes rows that would violate the unique index
@@ -135,7 +134,7 @@ const (
 		LIMIT 1;`
 
 	SelectFullTxByHash = `SELECT id, block_hash, block_height, block_time,
-			time, tx_type, version, tree, tx_hash, block_index, lock_time, expiry,
+			tx_type, version, tree, tx_hash, block_index, lock_time, expiry,
 			size, spent, sent, fees, mix_count, mix_denom, num_vin, vin_db_ids,
 			num_vout, vout_db_ids, is_valid, is_mainchain
 		FROM transactions WHERE tx_hash = $1
@@ -143,7 +142,7 @@ const (
 		LIMIT 1;`
 
 	SelectFullTxsByHash = `SELECT id, block_hash, block_height, block_time,
-			time, tx_type, version, tree, tx_hash, block_index, lock_time, expiry,
+			tx_type, version, tree, tx_hash, block_index, lock_time, expiry,
 			size, spent, sent, fees, mix_count, mix_denom, num_vin, vin_db_ids,
 			num_vout, vout_db_ids, is_valid, is_mainchain
 		FROM transactions WHERE tx_hash = $1
