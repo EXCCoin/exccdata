@@ -7,7 +7,6 @@ package dcrpg
 import (
 	"context"
 	"database/sql"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -18,7 +17,6 @@ import (
 	"github.com/EXCCoin/exccd/chaincfg/chainhash"
 	"github.com/EXCCoin/exccd/chaincfg/v3"
 	"github.com/EXCCoin/exccd/dcrutil/v4"
-	"github.com/EXCCoin/exccd/txscript/v4/stdscript"
 	"github.com/EXCCoin/exccd/wire"
 
 	"github.com/EXCCoin/exccdata/db/dcrpg/v8/internal"
@@ -359,7 +357,7 @@ func InsertTickets(db *sql.DB, dbTxns []*dbtypes.Tx, txDbIDs []uint64, checked, 
 			if len(tx.Vouts[0].ScriptPubKeyData.Addresses) > 0 {
 				stakesubmissionAddress = tx.Vouts[0].ScriptPubKeyData.Addresses[0]
 			}
-			isScriptHash = stdscript.IsStakeSubmissionScriptHashScript(tx.Vouts[0].Version, tx.Vouts[0].ScriptPubKey)
+			isScriptHash = tx.Vouts[0].ScriptPubKeyData.Type == dbtypes.SCScriptHash
 			// NOTE: This was historically broken, always setting false, and
 			// calling it "isMultisig"! A DB upgrade is needed to identify old
 			// p2sh tickets, or just remove the is_multisig column entirely.
@@ -419,8 +417,8 @@ func InsertTickets(db *sql.DB, dbTxns []*dbtypes.Tx, txDbIDs []uint64, checked, 
 // Outputs are slices of DB row IDs for the votes and misses, and an error.
 func InsertVotes(db *sql.DB, dbTxns []*dbtypes.Tx, _ /*txDbIDs*/ []uint64, fTx *TicketTxnIDGetter,
 	msgBlock *MsgBlockPG, checked, updateExistingRecords bool, params *chaincfg.Params,
-	votesMilestones *dbtypes.BlockChainData) ([]uint64, []*dbtypes.Tx, []string,
-	[]uint64, map[string]uint64, error) {
+	votesMilestones *dbtypes.BlockChainData) ([]uint64, []*dbtypes.Tx, []dbtypes.ChainHash,
+	[]uint64, map[dbtypes.ChainHash]uint64, error) {
 	// Choose only SSGen txns
 	msgTxs := msgBlock.STransactions
 	var voteTxs []*dbtypes.Tx
@@ -549,13 +547,18 @@ func InsertVotes(db *sql.DB, dbTxns []*dbtypes.Tx, _ /*txDbIDs*/ []uint64, fTx *
 
 		voteReward := dcrutil.Amount(msgTx.TxIn[0].ValueIn).ToCoin()
 		stakeSubmissionAmount := dcrutil.Amount(msgTx.TxIn[1].ValueIn).ToCoin()
-		stakeSubmissionTxHash := msgTx.TxIn[1].PreviousOutPoint.Hash.String()
-		spentTicketHashes = append(spentTicketHashes, stakeSubmissionTxHash)
+		stakeSubmissionTxHashStr := msgTx.TxIn[1].PreviousOutPoint.Hash.String()
+		stakeSubmissionTxHashCH, errCH := chainhash.NewHashFromStr(stakeSubmissionTxHashStr)
+		if errCH != nil {
+			bail()
+			return nil, nil, nil, nil, nil, errCH
+		}
+		spentTicketHashes = append(spentTicketHashes, dbtypes.ChainHash(*stakeSubmissionTxHashCH))
 
 		// Lookup the row ID in the transactions table for the ticket purchase.
 		var ticketTxDbID uint64
 		if fTx != nil {
-			ticketTxDbID, err = fTx.TxnDbID(stakeSubmissionTxHash, false)
+			ticketTxDbID, err = fTx.TxnDbID(dbtypes.ChainHash(*stakeSubmissionTxHashCH), false)
 			if err != nil {
 				bail()
 				return nil, nil, nil, nil, nil, err
@@ -565,7 +568,7 @@ func InsertVotes(db *sql.DB, dbTxns []*dbtypes.Tx, _ /*txDbIDs*/ []uint64, fTx *
 
 		// Remove the spent ticket from missed list.
 		for im := range misses {
-			if misses[im] == stakeSubmissionTxHash {
+			if misses[im] == stakeSubmissionTxHashStr {
 				misses[im] = misses[len(misses)-1]
 				misses = misses[:len(misses)-1]
 				break
@@ -577,7 +580,7 @@ func InsertVotes(db *sql.DB, dbTxns []*dbtypes.Tx, _ /*txDbIDs*/ []uint64, fTx *
 		err = voteStmt.QueryRow(
 			tx.BlockHeight, tx.TxID, tx.BlockHash, candidateBlockHash,
 			int32(voteVersion), int16(voteBits), validBlock.Validity,
-			stakeSubmissionTxHash, ticketTxDbID, stakeSubmissionAmount,
+			stakeSubmissionTxHashStr, ticketTxDbID, stakeSubmissionAmount,
 			voteReward, tx.IsMainchainBlock, tx.BlockTime).Scan(&votesRowID)
 		if err != nil {
 			if err == sql.ErrNoRows {
@@ -685,7 +688,15 @@ func InsertVotes(db *sql.DB, dbTxns []*dbtypes.Tx, _ /*txDbIDs*/ []uint64, fTx *
 				}
 				return nil, nil, nil, nil, nil, err
 			}
-			missHashMap[misses[i]] = id
+			missHash, errMiss := chainhash.NewHashFromStr(misses[i])
+			if errMiss != nil {
+				_ = stmtMissed.Close()
+				if errRoll := dbtx.Rollback(); errRoll != nil {
+					log.Errorf("Rollback failed: %v", errRoll)
+				}
+				return nil, nil, nil, nil, nil, errMiss
+			}
+			missHashMap[dbtypes.ChainHash(*missHash)] = id
 		}
 		_ = stmtMissed.Close()
 	}
@@ -1012,7 +1023,7 @@ func RetrieveTicketInfoByHash(ctx context.Context, db *sql.DB, ticketHash dbtype
 	}
 
 	purchaseBlock = &apitypes.TinyBlock{
-		Hash:   purchaseHash,
+		Hash:   purchaseHash.String(),
 		Height: purchaseHeight,
 	}
 
@@ -1034,7 +1045,7 @@ func RetrieveTicketInfoByHash(ctx context.Context, db *sql.DB, ticketHash dbtype
 
 	if spendStatus == dbtypes.TicketVoted {
 		lotteryBlock = &apitypes.TinyBlock{
-			Hash:   spendHash,
+			Hash:   spendHash.String(),
 			Height: spendHeight,
 		}
 	}
@@ -1542,7 +1553,7 @@ func RetrieveAddressUTXOs(ctx context.Context, db *sql.DB, address string, curre
 			return nil, err
 		}
 		txnOutput.BlockTime = blockTime.UNIX()
-		txnOutput.ScriptPubKey = hex.EncodeToString(pkScript)
+		txnOutput.ScriptPubKey = apitypes.HexBytes(pkScript)
 		txnOutput.Amount = dcrutil.Amount(atoms).ToCoin()
 		txnOutput.Satoshis = atoms
 		txnOutput.Height = blockHeight
@@ -1585,7 +1596,7 @@ func RetrieveAddressDbUTXOs(ctx context.Context, db *sql.DB, address string) ([]
 			return nil, err
 		}
 		txnOutput.BlockTime = blockTime.UNIX()
-		txnOutput.PkScript = hex.EncodeToString(pkScript)
+		txnOutput.PkScript = pkScript
 		outputs = append(outputs, txnOutput)
 	}
 	if err = rows.Err(); err != nil {
@@ -1879,9 +1890,9 @@ func retrieveTxHistoryByType(ctx context.Context, db *sql.DB, addr, timeInterval
 		items.Time = append(items.Time, dbtypes.NewTimeDef(blockTime))
 		items.SentRtx = append(items.SentRtx, sentRtx)
 		items.ReceivedRtx = append(items.ReceivedRtx, receivedRtx)
-		items.Tickets = append(items.Tickets, tickets)
-		items.Votes = append(items.Votes, votes)
-		items.RevokeTx = append(items.RevokeTx, revokeTx)
+		items.Tickets = append(items.Tickets, uint32(tickets))
+		items.Votes = append(items.Votes, uint32(votes))
+		items.RevokeTx = append(items.RevokeTx, uint32(revokeTx))
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err
@@ -2006,9 +2017,8 @@ func InsertVout(db *sql.DB, dbVout *dbtypes.Vout, checked bool, updateOnConflict
 	err := db.QueryRow(insertStatement,
 		dbVout.TxHash, dbVout.TxIndex, dbVout.TxTree,
 		dbVout.Value, int32(dbVout.Version),
-		dbVout.ScriptPubKey, int32(dbVout.ScriptPubKeyData.ReqSigs),
-		dbVout.ScriptPubKeyData.Type,
-		pq.Array(dbVout.ScriptPubKeyData.Addresses)).Scan(&id)
+		dbVout.ScriptPubKeyData.Type.String(),
+		pq.Array(dbVout.ScriptPubKeyData.Addresses), dbVout.Mixed).Scan(&id)
 	return id, err
 }
 
@@ -2021,8 +2031,7 @@ func InsertVoutsStmt(stmt *sql.Stmt, dbVouts []*dbtypes.Vout, checked bool, doUp
 		var id uint64
 		err := stmt.QueryRow(
 			vout.TxHash, vout.TxIndex, vout.TxTree, vout.Value, int32(vout.Version),
-			vout.ScriptPubKey, int32(vout.ScriptPubKeyData.ReqSigs),
-			vout.ScriptPubKeyData.Type,
+			vout.ScriptPubKeyData.Type.String(),
 			pq.Array(vout.ScriptPubKeyData.Addresses), vout.Mixed).Scan(&id)
 		if err != nil {
 			if err == sql.ErrNoRows {
@@ -2094,18 +2103,15 @@ func InsertVouts(db *sql.DB, dbVouts []*dbtypes.Vout, checked bool, updateOnConf
 }
 
 func RetrievePkScriptByVinID(ctx context.Context, db *sql.DB, vinID uint64) (pkScript []byte, ver uint16, err error) {
-	err = db.QueryRowContext(ctx, internal.SelectPkScriptByVinID, vinID).Scan(&ver, &pkScript)
-	return
+	return nil, 0, nil
 }
 
 func RetrievePkScriptByVoutID(ctx context.Context, db *sql.DB, voutID uint64) (pkScript []byte, ver uint16, err error) {
-	err = db.QueryRowContext(ctx, internal.SelectPkScriptByID, voutID).Scan(&ver, &pkScript)
-	return
+	return nil, 0, nil
 }
 
 func RetrievePkScriptByOutpoint(ctx context.Context, db *sql.DB, txHash dbtypes.ChainHash, voutIndex uint32) (pkScript []byte, ver uint16, err error) {
-	err = db.QueryRowContext(ctx, internal.SelectPkScriptByOutpoint, txHash, voutIndex).Scan(&ver, &pkScript)
-	return
+	return nil, 0, nil
 }
 
 func RetrieveVoutIDByOutpoint(ctx context.Context, db *sql.DB, txHash dbtypes.ChainHash, voutIndex uint32) (id uint64, err error) {
@@ -2329,12 +2335,11 @@ func RetrieveVoutsByIDs(ctx context.Context, db *sql.DB, voutDbIDs []uint64) ([]
 		vout := &vouts[i]
 		var id0 uint64
 		var spendTxRowID sql.NullInt64 // discarded, but can be NULL
-		var reqSigs uint32
 		var addresses string
 		var scriptClass dbtypes.ScriptClass // or scan a string and then dbtypes.NewScriptClassFromString(scriptTypeString)
 		err := db.QueryRowContext(ctx, internal.SelectVoutByID, id).Scan(&id0, &vout.TxHash,
 			&vout.TxIndex, &vout.TxTree, &vout.Value, &vout.Version,
-			&vout.ScriptPubKey, &reqSigs, &scriptClass, &addresses, &vout.Mixed, &spendTxRowID)
+			&scriptClass, &addresses, &vout.Mixed, &spendTxRowID)
 		if err != nil {
 			return nil, err
 		}
@@ -2342,7 +2347,6 @@ func RetrieveVoutsByIDs(ctx context.Context, db *sql.DB, voutDbIDs []uint64) ([]
 		replacer := strings.NewReplacer("{", "", "}", "")
 		addresses = replacer.Replace(addresses)
 
-		vout.ScriptPubKeyData.ReqSigs = reqSigs
 		vout.ScriptPubKeyData.Type = scriptClass
 		// If there are no addresses, the Addresses should be nil or length
 		// zero. However, strings.Split will return [""] if addresses is "".
@@ -2804,7 +2808,7 @@ func InsertTx(db *sql.DB, dbTx *dbtypes.Tx, checked, updateExistingRecords bool)
 	insertStatement := internal.MakeTxInsertStatement(checked, updateExistingRecords)
 	var id uint64
 	err := db.QueryRow(insertStatement,
-		dbTx.BlockHash, dbTx.BlockHeight, dbTx.BlockTime, dbTx.Time,
+		dbTx.BlockHash, dbTx.BlockHeight, dbTx.BlockTime, dbTx.BlockTime,
 		dbTx.TxType, int16(dbTx.Version), dbTx.Tree, dbTx.TxID, dbTx.BlockIndex,
 		int32(dbTx.Locktime), int32(dbTx.Expiry), dbTx.Size, dbTx.Spent, dbTx.Sent, dbTx.Fees,
 		dbTx.MixCount, dbTx.MixDenom,
@@ -2819,7 +2823,7 @@ func InsertTxnsStmt(stmt *sql.Stmt, dbTxns []*dbtypes.Tx, checked, updateExistin
 	for _, tx := range dbTxns {
 		var id uint64
 		err := stmt.QueryRow(
-			tx.BlockHash, tx.BlockHeight, tx.BlockTime, tx.Time,
+			tx.BlockHash, tx.BlockHeight, tx.BlockTime, tx.BlockTime,
 			tx.TxType, int16(tx.Version), tx.Tree, tx.TxID, tx.BlockIndex,
 			int32(tx.Locktime), int32(tx.Expiry), tx.Size, tx.Spent, tx.Sent, tx.Fees,
 			tx.MixCount, tx.MixDenom,
@@ -2872,7 +2876,7 @@ func InsertTxns(db *sql.DB, dbTxns []*dbtypes.Tx, checked, updateExistingRecords
 	for _, tx := range dbTxns {
 		var id uint64
 		err := stmt.QueryRow(
-			tx.BlockHash, tx.BlockHeight, tx.BlockTime, tx.Time,
+			tx.BlockHash, tx.BlockHeight, tx.BlockTime, tx.BlockTime,
 			tx.TxType, int16(tx.Version), tx.Tree, tx.TxID, tx.BlockIndex,
 			int32(tx.Locktime), int32(tx.Expiry), tx.Size, tx.Spent, tx.Sent, tx.Fees,
 			tx.MixCount, tx.MixDenom,
@@ -2907,7 +2911,7 @@ func RetrieveDbTxByHash(ctx context.Context, db *sql.DB, txHash dbtypes.ChainHas
 	vinDbIDs := dbtypes.UInt64Array(dbTx.VinDbIds)
 	voutDbIDs := dbtypes.UInt64Array(dbTx.VoutDbIds)
 	err = db.QueryRowContext(ctx, internal.SelectFullTxByHash, txHash).Scan(&id,
-		&dbTx.BlockHash, &dbTx.BlockHeight, &dbTx.BlockTime, &dbTx.Time,
+		&dbTx.BlockHash, &dbTx.BlockHeight, &dbTx.BlockTime, &dbTx.BlockTime,
 		&dbTx.TxType, &dbTx.Version, &dbTx.Tree, &dbTx.TxID, &dbTx.BlockIndex,
 		&dbTx.Locktime, &dbTx.Expiry, &dbTx.Size, &dbTx.Spent, &dbTx.Sent,
 		&dbTx.Fees, &dbTx.MixCount, &dbTx.MixDenom, &dbTx.NumVin, &vinDbIDs,
@@ -2955,7 +2959,7 @@ func RetrieveDbTxsByHash(ctx context.Context, db *sql.DB, txHash dbtypes.ChainHa
 		// voutDbIDs := dbtypes.UInt64Array(dbTx.VoutDbIds)
 
 		err = rows.Scan(&id,
-			&dbTx.BlockHash, &dbTx.BlockHeight, &dbTx.BlockTime, &dbTx.Time,
+			&dbTx.BlockHash, &dbTx.BlockHeight, &dbTx.BlockTime, &dbTx.BlockTime,
 			&dbTx.TxType, &dbTx.Version, &dbTx.Tree, &dbTx.TxID, &dbTx.BlockIndex,
 			&dbTx.Locktime, &dbTx.Expiry, &dbTx.Size, &dbTx.Spent, &dbTx.Sent,
 			&dbTx.Fees, &dbTx.MixCount, &dbTx.MixDenom, &dbTx.NumVin, &vinids,
@@ -3614,8 +3618,8 @@ func InsertBlock(db *sql.DB, dbBlock *dbtypes.Block, isValid, isMainchain, check
 	err := db.QueryRow(insertStatement,
 		dbBlock.Hash, dbBlock.Height, dbBlock.Size, isValid, isMainchain,
 		int32(dbBlock.Version), dbBlock.NumTx, dbBlock.NumRegTx,
-		pq.Array(dbBlock.Tx), pq.Array(dbBlock.TxDbIDs),
-		dbBlock.NumStakeTx, pq.Array(dbBlock.STx), pq.Array(dbBlock.STxDbIDs),
+		pq.Array(dbBlock.TxDbIDs),
+		dbBlock.NumStakeTx, pq.Array(dbBlock.STxDbIDs),
 		dbBlock.Time, int64(dbBlock.Nonce), int16(dbBlock.VoteBits), dbBlock.Voters,
 		dbBlock.FreshStake, dbBlock.Revocations, dbBlock.PoolSize, int64(dbBlock.Bits),
 		int64(dbBlock.SBits), dbBlock.Difficulty, int32(dbBlock.StakeVersion),

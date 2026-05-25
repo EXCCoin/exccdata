@@ -84,12 +84,19 @@ const (
 		WHERE prev_tx_hash=$1 AND prev_tx_index=$2 ORDER BY is_valid DESC, is_mainchain DESC, block_time DESC;`
 
 	SelectFundingOutpointIndxByVinID = `SELECT prev_tx_index FROM vins WHERE id=$1;`
-	SelectAllVinInfoByID             = `SELECT tx_hash, tx_index, tx_tree, is_valid, is_mainchain, block_time,  --- could easily do this by tx_hash and tx_index
+	SelectAllVinInfoByID             = `SELECT tx_hash, tx_index, tx_tree, is_valid, is_mainchain, block_time,
 		prev_tx_hash, prev_tx_index, prev_tx_tree, value_in, tx_type FROM vins WHERE id = $1;`
 
-	/* alt without spend_tx_row_id
+	SelectVinIDsALL              = `SELECT id FROM vins;`
+	SelectVoutIDByOutpoint       = `SELECT id FROM vouts WHERE tx_hash=$1 AND tx_index=$2;`
+	SelectFundingOutpointByTxIn  = `SELECT id, prev_tx_hash, prev_tx_index, prev_tx_tree FROM vins WHERE tx_hash=$1 AND tx_index=$2;`
+	SelectFundingOutpointByVinID = `SELECT prev_tx_hash, prev_tx_index, prev_tx_tree FROM vins WHERE id=$1;`
+	SelectFundingTxByTxIn        = `SELECT id, prev_tx_hash FROM vins WHERE tx_hash=$1 AND tx_index=$2;`
+	SelectFundingTxByVinID       = `SELECT prev_tx_hash FROM vins WHERE id=$1;`
+	SelectSpendingTxByVinID      = `SELECT tx_hash, tx_index, tx_tree FROM vins WHERE id=$1;`
+
 	SelectUTXOsViaVinsMatch = `SELECT vouts.id, vouts.tx_hash, vouts.tx_index,   -- row ID and outpoint
-			vouts.script_addresses, vouts.value, vouts.mixed         -- value, addresses, and mixed flag of output
+		vouts.script_addresses, vouts.value, vouts.mixed         -- value, addresses, and mixed flag of output
 		FROM vouts
 		LEFT OUTER JOIN vins                   -- LEFT JOIN to identify when there is no matching input (spend)
 		ON vouts.tx_hash=vins.prev_tx_hash
@@ -98,7 +105,8 @@ const (
 		WHERE vins.prev_tx_hash IS NULL                   -- unspent, condition applied after join, which will put NULL when no vin matches the vout
 			AND array_length(script_addresses, 1)>0
 			AND transactions.is_mainchain AND transactions.is_valid;`
-	*/
+
+	SelectVinVoutPairByID = `SELECT tx_hash, tx_index, tx_tree, prev_tx_hash, prev_tx_index, prev_tx_tree, value_in, tx_type FROM vins WHERE id=$1;`
 
 	SelectUTXOs = `SELECT vouts.id, vouts.tx_hash, vouts.tx_index, vouts.script_addresses, vouts.value, vouts.mixed
 		FROM vouts

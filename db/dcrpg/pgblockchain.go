@@ -1095,12 +1095,6 @@ func (pgb *ChainDB) BestBlockStr() (string, int64) {
 	return pgb.bestBlock.hash.String(), pgb.bestBlock.height
 }
 
-// Hash uses the last stored block hash.
-func (block *BestBlock) Hash() *chainhash.Hash {
-	hash, _ := chainhash.NewHashFromStr(block.HashStr())
-	return hash
-}
-
 // BestBlockHash is a getter for ChainDB.bestBlock.hash.
 func (pgb *ChainDB) BestBlockHash() *chainhash.Hash {
 	return pgb.bestBlock.Hash()
@@ -1153,15 +1147,6 @@ func (pgb *ChainDB) VotesInBlock(hash string) (int16, error) {
 	return voters, nil
 }
 
-// BlockHash queries the DB for the hash of the mainchain block at the given
-// height.
-func (pgb *ChainDB) BlockHash(height int64) (string, error) {
-	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
-	defer cancel()
-	hash, err := RetrieveBlockHash(ctx, pgb.db, height)
-	return hash, pgb.replaceCancelError(err)
-}
-
 // ProposalVotes retrieves all the votes data associated with the provided token.
 // TODO: Rewriting this func. may not be in chaindb struct, and in appContext instead
 // func (pgb *ChainDB) ProposalVotes(proposalToken string) (*dbtypes.ProposalChartsData, error) {
@@ -1198,29 +1183,18 @@ func (pgb *ChainDB) SpendingTransactions(fundingTxID string) ([]string, []uint32
 // spending tx input index, the funding tx output index, and an error value are
 // returned.
 func (pgb *ChainDB) SpendingTransaction(fundingTxID string,
-	fundingTxVinVoutIndex uint32) (string, uint32, uint32, error) {
+	fundingTxVinVoutIndex uint32) (string, uint32, int8, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
 	ch, err := chainhash.NewHashFromStr(fundingTxID)
 	if err != nil {
-		return "", 0, 0, err
+		return "", 0, int8(0), err
 	}
 	_, spendingTx, vinInd, voutInd, err := RetrieveSpendingTxByTxOut(ctx, pgb.db, dbtypes.ChainHash(*ch), fundingTxVinVoutIndex)
 	if err != nil {
-		return "", 0, 0, pgb.replaceCancelError(err)
+		return "", 0, int8(0), pgb.replaceCancelError(err)
 	}
 	return spendingTx.String(), vinInd, voutInd, nil
-}
-
-// SpendingTransaction returns the transaction that spends the specified
-// transaction outpoint, if it is spent. The spending transaction hash, input
-// index, tx tree, and an error value are returned.
-func (pgb *ChainDB) SpendingTransaction(fundingTxID string,
-	fundingTxVout uint32) (string, uint32, int8, error) {
-	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
-	defer cancel()
-	_, spendingTx, vinInd, tree, err := RetrieveSpendingTxByTxOut(ctx, pgb.db, fundingTxID, fundingTxVout)
-	return spendingTx, vinInd, tree, pgb.replaceCancelError(err)
 }
 
 // BlockTransactions retrieves all transactions in the specified block, their
@@ -1228,8 +1202,19 @@ func (pgb *ChainDB) SpendingTransaction(fundingTxID string,
 func (pgb *ChainDB) BlockTransactions(blockHash string) ([]string, []uint32, []int8, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	_, blockTransactions, blockInds, trees, _, err := RetrieveTxsByBlockHash(ctx, pgb.db, blockHash)
-	return blockTransactions, blockInds, trees, pgb.replaceCancelError(err)
+	ch, err := chainhash.NewHashFromStr(blockHash)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	_, blockTransactions, blockInds, trees, _, err := RetrieveTxsByBlockHash(ctx, pgb.db, dbtypes.ChainHash(*ch))
+	if err != nil {
+		return nil, nil, nil, pgb.replaceCancelError(err)
+	}
+	txStrs := make([]string, len(blockTransactions))
+	for i := range blockTransactions {
+		txStrs[i] = blockTransactions[i].String()
+	}
+	return txStrs, blockInds, trees, nil
 }
 
 // Transaction retrieves all rows from the transactions table for the given
@@ -1237,7 +1222,11 @@ func (pgb *ChainDB) BlockTransactions(blockHash string) ([]string, []uint32, []i
 func (pgb *ChainDB) Transaction(txHash string) ([]*dbtypes.Tx, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	_, dbTxs, err := RetrieveDbTxsByHash(ctx, pgb.db, txHash)
+	ch, err := chainhash.NewHashFromStr(txHash)
+	if err != nil {
+		return nil, err
+	}
+	_, dbTxs, err := RetrieveDbTxsByHash(ctx, pgb.db, dbtypes.ChainHash(*ch))
 	return dbTxs, pgb.replaceCancelError(err)
 }
 
@@ -1246,8 +1235,19 @@ func (pgb *ChainDB) Transaction(txHash string) ([]*dbtypes.Tx, error) {
 func (pgb *ChainDB) BlockMissedVotes(blockHash string) ([]string, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	mv, err := RetrieveMissedVotesInBlock(ctx, pgb.db, blockHash)
-	return mv, pgb.replaceCancelError(err)
+	ch, err := chainhash.NewHashFromStr(blockHash)
+	if err != nil {
+		return nil, err
+	}
+	mv, err := RetrieveMissedVotesInBlock(ctx, pgb.db, dbtypes.ChainHash(*ch))
+	if err != nil {
+		return nil, pgb.replaceCancelError(err)
+	}
+	strs := make([]string, len(mv))
+	for i := range mv {
+		strs[i] = mv[i].String()
+	}
+	return strs, nil
 }
 
 // missedVotesForBlockRange retrieves the number of missed votes for the block
@@ -1266,8 +1266,19 @@ func (pgb *ChainDB) missedVotesForBlockRange(startHeight, endHeight int64) (int6
 func (pgb *ChainDB) TicketMisses(ticketHash string) ([]string, []int64, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	blockHashes, blockHeights, err := RetrieveMissesForTicket(ctx, pgb.db, ticketHash)
-	return blockHashes, blockHeights, pgb.replaceCancelError(err)
+	ch, err := chainhash.NewHashFromStr(ticketHash)
+	if err != nil {
+		return nil, nil, err
+	}
+	blockHashes, blockHeights, err := RetrieveMissesForTicket(ctx, pgb.db, dbtypes.ChainHash(*ch))
+	if err != nil {
+		return nil, nil, pgb.replaceCancelError(err)
+	}
+	strs := make([]string, len(blockHashes))
+	for i := range blockHashes {
+		strs[i] = blockHashes[i].String()
+	}
+	return strs, blockHeights, nil
 }
 
 // TicketMiss retrieves the mainchain block in which the specified ticket was
@@ -1276,8 +1287,12 @@ func (pgb *ChainDB) TicketMisses(ticketHash string) ([]string, []int64, error) {
 func (pgb *ChainDB) TicketMiss(ticketHash string) (string, int64, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	blockHash, blockHeight, err := RetrieveMissForTicket(ctx, pgb.db, ticketHash)
-	return blockHash, blockHeight, pgb.replaceCancelError(err)
+	ch, err := chainhash.NewHashFromStr(ticketHash)
+	if err != nil {
+		return "", 0, err
+	}
+	blockHash, blockHeight, err := RetrieveMissForTicket(ctx, pgb.db, dbtypes.ChainHash(*ch))
+	return blockHash.String(), blockHeight, pgb.replaceCancelError(err)
 }
 
 // PoolStatusForTicket retrieves the specified ticket's spend status and ticket
@@ -1285,7 +1300,11 @@ func (pgb *ChainDB) TicketMiss(ticketHash string) (string, int64, error) {
 func (pgb *ChainDB) PoolStatusForTicket(txid string) (dbtypes.TicketSpendType, dbtypes.TicketPoolStatus, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	_, spendType, poolStatus, err := RetrieveTicketStatusByHash(ctx, pgb.db, txid)
+	ch, err := chainhash.NewHashFromStr(txid)
+	if err != nil {
+		return 0, 0, err
+	}
+	_, spendType, poolStatus, err := RetrieveTicketStatusByHash(ctx, pgb.db, dbtypes.ChainHash(*ch))
 	return spendType, poolStatus, pgb.replaceCancelError(err)
 }
 
@@ -1293,7 +1312,11 @@ func (pgb *ChainDB) PoolStatusForTicket(txid string) (dbtypes.TicketSpendType, d
 func (pgb *ChainDB) VoutValue(txID string, vout uint32) (uint64, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	voutValue, err := RetrieveVoutValue(ctx, pgb.db, txID, vout)
+	ch, err := chainhash.NewHashFromStr(txID)
+	if err != nil {
+		return 0, err
+	}
+	voutValue, err := RetrieveVoutValue(ctx, pgb.db, dbtypes.ChainHash(*ch), vout)
 	if err != nil {
 		return 0, pgb.replaceCancelError(err)
 	}
@@ -1306,7 +1329,11 @@ func (pgb *ChainDB) VoutValue(txID string, vout uint32) (uint64, error) {
 func (pgb *ChainDB) VoutValues(txID string) ([]uint64, []uint32, []int8, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	voutValues, txInds, txTrees, err := RetrieveVoutValues(ctx, pgb.db, txID)
+	ch, err := chainhash.NewHashFromStr(txID)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	voutValues, txInds, txTrees, err := RetrieveVoutValues(ctx, pgb.db, dbtypes.ChainHash(*ch))
 	if err != nil {
 		return nil, nil, nil, pgb.replaceCancelError(err)
 	}
@@ -1319,8 +1346,12 @@ func (pgb *ChainDB) VoutValues(txID string) ([]uint64, []uint32, []int8, error) 
 func (pgb *ChainDB) TransactionBlock(txID string) (string, uint32, int8, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	_, blockHash, blockInd, tree, err := RetrieveTxByHash(ctx, pgb.db, txID)
-	return blockHash, blockInd, tree, pgb.replaceCancelError(err)
+	ch, err := chainhash.NewHashFromStr(txID)
+	if err != nil {
+		return "", 0, 0, err
+	}
+	_, blockHash, blockInd, tree, err := RetrieveTxByHash(ctx, pgb.db, dbtypes.ChainHash(*ch))
+	return blockHash.String(), blockInd, tree, pgb.replaceCancelError(err)
 }
 
 // AgendaVotes fetches the data used to plot a graph of votes cast per day per
@@ -1684,7 +1715,11 @@ func (pgb *ChainDB) ticketPoolVisualization(interval dbtypes.TimeBasedGrouping) 
 func (pgb *ChainDB) GetTicketInfo(txid string) (*apitypes.TicketInfo, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	spendStatus, poolStatus, purchaseBlock, lotteryBlock, spendTxid, err := RetrieveTicketInfoByHash(ctx, pgb.db, txid)
+	ch, err := chainhash.NewHashFromStr(txid)
+	if err != nil {
+		return nil, err
+	}
+	spendStatus, poolStatus, purchaseBlock, lotteryBlock, spendTxid, err := RetrieveTicketInfoByHash(ctx, pgb.db, dbtypes.ChainHash(*ch))
 	if err != nil {
 		return nil, pgb.replaceCancelError(err)
 	}
@@ -1704,12 +1739,12 @@ func (pgb *ChainDB) GetTicketInfo(txid string) (*apitypes.TicketInfo, error) {
 	}
 
 	if poolStatus == dbtypes.PoolStatusMissed {
-		hash, height, err := RetrieveMissForTicket(ctx, pgb.db, txid)
+		hash, height, err := RetrieveMissForTicket(ctx, pgb.db, dbtypes.ChainHash(*ch))
 		if err != nil {
 			return nil, pgb.replaceCancelError(err)
 		}
 		lotteryBlock = &apitypes.TinyBlock{
-			Hash:   hash,
+			Hash:   hash.String(),
 			Height: uint32(height),
 		}
 	}
@@ -1734,9 +1769,21 @@ func (pgb *ChainDB) TSpendVotes(tspendID *chainhash.Hash) (*dbtypes.TreasurySpen
 		return nil, fmt.Errorf("expected 1 tally, got %d", len(tspendVotesResult.Votes))
 	}
 
-	tsv := dbtypes.TreasurySpendVotes(tspendVotesResult.Votes[0])
+	v := tspendVotesResult.Votes[0]
+	h, err := chainhash.NewHashFromStr(v.Hash)
+	if err != nil {
+		return nil, err
+	}
+	tsv := &dbtypes.TreasurySpendVotes{
+		Hash:      dbtypes.ChainHash(*h),
+		Expiry:    v.Expiry,
+		VoteStart: v.VoteStart,
+		VoteEnd:   v.VoteEnd,
+		YesVotes:  v.YesVotes,
+		NoVotes:   v.NoVotes,
+	}
 
-	return &tsv, nil
+	return tsv, nil
 }
 
 // TreasuryBalance calculates the *dbtypes.TreasuryBalance.
@@ -2330,7 +2377,7 @@ FUNDING_TX_DUPLICATE_CHECK:
 		// database as soon as they are mined and thus we need to be careful
 		// to not include those transactions in our list.
 		for _, b := range addrData.Transactions {
-			if f.Hash.String() == b.TxID && f.Index == b.InOutID {
+			if f.Hash.String() == b.TxID.String() && f.Index == b.InOutID {
 				continue FUNDING_TX_DUPLICATE_CHECK
 			}
 		}
@@ -2345,7 +2392,7 @@ FUNDING_TX_DUPLICATE_CHECK:
 		}
 		if txnType == dbtypes.AddrTxnAll || txnType == dbtypes.AddrTxnCredit || txnType == dbtypes.AddrUnspentTxn {
 			addrTx := &dbtypes.AddressTx{
-				TxID:          fundingTx.Hash().String(),
+				TxID:          dbtypes.ChainHash(fundingTx.Hash()),
 				TxType:        txhelpers.DetermineTxTypeString(fundingTx.Tx, true), // unconfirmed, just assume treasury could be active
 				InOutID:       f.Index,
 				Time:          dbtypes.NewTimeDefFromUNIX(fundingTx.MemPoolTime),
@@ -2374,7 +2421,7 @@ SPENDING_TX_DUPLICATE_CHECK:
 		// database as soon as they are mined and thus we need to be careful
 		// to not include those transactions in our list.
 		for _, b := range addrData.Transactions {
-			if f.TxSpending.String() == b.TxID && f.InputIndex == int(b.InOutID) {
+			if f.TxSpending.String() == b.TxID.String() && f.InputIndex == int(b.InOutID) {
 				continue SPENDING_TX_DUPLICATE_CHECK
 			}
 		}
@@ -2398,7 +2445,7 @@ SPENDING_TX_DUPLICATE_CHECK:
 		// Look through old transactions and set the spending transactions'
 		// matching transaction fields.
 		for _, dbTxn := range addrData.Transactions {
-			if dbTxn.TxID == strprevhash && dbTxn.InOutID == previndex && dbTxn.IsFunding {
+			if dbTxn.TxID.String() == strprevhash && dbTxn.InOutID == previndex && dbTxn.IsFunding {
 				dbTxn.MatchedTx = spendingTx.Hash().String()
 				dbTxn.MatchedTxIndex = uint32(f.InputIndex)
 			}
@@ -2406,7 +2453,7 @@ SPENDING_TX_DUPLICATE_CHECK:
 
 		if txnType == dbtypes.AddrTxnAll || txnType == dbtypes.AddrTxnDebit {
 			addrTx := &dbtypes.AddressTx{
-				TxID:           spendingTx.Hash().String(),
+				TxID:           dbtypes.ChainHash(spendingTx.Hash()),
 				TxType:         txhelpers.DetermineTxTypeString(spendingTx.Tx, true), // unconfirmed tx, so assume treasury could be active
 				InOutID:        uint32(f.InputIndex),
 				Time:           dbtypes.NewTimeDefFromUNIX(spendingTx.MemPoolTime),
@@ -2441,7 +2488,11 @@ SPENDING_TX_DUPLICATE_CHECK:
 func (pgb *ChainDB) DbTxByHash(txid string) (*dbtypes.Tx, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	_, dbTx, err := RetrieveDbTxByHash(ctx, pgb.db, txid)
+	ch, err := chainhash.NewHashFromStr(txid)
+	if err != nil {
+		return nil, err
+	}
+	_, dbTx, err := RetrieveDbTxByHash(ctx, pgb.db, dbtypes.ChainHash(*ch))
 	return dbTx, pgb.replaceCancelError(err)
 }
 
@@ -2469,7 +2520,7 @@ func (pgb *ChainDB) FillAddressTransactions(addrInfo *dbtypes.AddressInfo) error
 	for i, txn := range addrInfo.Transactions {
 		// Retrieve the most valid, most mainchain, and most recent tx with this
 		// hash. This means it prefers mainchain and valid blocks first.
-		dbTx, err := pgb.DbTxByHash(txn.TxID)
+		dbTx, err := pgb.DbTxByHash(txn.TxID.String())
 		if err != nil {
 			return err
 		}
@@ -2502,7 +2553,7 @@ func (pgb *ChainDB) FillAddressTransactions(addrInfo *dbtypes.AddressInfo) error
 			} else {
 				// Funding transaction: lookup by the matching (spending) tx
 				// hash and tx index.
-				_, idx, _, err := pgb.SpendingTransaction(txn.TxID, txn.InOutID)
+				_, idx, _, err := pgb.SpendingTransaction(txn.TxID.String(), txn.InOutID)
 				if err != nil {
 					log.Warnf("Matched Transaction Lookup failed for %s:%d: %v",
 						txn.TxID, txn.InOutID, err)
@@ -2611,7 +2662,7 @@ func (pgb *ChainDB) AddressTransactionDetails(addr string, count, skip int64,
 	txsShort := make([]*apitypes.AddressTxShort, 0, len(txs))
 	for i := range txs {
 		txsShort = append(txsShort, &apitypes.AddressTxShort{
-			TxID:          txs[i].TxID,
+			TxID:          txs[i].TxID.String(),
 			Time:          apitypes.TimeAPI{S: txs[i].Time},
 			Value:         txs[i].Total,
 			Confirmations: int64(txs[i].Confirmations),
@@ -2641,11 +2692,17 @@ func (pgb *ChainDB) UpdateChainState(blockChainInfo *chainjson.GetBlockChainInfo
 
 	ruleChangeInterval := int64(pgb.chainParams.RuleChangeActivationInterval)
 
+	bbh, err := chainhash.NewHashFromStr(blockChainInfo.BestBlockHash)
+	if err != nil {
+		log.Errorf("chainhash.NewHashFromStr for BestBlockHash: %v", err)
+		return
+	}
+
 	chainInfo := dbtypes.BlockChainData{
 		Chain:                  blockChainInfo.Chain,
 		SyncHeight:             blockChainInfo.SyncHeight,
 		BestHeight:             blockChainInfo.Blocks,
-		BestBlockHash:          blockChainInfo.BestBlockHash,
+		BestBlockHash:          dbtypes.ChainHash(*bbh),
 		Difficulty:             blockChainInfo.Difficulty,
 		VerificationProgress:   blockChainInfo.VerificationProgress,
 		ChainWork:              blockChainInfo.ChainWork,
@@ -3132,8 +3189,12 @@ func (pgb *ChainDB) SetVinsMainchainByBlock(blockHash string) (int64, []dbtypes.
 
 	// Get vins DB IDs from the transactions table, for each tx in the block.
 	onlyRegularTxns := false
+	ch, err := chainhash.NewHashFromStr(blockHash)
+	if err != nil {
+		return 0, nil, nil, err
+	}
 	vinDbIDsBlk, voutDbIDsBlk, areMainchain, err :=
-		RetrieveTxnsVinsVoutsByBlock(ctx, pgb.db, blockHash, onlyRegularTxns)
+		RetrieveTxnsVinsVoutsByBlock(ctx, pgb.db, dbtypes.ChainHash(*ch), onlyRegularTxns)
 	if err != nil {
 		return 0, nil, nil, fmt.Errorf("unable to retrieve vin data for block %s: %w", blockHash, err)
 	}
@@ -3236,17 +3297,29 @@ func (pgb *ChainDB) VoutsForTx(dbTx *dbtypes.Tx) ([]dbtypes.Vout, error) {
 }
 
 func (pgb *ChainDB) TipToSideChain(mainRoot string) (tipHash string, blocksMoved int64) {
-	tipHash = pgb.BestBlockHashStr()
+	tipHashStr := pgb.BestBlockHashStr()
+	mainRootPtr, err := chainhash.NewHashFromStr(mainRoot)
+	if err != nil {
+		log.Errorf("chainhash.NewHashFromStr for mainRoot: %v", err)
+		return tipHashStr, 0
+	}
+	mainRootCH := dbtypes.ChainHash(*mainRootPtr)
+	tipHashPtr, err := chainhash.NewHashFromStr(tipHashStr)
+	if err != nil {
+		log.Errorf("chainhash.NewHashFromStr for tipHash: %v", err)
+		return tipHashStr, 0
+	}
+	tipHashCH := dbtypes.ChainHash(*tipHashPtr)
 	addresses := make(map[string]struct{})
 	var txnsUpdated, vinsUpdated, votesUpdated, ticketsUpdated, treasuryTxnsUpdates, addrsUpdated int64
-	for tipHash != mainRoot {
+	for tipHashCH != mainRootCH {
 		// 1. Block. Set is_mainchain=false on the tip block, return hash of
 		// previous block.
 		now := time.Now()
-		previousHash, err := SetMainchainByBlockHash(pgb.db, tipHash, false)
+		previousHash, err := SetMainchainByBlockHash(pgb.db, tipHashCH, false)
 		if err != nil {
 			log.Errorf("Failed to set block %s as a sidechain block: %v",
-				tipHash, err)
+				tipHashCH, err)
 		}
 		blocksMoved++
 		log.Debugf("SetMainchainByBlockHash: %v", time.Since(now))
@@ -3254,30 +3327,30 @@ func (pgb *ChainDB) TipToSideChain(mainRoot string) (tipHash string, blocksMoved
 		// 2. Transactions. Set is_mainchain=false on all transactions in the
 		// tip block, returning only the number of transactions updated.
 		now = time.Now()
-		rowsUpdated, _, err := UpdateTransactionsMainchain(pgb.db, tipHash, false)
+		rowsUpdated, _, err := UpdateTransactionsMainchain(pgb.db, tipHashCH, false)
 		if err != nil {
 			log.Errorf("Failed to set transactions in block %s as sidechain: %v",
-				tipHash, err)
+				tipHashCH, err)
 		}
 		txnsUpdated += rowsUpdated
 		log.Debugf("UpdateTransactionsMainchain: %v", time.Since(now))
 
 		// 3. Vouts. For all transactions in this block, locate any vouts that
 		// reference them in vouts.spend_tx_row_id, and unset spend_tx_row_id.
-		voutsUnset, err := clearVoutAllSpendTxRowIDs(pgb.db, tipHash)
+		voutsUnset, err := clearVoutAllSpendTxRowIDs(pgb.db, tipHashCH)
 		if err != nil {
-			log.Errorf("clearVoutAllSpendTxRowIDs for block %s: %v", tipHash, err)
+			log.Errorf("clearVoutAllSpendTxRowIDs for block %s: %v", tipHashCH, err)
 		}
 		log.Debugf("Unset spend_tx_row_id for %d vouts previously spent by "+
-			"transactions in orphaned block %s", voutsUnset, tipHash)
+			"transactions in orphaned block %s", voutsUnset, tipHashCH)
 
 		// 4. Vins. Set is_mainchain=false on all vins, returning the number of
 		// vins updated, the vins table row IDs, and the vouts table row IDs.
 		now = time.Now()
-		rowsUpdated, vinDbIDsBlk, voutDbIDsBlk, err := pgb.SetVinsMainchainByBlock(tipHash) // isMainchain from transactions table
+		rowsUpdated, vinDbIDsBlk, voutDbIDsBlk, err := pgb.SetVinsMainchainByBlock(tipHashCH.String()) // isMainchain from transactions table
 		if err != nil {
 			log.Errorf("Failed to set vins in block %s as sidechain: %v",
-				tipHash, err)
+				tipHashCH, err)
 		}
 		vinsUpdated += rowsUpdated
 		log.Debugf("SetVinsMainchainByBlock: %v", time.Since(now))
@@ -3291,7 +3364,7 @@ func (pgb *ChainDB) TipToSideChain(mainRoot string) (tipHash string, blocksMoved
 			vinDbIDsBlk, voutDbIDsBlk, false)
 		if err != nil {
 			log.Errorf("Failed to set addresses rows in block %s as sidechain: %v",
-				tipHash, err)
+				tipHashCH, err)
 		}
 		addrsUpdated += numAddrSpending + numAddrFunding
 		log.Debugf("UpdateAddressesMainchainByIDs: %v", time.Since(now))
@@ -3301,43 +3374,43 @@ func (pgb *ChainDB) TipToSideChain(mainRoot string) (tipHash string, blocksMoved
 
 		// 6. Votes. Sets is_mainchain=false on all votes in the tip block.
 		now = time.Now()
-		rowsUpdated, err = UpdateVotesMainchain(pgb.db, tipHash, false)
+		rowsUpdated, err = UpdateVotesMainchain(pgb.db, tipHashCH, false)
 		if err != nil {
 			log.Errorf("Failed to set votes in block %s as sidechain: %v",
-				tipHash, err)
+				tipHashCH, err)
 		}
 		votesUpdated += rowsUpdated
 		log.Debugf("UpdateVotesMainchain: %v", time.Since(now))
 
 		// 7. Tickets. Sets is_mainchain=false on all tickets in the tip block.
 		now = time.Now()
-		rowsUpdated, err = UpdateTicketsMainchain(pgb.db, tipHash, false)
+		rowsUpdated, err = UpdateTicketsMainchain(pgb.db, tipHashCH, false)
 		if err != nil {
 			log.Errorf("Failed to set tickets in block %s as sidechain: %v",
-				tipHash, err)
+				tipHashCH, err)
 		}
 		ticketsUpdated += rowsUpdated
 		log.Debugf("UpdateTicketsMainchain: %v", time.Since(now))
 
 		// 8. Treasury. Sets is_mainchain=false on all entries in the tip block.
 		now = time.Now()
-		rowsUpdated, err = UpdateTreasuryMainchain(pgb.db, tipHash, false)
+		rowsUpdated, err = UpdateTreasuryMainchain(pgb.db, tipHashCH, false)
 		if err != nil {
 			log.Errorf("Failed to set tickets in block %s as sidechain: %v",
-				tipHash, err)
+				tipHashCH, err)
 		}
 		treasuryTxnsUpdates += rowsUpdated
 		log.Debugf("UpdateTreasuryMainchain: %v", time.Since(now))
 
 		// move on to next block
-		tipHash = previousHash
+		tipHashCH = previousHash
 
 		pgb.bestBlock.mtx.Lock()
-		pgb.bestBlock.height, err = pgb.BlockHeight(tipHash)
+		pgb.bestBlock.height, err = pgb.BlockHeight(tipHashCH.String())
 		if err != nil {
-			log.Errorf("Failed to retrieve block height for %s", tipHash)
+			log.Errorf("Failed to retrieve block height for %s", tipHashCH)
 		}
-		pgb.bestBlock.hash = tipHash
+		pgb.bestBlock.hash = tipHashCH
 		pgb.bestBlock.mtx.Unlock()
 	}
 
@@ -3353,6 +3426,7 @@ func (pgb *ChainDB) TipToSideChain(mainRoot string) (tipHash string, blocksMoved
 	log.Debugf("Reorg orphaned: %d blocks, %d txns, %d vins, %d addresses, %d votes, %d tickets, %d treasury txns",
 		blocksMoved, txnsUpdated, vinsUpdated, addrsUpdated, votesUpdated, ticketsUpdated, treasuryTxnsUpdates)
 
+	tipHash = tipHashCH.String()
 	return
 }
 
@@ -3383,7 +3457,15 @@ func (pgb *ChainDB) StoreBlock(msgBlock *wire.MsgBlock, isValid, isMainchain,
 	}
 
 	// Convert the wire.MsgBlock to a dbtypes.Block.
-	dbBlock := dbtypes.MsgBlockToDBBlock(msgBlock, pgb.chainParams, chainWork, winningTickets)
+	winningTicketsCH := make([]dbtypes.ChainHash, len(winningTickets))
+	for i := range winningTickets {
+		ch, err := chainhash.NewHashFromStr(winningTickets[i])
+		if err != nil {
+			return 0, 0, 0, fmt.Errorf("chainhash.NewHashFromStr for winning ticket: %w", err)
+		}
+		winningTicketsCH[i] = dbtypes.ChainHash(*ch)
+	}
+	dbBlock := dbtypes.MsgBlockToDBBlock(msgBlock, pgb.chainParams, chainWork, winningTicketsCH)
 
 	// Get the previous winners (stake DB pool info cache has this info). If the
 	// previous block is side chain, stakedb will not have the
@@ -3497,7 +3579,7 @@ func (pgb *ChainDB) StoreBlock(msgBlock *wire.MsgBlock, isValid, isMainchain,
 	// and an empty string for the next block hash, which may be updated when a
 	// new block extends this chain.
 	err = InsertBlockPrevNext(pgb.db, blockDbID, dbBlock.Hash,
-		dbBlock.PreviousHash, "")
+		dbBlock.PreviousHash, dbtypes.ChainHash{})
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Error("InsertBlockPrevNext:", err)
 		return
@@ -3605,7 +3687,7 @@ func (pgb *ChainDB) UpdateLastBlock(msgBlock *wire.MsgBlock, isMainchain bool) e
 	}
 
 	// Update the previous block's next block hash in the block_chain table.
-	err := UpdateBlockNext(pgb.db, lastBlockDbID, msgBlock.BlockHash().String())
+	err := UpdateBlockNext(pgb.db, lastBlockDbID, dbtypes.ChainHash(msgBlock.BlockHash()))
 	if err != nil {
 		return fmt.Errorf("UpdateBlockNext: %w", err)
 	}
@@ -3626,7 +3708,7 @@ func (pgb *ChainDB) UpdateLastBlock(msgBlock *wire.MsgBlock, isMainchain bool) e
 
 		// For the transactions invalidated by this block, locate any vouts that
 		// reference them in vouts.spend_tx_row_id, and unset spend_tx_row_id.
-		voutsUnset, err := clearVoutRegularSpendTxRowIDs(pgb.db, lastBlockHash.String())
+		voutsUnset, err := clearVoutRegularSpendTxRowIDs(pgb.db, dbtypes.ChainHash(lastBlockHash))
 		if err != nil {
 			return fmt.Errorf("clearVoutRegularSpendTxRowIDs: %w", err)
 		}
@@ -3634,13 +3716,13 @@ func (pgb *ChainDB) UpdateLastBlock(msgBlock *wire.MsgBlock, isMainchain bool) e
 			"regular transactions in invalidated block %s", voutsUnset, lastBlockHash)
 
 		// Update the is_valid flag for the last block's vins.
-		err = UpdateLastVins(pgb.db, lastBlockHash.String(), lastIsValid, isMainchain)
+		err = UpdateLastVins(pgb.db, dbtypes.ChainHash(lastBlockHash), lastIsValid, isMainchain)
 		if err != nil {
 			return fmt.Errorf("UpdateLastVins: %w", err)
 		}
 
 		// Update the is_valid flag for the last block's regular transactions.
-		_, _, err = UpdateTransactionsValid(pgb.db, lastBlockHash.String(), lastIsValid)
+		_, _, err = UpdateTransactionsValid(pgb.db, dbtypes.ChainHash(lastBlockHash), lastIsValid)
 		if err != nil {
 			return fmt.Errorf("UpdateTransactionsValid: %w", err)
 		}
@@ -3650,7 +3732,7 @@ func (pgb *ChainDB) UpdateLastBlock(msgBlock *wire.MsgBlock, isMainchain bool) e
 		//  Update on addresses  (cost=0.00..1012201.53 rows=1 width=181)
 		// 		->  Seq Scan on addresses  (cost=0.00..1012201.53 rows=1 width=181)
 		// 		Filter: ((NOT is_funding) AND (tx_vin_vout_row_id = 13241234))
-		addrs, err := UpdateLastAddressesValid(pgb.db, lastBlockHash.String(), lastIsValid)
+		addrs, err := UpdateLastAddressesValid(pgb.db, dbtypes.ChainHash(lastBlockHash), lastIsValid)
 		if err != nil {
 			return fmt.Errorf("UpdateLastAddressesValid: %w", err)
 		}
@@ -3808,7 +3890,7 @@ txns:
 
 		for iv := range dbTxVins[it] {
 			vin := &dbTxVins[it][iv]
-			if txhelpers.IsZeroHashStr(vin.PrevTxHash) {
+			if txhelpers.IsZeroHashStr(vin.PrevTxHash.String()) {
 				continue
 			}
 			utxo := pgb.utxoCache.Peek(vin.PrevTxHash, vin.PrevTxIndex)
@@ -3923,7 +4005,7 @@ txns:
 		// ticket spend info below.
 
 		// voteDbIDs, voteTxns, spentTicketHashes, ticketDbIDs, missDbIDs, err := ...
-		var missesHashIDs map[string]uint64
+		var missesHashIDs map[dbtypes.ChainHash]uint64
 		_, _, _, _, missesHashIDs, err = InsertVotes(pgb.db, dbTransactions, txDbIDs,
 			pgb.unspentTicketCache, msgBlock, pgb.dupChecks, updateExistingRecords,
 			pgb.chainParams, pgb.ChainInfo())
@@ -4003,10 +4085,10 @@ txns:
 		unspentMisses := make(map[string]struct{})
 		// missesHashIDs refers to lottery winners that did not vote.
 		for miss := range missesHashIDs {
-			if _, ok := revokes[miss]; !ok {
+			if _, ok := revokes[miss.String()]; !ok {
 				// unrevoked miss
-				unspentMissedTicketHashes = append(unspentMissedTicketHashes, miss)
-				unspentMisses[miss] = struct{}{}
+				unspentMissedTicketHashes = append(unspentMissedTicketHashes, miss.String())
+				unspentMisses[miss.String()] = struct{}{}
 				missStatuses = append(missStatuses, dbtypes.PoolStatusMissed)
 			}
 		}
@@ -4042,7 +4124,13 @@ txns:
 		// expire the cache entry.
 		unspentEnMRowIDs := make([]uint64, len(unspentEnM))
 		for iu := range unspentEnM {
-			t, err0 := pgb.unspentTicketCache.TxnDbID(unspentEnM[iu], false)
+			ch, errHash := chainhash.NewHashFromStr(unspentEnM[iu])
+			if errHash != nil {
+				txRes.err = fmt.Errorf("failed to parse ticket hash %s: %w",
+					unspentEnM[iu], errHash)
+				return txRes
+			}
+			t, err0 := pgb.unspentTicketCache.TxnDbID(dbtypes.ChainHash(*ch), false)
 			if err0 != nil {
 				txRes.err = fmt.Errorf("failed to retrieve ticket %s DB ID: %w",
 					unspentEnM[iu], err0)
@@ -4098,7 +4186,7 @@ txns:
 
 			// Skip coinbase inputs (they are new coins and thus have no
 			// previous outpoint funding them).
-			if bytes.Equal(zeroHashStringBytes, []byte(vin.PrevTxHash)) {
+			if bytes.Equal(zeroHashStringBytes, []byte(vin.PrevTxHash.String())) {
 				continue
 			}
 
@@ -4307,7 +4395,7 @@ func (pgb *ChainDB) CollectTicketSpendDBInfo(dbTxns []*dbtypes.Tx, txDbIDs []uin
 
 		// Ensure the transactions in dbTxns and msgBlock.STransactions correspond.
 		msgTx := msgTxns[i]
-		if tx.TxID != msgTx.CachedTxHash().String() {
+		if tx.TxID.String() != msgTx.CachedTxHash().String() {
 			err = fmt.Errorf("txid of dbtypes.Tx does not match that of msgTx")
 			return
 		} // comment this check
@@ -4328,7 +4416,12 @@ func (pgb *ChainDB) CollectTicketSpendDBInfo(dbTxns []*dbtypes.Tx, txDbIDs []uin
 
 		// ticket's row ID in *tickets* table
 		expireEntries := isMainchain // expire all cache entries for main chain blocks
-		t, err0 := pgb.unspentTicketCache.TxnDbID(ticketHash, expireEntries)
+		tch, errHash := chainhash.NewHashFromStr(ticketHash)
+		if errHash != nil {
+			err = fmt.Errorf("failed to parse ticket hash %s: %w", ticketHash, errHash)
+			return
+		}
+		t, err0 := pgb.unspentTicketCache.TxnDbID(dbtypes.ChainHash(*tch), expireEntries)
 		if err0 != nil {
 			err = fmt.Errorf("failed to retrieve ticket %s DB ID: %w", ticketHash, err0)
 			return
@@ -4575,7 +4668,12 @@ func (pgb *ChainDB) GetPoolInfo(idx int) *apitypes.TicketPoolInfo {
 // GetPoolInfoByHash retrieves the ticket pool statistics at the specified block
 // hash.
 func (pgb *ChainDB) GetPoolInfoByHash(hash string) *apitypes.TicketPoolInfo {
-	ticketPoolInfo, err := RetrievePoolInfoByHash(pgb.ctx, pgb.db, hash)
+	ch, err := chainhash.NewHashFromStr(hash)
+	if err != nil {
+		log.Errorf("Unable to parse hash: %v", err)
+		return nil
+	}
+	ticketPoolInfo, err := RetrievePoolInfoByHash(pgb.ctx, pgb.db, dbtypes.ChainHash(*ch))
 	if err != nil {
 		log.Errorf("Unable to retrieve ticket pool info: %v", err)
 		return nil
@@ -4724,7 +4822,11 @@ func (pgb *ChainDB) GetBlockHeight(hash string) (int64, error) {
 	// }
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	height, err := RetrieveBlockHeight(ctx, pgb.db, hash)
+	ch, err := chainhash.NewHashFromStr(hash)
+	if err != nil {
+		return -1, err
+	}
+	height, err := RetrieveBlockHeight(ctx, pgb.db, dbtypes.ChainHash(*ch))
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			log.Errorf("Unexpected error retrieving block height for hash %s: %v", hash, err)
@@ -5114,7 +5216,11 @@ func (pgb *ChainDB) BlockSummaryByHash(hash string) (*apitypes.BlockDataBasic, e
 		// Cache miss necessitates a DB query.
 	}
 
-	bd, err := RetrieveBlockSummaryByHash(pgb.ctx, pgb.db, hash)
+	ch, err := chainhash.NewHashFromStr(hash)
+	if err != nil {
+		return nil, err
+	}
+	bd, err := RetrieveBlockSummaryByHash(pgb.ctx, pgb.db, dbtypes.ChainHash(*ch))
 	if err != nil {
 		return nil, err
 	}
@@ -5222,7 +5328,12 @@ func (pgb *ChainDB) GetSDiff(idx int) float64 {
 
 // GetSBitsByHash gets the stake difficulty in DCR for a given block height.
 func (pgb *ChainDB) GetSBitsByHash(hash string) int64 {
-	sbits, err := RetrieveSBitsByHash(pgb.ctx, pgb.db, hash)
+	ch, err := chainhash.NewHashFromStr(hash)
+	if err != nil {
+		log.Errorf("Unable to parse hash: %v", err)
+		return -1
+	}
+	sbits, err := RetrieveSBitsByHash(pgb.ctx, pgb.db, dbtypes.ChainHash(*ch))
 	if err != nil {
 		log.Errorf("Unable to retrieve stake difficulty: %v", err)
 		return -1

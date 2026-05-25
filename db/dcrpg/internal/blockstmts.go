@@ -89,10 +89,23 @@ const (
 	SelectBlockTimeByHeight = `SELECT time FROM blocks
 		WHERE height = $1 AND is_mainchain = true;`
 
+	SelectGenesisTime = `SELECT time FROM blocks
+		WHERE is_mainchain = true ORDER BY height ASC LIMIT 1;`
+
 	// RetrieveBestBlockHeightAny = `SELECT id, hash, height FROM blocks
 	// 	ORDER BY height DESC LIMIT 1;`
 	RetrieveBestBlockHeight = `SELECT id, hash, height FROM blocks
 		WHERE is_mainchain = true ORDER BY height DESC LIMIT 1;`
+
+	RetrieveBestBlockHeightAny = `SELECT id, hash, height FROM blocks
+		ORDER BY height DESC LIMIT 1;`
+
+	SelectBlocksHashes  = `SELECT hash FROM blocks ORDER BY id;`
+	SelectSideChainTips = `SELECT is_valid, height, previous_hash, hash FROM blocks
+		WHERE is_mainchain = false AND hash NOT IN (SELECT previous_hash FROM blocks);`
+	SelectBlocksPreviousHash = `SELECT previous_hash FROM blocks WHERE hash = $1;`
+	SelectTxsPerDay          = `SELECT time, count(*) FROM transactions
+		WHERE block_time > $1 GROUP BY block_time ORDER BY block_time;`
 
 	// SelectBlocksTicketsPrice selects the ticket price and difficulty for the
 	// first block in a stake difficulty window.
@@ -133,6 +146,8 @@ const (
 		LIMIT $2 OFFSET $3;`
 
 	SelectBlockVoteCount = `SELECT voters FROM blocks WHERE hash = $1;`
+
+	SelectPoolInfoByHash = `SELECT height, pool_size, sbits, winners FROM blocks WHERE hash = $1;`
 
 	SelectSideChainBlocks = `SELECT is_valid, height, previous_hash, hash, block_chain.next_hash
 		FROM blocks

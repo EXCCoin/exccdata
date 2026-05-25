@@ -350,7 +350,7 @@ func DeleteBlocks(ctx context.Context, N int64, db *sql.DB) (res []dbtypes.Delet
 			return
 		}
 		res = append(res, resi)
-		if hash == "" {
+		if hash.String() == "" {
 			break
 		}
 		if (i%100 == 0 && i > 0) || i == N-1 {
