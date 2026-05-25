@@ -471,7 +471,7 @@ func (iapi *InsightApi) getAddressesTxnOutput(w http.ResponseWriter, r *http.Req
 					TxnID:         fundingTx.Hash().String(),
 					Vout:          f.Index,
 					BlockTime:     fundingTx.MemPoolTime,
-					ScriptPubKey:  hex.EncodeToString(txOut.PkScript),
+					ScriptPubKey:  txOut.PkScript,
 					Amount:        dcrutil.Amount(txOut.Value).ToCoin(),
 					Satoshis:      txOut.Value,
 					Confirmations: 0,
