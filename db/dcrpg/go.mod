@@ -19,7 +19,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/jrick/logrotate v1.0.0
-	github.com/lib/pq v1.10.9
+	github.com/lib/pq v1.12.3
 )
 
 require (

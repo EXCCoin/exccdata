@@ -31,6 +31,7 @@ require (
 	github.com/agl/ed25519 v0.0.0-20170116200512-5312a6153412 // indirect
 	github.com/dchest/siphash v1.2.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/lib/pq v1.12.3 // indirect
 	github.com/mattn/go-pointer v0.0.1 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 // indirect
 	go.etcd.io/bbolt v1.3.7 // indirect
