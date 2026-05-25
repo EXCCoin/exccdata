@@ -4,7 +4,9 @@ package internal
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -128,4 +130,47 @@ func ScanLinearArray(src, del []byte, typ string) (elems [][]byte, err error) {
 		return nil, fmt.Errorf("pq: cannot convert ARRAY%s to %s", strings.Replace(fmt.Sprint(dims), " ", "][", -1), typ)
 	}
 	return elems, err
+}
+
+func ParseBytea(s []byte) ([]byte, error) {
+	if len(s) >= 2 && bytes.Equal(s[:2], []byte("\\x")) {
+		s = s[2:]
+		result := make([]byte, hex.DecodedLen(len(s)))
+		_, err := hex.Decode(result, s)
+		if err != nil {
+			return nil, err
+		}
+		return result, nil
+	}
+
+	var result []byte
+	for len(s) > 0 {
+		if s[0] == '\\' {
+			if len(s) >= 2 && s[1] == '\\' {
+				result = append(result, '\\')
+				s = s[2:]
+				continue
+			}
+
+			if len(s) < 4 {
+				return nil, fmt.Errorf("invalid bytea sequence %v", s)
+			}
+			r, err := strconv.ParseUint(string(s[1:4]), 8, 8)
+			if err != nil {
+				return nil, fmt.Errorf("could not parse bytea value: %s", err.Error())
+			}
+			result = append(result, byte(r))
+			s = s[4:]
+		} else {
+			i := bytes.IndexByte(s, '\\')
+			if i == -1 {
+				result = append(result, s...)
+				break
+			}
+			result = append(result, s[:i]...)
+			s = s[i:]
+		}
+	}
+
+	return result, nil
 }

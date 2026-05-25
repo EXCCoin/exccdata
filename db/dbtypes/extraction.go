@@ -10,9 +10,6 @@ import (
 	"github.com/EXCCoin/exccdata/v8/txhelpers"
 )
 
-// ExtractBlockTransactions extracts transaction information from a
-// wire.MsgBlock and returns the processed information in slices of the dbtypes
-// Tx, Vout, and VinTxPropertyARRAY.
 func ExtractBlockTransactions(msgBlock *wire.MsgBlock, txTree int8,
 	chainParams *chaincfg.Params, isValid, isMainchain bool) ([]*Tx, [][]*Vout, []VinTxPropertyARRAY) {
 	dbTxs, dbTxVouts, dbTxVins := processTransactions(msgBlock, txTree,
@@ -39,10 +36,10 @@ func processTransactions(msgBlock *wire.MsgBlock, tree int8, chainParams *chainc
 	}
 
 	blockHeight := msgBlock.Header.Height
-	blockHash := msgBlock.BlockHash()
+	blockHash := ChainHash(msgBlock.BlockHash())
 	blockTime := NewTimeDef(msgBlock.Header.Timestamp)
 
-	treasuryActive := stakeTree && txhelpers.IsTreasuryActive(chainParams.Net, int64(blockHeight)) // treasury txns are stake
+	treasuryActive := stakeTree && txhelpers.IsTreasuryActive(chainParams.Net, int64(blockHeight))
 
 	dbTransactions := make([]*Tx, 0, len(txs))
 	dbTxVouts := make([][]*Vout, len(txs))
@@ -56,8 +53,6 @@ func processTransactions(msgBlock *wire.MsgBlock, tree int8, chainParams *chainc
 		if isStake && !stakeTree {
 			fmt.Printf(" ***************** INCONSISTENT TREE: txn %v, type = %v", tx.TxHash(), txType)
 			continue
-			// You are doing it wrong
-			// return nil, nil, nil
 		}
 
 		var mixDenom int64
@@ -77,14 +72,13 @@ func processTransactions(msgBlock *wire.MsgBlock, tree int8, chainParams *chainc
 		}
 		fees := spent - sent
 		dbTx := &Tx{
-			BlockHash:        blockHash.String(),
+			BlockHash:        blockHash,
 			BlockHeight:      int64(blockHeight),
 			BlockTime:        blockTime,
-			Time:             blockTime, // TODO, receive time? no! REMOVE
 			TxType:           int16(txType),
 			Version:          tx.Version,
 			Tree:             tree,
-			TxID:             tx.CachedTxHash().String(),
+			TxID:             ChainHash(*tx.CachedTxHash()),
 			BlockIndex:       uint32(txIndex),
 			Locktime:         tx.LockTime,
 			Expiry:           tx.Expiry,
@@ -100,12 +94,10 @@ func processTransactions(msgBlock *wire.MsgBlock, tree int8, chainParams *chainc
 			IsMainchainBlock: isMainchain,
 		}
 
-		//dbTx.Vins = make([]VinTxProperty, 0, dbTx.NumVin)
 		dbTxVins[txIndex] = make(VinTxPropertyARRAY, 0, len(tx.TxIn))
 		for idx, txin := range tx.TxIn {
 			dbTxVins[txIndex] = append(dbTxVins[txIndex], VinTxProperty{
-				PrevOut:     txin.PreviousOutPoint.String(),
-				PrevTxHash:  txin.PreviousOutPoint.Hash.String(),
+				PrevTxHash:  ChainHash(txin.PreviousOutPoint.Hash),
 				PrevTxIndex: txin.PreviousOutPoint.Index,
 				PrevTxTree:  uint16(txin.PreviousOutPoint.Tree),
 				Sequence:    txin.Sequence,
@@ -123,36 +115,26 @@ func processTransactions(msgBlock *wire.MsgBlock, tree int8, chainParams *chainc
 			})
 		}
 
-		//dbTx.VinDbIds = make([]uint64, int(dbTx.NumVin))
-
-		// Vouts and their db IDs
 		dbTxVouts[txIndex] = make([]*Vout, 0, len(tx.TxOut))
-		//dbTx.Vouts = make([]*Vout, 0, len(tx.TxOut))
 		for io, txout := range tx.TxOut {
 			vout := Vout{
-				TxHash:       dbTx.TxID,
-				TxIndex:      uint32(io),
-				TxTree:       tree,
-				TxType:       dbTx.TxType,
-				Value:        uint64(txout.Value),
-				Version:      txout.Version,
-				ScriptPubKey: txout.PkScript,
-				Mixed:        mixDenom > 0 && mixDenom == txout.Value, // later, check ticket and vote outputs against the spent outputs' mixed status
+				TxHash:  dbTx.TxID,
+				TxIndex: uint32(io),
+				TxTree:  tree,
+				TxType:  dbTx.TxType,
+				Value:   uint64(txout.Value),
+				Version: txout.Version,
+				Mixed:   mixDenom > 0 && mixDenom == txout.Value,
 			}
-			scriptClass, scriptAddrs := stdscript.ExtractAddrs(vout.Version, vout.ScriptPubKey, chainParams)
-			reqSigs := stdscript.DetermineRequiredSigs(vout.Version, vout.ScriptPubKey)
+			scriptClass, scriptAddrs := stdscript.ExtractAddrs(vout.Version, txout.PkScript, chainParams)
 			addys := make([]string, 0, len(scriptAddrs))
 			for ia := range scriptAddrs {
 				addys = append(addys, scriptAddrs[ia].String())
 			}
-			vout.ScriptPubKeyData.ReqSigs = uint32(reqSigs)
 			vout.ScriptPubKeyData.Type = NewScriptClass(scriptClass)
 			vout.ScriptPubKeyData.Addresses = addys
 			dbTxVouts[txIndex] = append(dbTxVouts[txIndex], &vout)
-			//dbTx.Vouts = append(dbTx.Vouts, &vout)
 		}
-
-		//dbTx.VoutDbIds = make([]uint64, len(dbTxVouts[txIndex]))
 
 		dbTransactions = append(dbTransactions, dbTx)
 	}
