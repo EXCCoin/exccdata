@@ -293,7 +293,7 @@ type ChainDeployments struct {
 type BestBlock struct {
 	mtx    sync.RWMutex
 	height int64
-	hash   string
+	hash   dbtypes.ChainHash
 }
 
 func (pgb *ChainDB) timeoutError() string {
@@ -360,7 +360,11 @@ func (pgb *ChainDB) MissingSideChainBlocks() ([]dbtypes.SideChain, int, error) {
 			sideHeightDB, err := pgb.BlockHeight(sideChain[is])
 			if errors.Is(err, dbtypes.ErrNoResult) {
 				// This block is NOT already in the DB.
-				blocksToStore[it].Hashes = append(blocksToStore[it].Hashes, sideChain[is])
+				ch, err := chainhash.NewHashFromStr(sideChain[is])
+				if err != nil {
+					return nil, 0, fmt.Errorf("failed to decode side chain hash %s: %w", sideChain[is], err)
+				}
+				blocksToStore[it].Hashes = append(blocksToStore[it].Hashes, dbtypes.ChainHash(*ch))
 				blocksToStore[it].Heights = append(blocksToStore[it].Heights, sideHeight)
 				nSideChainBlocks++
 			} else if err == nil {
@@ -387,7 +391,7 @@ func (pgb *ChainDB) MissingSideChainBlocks() ([]dbtypes.SideChain, int, error) {
 // TicketTxnIDGetter provides a cache for DB row IDs of tickets.
 type TicketTxnIDGetter struct {
 	mtx     sync.RWMutex
-	idCache map[string]uint64
+	idCache map[dbtypes.ChainHash]uint64
 	db      *sql.DB
 }
 
@@ -395,7 +399,7 @@ type TicketTxnIDGetter struct {
 // hash. A cache is checked first. In the event of a cache hit, the DB ID is
 // returned and deleted from the internal cache. In the event of a cache miss,
 // the database is queried. If the database query fails, the error is non-nil.
-func (t *TicketTxnIDGetter) TxnDbID(txid string, expire bool) (uint64, error) {
+func (t *TicketTxnIDGetter) TxnDbID(txid dbtypes.ChainHash, expire bool) (uint64, error) {
 	if t == nil {
 		panic("You're using an uninitialized TicketTxnIDGetter")
 	}
@@ -416,7 +420,7 @@ func (t *TicketTxnIDGetter) TxnDbID(txid string, expire bool) (uint64, error) {
 }
 
 // Set stores the (transaction hash, DB row ID) pair a map for future access.
-func (t *TicketTxnIDGetter) Set(txid string, txDbID uint64) {
+func (t *TicketTxnIDGetter) Set(txid dbtypes.ChainHash, txDbID uint64) {
 	if t == nil {
 		return
 	}
@@ -426,7 +430,7 @@ func (t *TicketTxnIDGetter) Set(txid string, txDbID uint64) {
 }
 
 // SetN stores several (transaction hash, DB row ID) pairs in the map.
-func (t *TicketTxnIDGetter) SetN(txid []string, txDbID []uint64) {
+func (t *TicketTxnIDGetter) SetN(txid []dbtypes.ChainHash, txDbID []uint64) {
 	if t == nil {
 		return
 	}
@@ -441,7 +445,7 @@ func (t *TicketTxnIDGetter) SetN(txid []string, txDbID []uint64) {
 func NewTicketTxnIDGetter(db *sql.DB) *TicketTxnIDGetter {
 	return &TicketTxnIDGetter{
 		db:      db,
-		idCache: make(map[string]uint64),
+		idCache: make(map[dbtypes.ChainHash]uint64),
 	}
 }
 
@@ -567,14 +571,14 @@ func NewChainDB(ctx context.Context, cfg *ChainDBCfg, stakeDB *stakedb.StakeData
 		if err = CreateTables(db); err != nil {
 			return nil, fmt.Errorf("failed to create tables: %w", err)
 		}
-		err = insertMetaData(db, &metaData{
+		err = initMetaData(db, &metaData{
 			netName:         params.Name,
 			currencyNet:     uint32(params.Net),
 			bestBlockHeight: -1,
 			dbVer:           *targetDatabaseVersion,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("insertMetaData failed: %w", err)
+			return nil, fmt.Errorf("initMetaData failed: %w", err)
 		}
 	case metaNotFoundErr:
 		log.Errorf("Legacy DB versioning found. No upgrade supported. Wipe all data and start fresh.")
@@ -853,7 +857,11 @@ func (pgb *ChainDB) DisapprovedBlocks() ([]*dbtypes.BlockStatus, error) {
 func (pgb *ChainDB) BlockStatus(hash string) (dbtypes.BlockStatus, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	bs, err := RetrieveBlockStatus(ctx, pgb.db, hash)
+	ch, err := chainhash.NewHashFromStr(hash)
+	if err != nil {
+		return dbtypes.BlockStatus{}, err
+	}
+	bs, err := RetrieveBlockStatus(ctx, pgb.db, dbtypes.ChainHash(*ch))
 	return bs, pgb.replaceCancelError(err)
 }
 
@@ -868,7 +876,11 @@ func (pgb *ChainDB) BlockStatuses(height int64) ([]*dbtypes.BlockStatus, error) 
 
 // blockFlags retrieves the block's isValid and isMainchain flags.
 func (pgb *ChainDB) blockFlags(ctx context.Context, hash string) (bool, bool, error) {
-	iv, im, err := RetrieveBlockFlags(ctx, pgb.db, hash)
+	ch, err := chainhash.NewHashFromStr(hash)
+	if err != nil {
+		return false, false, err
+	}
+	iv, im, err := RetrieveBlockFlags(ctx, pgb.db, dbtypes.ChainHash(*ch))
 	return iv, im, pgb.replaceCancelError(err)
 }
 
@@ -962,7 +974,11 @@ func (pgb *ChainDB) RegisterCharts(charts *cache.ChartData) {
 func (pgb *ChainDB) TransactionBlocks(txHash string) ([]*dbtypes.BlockStatus, []uint32, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	hashes, heights, inds, valids, mainchains, err := RetrieveTxnsBlocks(ctx, pgb.db, txHash)
+	ch, err := chainhash.NewHashFromStr(txHash)
+	if err != nil {
+		return nil, nil, err
+	}
+	hashes, heights, inds, valids, mainchains, err := RetrieveTxnsBlocks(ctx, pgb.db, dbtypes.ChainHash(*ch))
 	if err != nil {
 		return nil, nil, pgb.replaceCancelError(err)
 	}
@@ -995,24 +1011,20 @@ func (pgb *ChainDB) HashDB() (string, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
 	hash, _, err := DBBestBlock(ctx, pgb.db)
-	return hash, pgb.replaceCancelError(err)
+	return hash.String(), pgb.replaceCancelError(err)
 }
 
-// HeightHashDB retrieves the best block height and hash according to the meta
-// table.
 func (pgb *ChainDB) HeightHashDB() (int64, string, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
 	hash, height, err := DBBestBlock(ctx, pgb.db)
-	return height, hash, pgb.replaceCancelError(err)
+	return height, hash.String(), pgb.replaceCancelError(err)
 }
 
-// HeightDBLegacy queries the blocks table for the best block height. When the
-// tables are empty, the returned height will be -1.
 func (pgb *ChainDB) HeightDBLegacy() (int64, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	bestHeight, _, _, err := RetrieveBestBlockHeight(ctx, pgb.db)
+	bestHeight, _, err := RetrieveBestBlockHeight(ctx, pgb.db)
 	height := int64(bestHeight)
 	if errors.Is(err, sql.ErrNoRows) {
 		height = -1
@@ -1020,21 +1032,18 @@ func (pgb *ChainDB) HeightDBLegacy() (int64, error) {
 	return height, pgb.replaceCancelError(err)
 }
 
-// HashDBLegacy queries the blocks table for the best block's hash.
 func (pgb *ChainDB) HashDBLegacy() (string, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	_, bestHash, _, err := RetrieveBestBlockHeight(ctx, pgb.db)
-	return bestHash, pgb.replaceCancelError(err)
+	_, bestHash, err := RetrieveBestBlockHeight(ctx, pgb.db)
+	return bestHash.String(), pgb.replaceCancelError(err)
 }
 
-// HeightHashDBLegacy queries the blocks table for the best block's height and
-// hash.
 func (pgb *ChainDB) HeightHashDBLegacy() (uint64, string, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	height, hash, _, err := RetrieveBestBlockHeight(ctx, pgb.db)
-	return height, hash, pgb.replaceCancelError(err)
+	height, hash, err := RetrieveBestBlockHeight(ctx, pgb.db)
+	return height, hash.String(), pgb.replaceCancelError(err)
 }
 
 // Height is a getter for ChainDB.bestBlock.height.
@@ -1065,12 +1074,10 @@ func (pgb *ChainDB) GetBestBlockHash() (string, error) {
 func (block *BestBlock) HashStr() string {
 	block.mtx.RLock()
 	defer block.mtx.RUnlock()
-	return block.hash
+	return block.hash.String()
 }
 
-// Hash uses the last stored block hash.
 func (block *BestBlock) Hash() *chainhash.Hash {
-	// Caller should check hash instead of error
 	hash, _ := chainhash.NewHashFromStr(block.HashStr())
 	return hash
 }
@@ -1078,14 +1085,20 @@ func (block *BestBlock) Hash() *chainhash.Hash {
 func (pgb *ChainDB) BestBlock() (*chainhash.Hash, int64) {
 	pgb.bestBlock.mtx.RLock()
 	defer pgb.bestBlock.mtx.RUnlock()
-	hash, _ := chainhash.NewHashFromStr(pgb.bestBlock.hash)
+	hash, _ := chainhash.NewHashFromStr(pgb.bestBlock.hash.String())
 	return hash, pgb.bestBlock.height
 }
 
 func (pgb *ChainDB) BestBlockStr() (string, int64) {
 	pgb.bestBlock.mtx.RLock()
 	defer pgb.bestBlock.mtx.RUnlock()
-	return pgb.bestBlock.hash, pgb.bestBlock.height
+	return pgb.bestBlock.hash.String(), pgb.bestBlock.height
+}
+
+// Hash uses the last stored block hash.
+func (block *BestBlock) Hash() *chainhash.Hash {
+	hash, _ := chainhash.NewHashFromStr(block.HashStr())
+	return hash
 }
 
 // BestBlockHash is a getter for ChainDB.bestBlock.hash.
@@ -1102,8 +1115,42 @@ func (pgb *ChainDB) BestBlockHashStr() string {
 func (pgb *ChainDB) BlockHeight(hash string) (int64, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	height, err := RetrieveBlockHeight(ctx, pgb.db, hash)
+	ch, err := chainhash.NewHashFromStr(hash)
+	if err != nil {
+		return 0, err
+	}
+	height, err := RetrieveBlockHeight(ctx, pgb.db, dbtypes.ChainHash(*ch))
 	return height, pgb.replaceCancelError(err)
+}
+
+func (pgb *ChainDB) BlockHash(height int64) (string, error) {
+	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
+	defer cancel()
+	hash, err := RetrieveBlockHash(ctx, pgb.db, height)
+	return hash.String(), pgb.replaceCancelError(err)
+}
+
+func (pgb *ChainDB) BlockTimeByHeight(height int64) (int64, error) {
+	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
+	defer cancel()
+	time, err := RetrieveBlockTimeByHeight(ctx, pgb.db, height)
+	return time.UNIX(), pgb.replaceCancelError(err)
+}
+
+func (pgb *ChainDB) VotesInBlock(hash string) (int16, error) {
+	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
+	defer cancel()
+	ch, err := chainhash.NewHashFromStr(hash)
+	if err != nil {
+		return -1, err
+	}
+	voters, err := RetrieveBlockVoteCount(ctx, pgb.db, dbtypes.ChainHash(*ch))
+	if err != nil {
+		err = pgb.replaceCancelError(err)
+		log.Errorf("Unable to get block voter count for hash %s: %v", hash, err)
+		return -1, err
+	}
+	return voters, nil
 }
 
 // BlockHash queries the DB for the hash of the mainchain block at the given
@@ -1113,29 +1160,6 @@ func (pgb *ChainDB) BlockHash(height int64) (string, error) {
 	defer cancel()
 	hash, err := RetrieveBlockHash(ctx, pgb.db, height)
 	return hash, pgb.replaceCancelError(err)
-}
-
-// BlockTimeByHeight queries the DB for the time of the mainchain block at the
-// given height.
-func (pgb *ChainDB) BlockTimeByHeight(height int64) (int64, error) {
-	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
-	defer cancel()
-	time, err := RetrieveBlockTimeByHeight(ctx, pgb.db, height)
-	return time.UNIX(), pgb.replaceCancelError(err)
-}
-
-// VotesInBlock returns the number of votes mined in the block with the
-// specified hash.
-func (pgb *ChainDB) VotesInBlock(hash string) (int16, error) {
-	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
-	defer cancel()
-	voters, err := RetrieveBlockVoteCount(ctx, pgb.db, hash)
-	if err != nil {
-		err = pgb.replaceCancelError(err)
-		log.Errorf("Unable to get block voter count for hash %s: %v", hash, err)
-		return -1, err
-	}
-	return voters, nil
 }
 
 // ProposalVotes retrieves all the votes data associated with the provided token.
@@ -1154,8 +1178,38 @@ func (pgb *ChainDB) VotesInBlock(hash string) (int16, error) {
 func (pgb *ChainDB) SpendingTransactions(fundingTxID string) ([]string, []uint32, []uint32, error) {
 	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
 	defer cancel()
-	_, spendingTxns, vinInds, voutInds, err := RetrieveSpendingTxsByFundingTx(ctx, pgb.db, fundingTxID)
-	return spendingTxns, vinInds, voutInds, pgb.replaceCancelError(err)
+	ch, err := chainhash.NewHashFromStr(fundingTxID)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	_, spendingTxns, vinInds, voutInds, err := RetrieveSpendingTxsByFundingTx(ctx, pgb.db, dbtypes.ChainHash(*ch))
+	if err != nil {
+		return nil, nil, nil, pgb.replaceCancelError(err)
+	}
+	strs := make([]string, len(spendingTxns))
+	for i := range spendingTxns {
+		strs[i] = spendingTxns[i].String()
+	}
+	return strs, vinInds, voutInds, nil
+}
+
+// SpendingTransaction retrieves the transaction spending a specific outpoint
+// from the specified funding transaction. The spending transaction hash, the
+// spending tx input index, the funding tx output index, and an error value are
+// returned.
+func (pgb *ChainDB) SpendingTransaction(fundingTxID string,
+	fundingTxVinVoutIndex uint32) (string, uint32, uint32, error) {
+	ctx, cancel := context.WithTimeout(pgb.ctx, pgb.queryTimeout)
+	defer cancel()
+	ch, err := chainhash.NewHashFromStr(fundingTxID)
+	if err != nil {
+		return "", 0, 0, err
+	}
+	_, spendingTx, vinInd, voutInd, err := RetrieveSpendingTxByTxOut(ctx, pgb.db, dbtypes.ChainHash(*ch), fundingTxVinVoutIndex)
+	if err != nil {
+		return "", 0, 0, pgb.replaceCancelError(err)
+	}
+	return spendingTx.String(), vinInd, voutInd, nil
 }
 
 // SpendingTransaction returns the transaction that spends the specified

@@ -26,7 +26,7 @@ const (
 	// This includes changes such as creating tables, adding/deleting columns,
 	// adding/deleting indexes or any other operations that create, delete, or
 	// modify the definition of any database relation.
-	schemaVersion = 0
+	schemaVersion = 1
 
 	// maintVersion indicates when certain maintenance operations should be
 	// performed for the same compatVersion and schemaVersion. Such operations
@@ -86,7 +86,7 @@ const (
 func (v *DatabaseVersion) NeededToReach(other *DatabaseVersion) CompatAction {
 	switch {
 	case v.compat < other.compat:
-		return Rebuild
+		return Upgrade
 	case v.compat > other.compat:
 		return TimeTravel
 	case v.schema < other.schema:
@@ -147,7 +147,7 @@ func initMetaData(db *sql.DB, meta *metaData) error {
 	return err
 }
 
-func updateSchemaVersion(db *sql.DB, schema uint32) error { //nolint:unused
+func updateSchemaVersion(db *sql.DB, schema uint32) error {
 	_, err := db.Exec(internal.SetDBSchemaVersion, schema)
 	return err
 }
@@ -206,6 +206,8 @@ func (u *Upgrader) UpgradeDatabase() (bool, error) {
 
 func (u *Upgrader) upgradeDatabase(current, target DatabaseVersion) (bool, error) {
 	switch current.compat {
+	case 1:
+		return u.compatVersion1Upgrades(current, target)
 	case 2:
 		return u.compatVersion2Upgrades(current, target)
 	default:
@@ -242,194 +244,157 @@ func (u *Upgrader) compatVersion2Upgrades(current, target DatabaseVersion) (bool
 	// initSchema := current.schema
 	switch current.schema {
 	case 0:
-		return true, nil // nothing to do
-
-	/* when there's an upgrade to define:
-	case 0:
-		// Remove table comments where the versions were stored.
-		log.Infof("Performing database upgrade 2.0.0 -> 2.1.0")
-
-		// removeTableComments(u.db) // do something here
-
-		// Continue to upgrades for the next schema version.
+		err = u.upgradeSchema0to1()
+		if err != nil {
+			return false, fmt.Errorf("failed to upgrade 2.0.0 to 2.1.0: %v", err)
+		}
+		current.schema++
+		current.maint = 0
+		if err = storeVers(u.db, &current); err != nil {
+			return false, err
+		}
 		fallthrough
 	case 1:
-		// Upgrade to schema v2.
-		err = u.upgradeSchema1to2()
-		if err != nil {
-			return false, fmt.Errorf("failed to upgrade 1.1.0 to 1.2.0: %v", err)
-		}
-		current.schema++
-		if err = updateSchemaVersion(u.db, current.schema); err != nil {
-			return false, fmt.Errorf("failed to update schema version: %v", err)
-		}
-		fallthrough
-	case 2:
-		// Upgrade to schema v3.
-		err = u.upgradeSchema2to3()
-		if err != nil {
-			return false, fmt.Errorf("failed to upgrade 1.2.0 to 1.3.0: %v", err)
-		}
-		current.schema++
-		if err = updateSchemaVersion(u.db, current.schema); err != nil {
-			return false, fmt.Errorf("failed to update schema version: %v", err)
-		}
-		fallthrough
-
-	case 3:
-		// Upgrade to schema v4.
-		err = u.upgradeSchema3to4()
-		if err != nil {
-			return false, fmt.Errorf("failed to upgrade 1.3.0 to 1.4.0: %v", err)
-		}
-		current.schema++
-		if err = updateSchemaVersion(u.db, current.schema); err != nil {
-			return false, fmt.Errorf("failed to update schema version: %v", err)
-		}
-		fallthrough
-
-	case 4:
-		// Upgrade to schema v5.
-		err = u.upgradeSchema4to5()
-		if err != nil {
-			return false, fmt.Errorf("failed to upgrade 1.4.0 to 1.5.0: %v", err)
-		}
-		current.schema++
-		if err = updateSchemaVersion(u.db, current.schema); err != nil {
-			return false, fmt.Errorf("failed to update schema version: %v", err)
-		}
-		fallthrough
-
-	case 5:
-		// Perform schema v5 maintenance.
-		switch current.maint {
-		case 0:
-			// The maint 0 -> 1 upgrade is only needed if the user had upgraded
-			// to 1.5.0 before 1.5.1 was defined.
-			log.Infof("Performing database upgrade 1.5.0 -> 1.5.1")
-			if initSchema == 5 {
-				err = u.setTxMixData()
-				if err != nil {
-					return false, fmt.Errorf("failed to upgrade 1.5.0 to 1.5.1: %v", err)
-				}
-			}
-			current.maint++
-			if err = updateMaintenanceVersion(u.db, current.maint); err != nil {
-				return false, fmt.Errorf("failed to update maintenance version: %v", err)
-			}
-			fallthrough
-		case 1:
-			// all ready
-		default:
-			return false, fmt.Errorf("unsupported maint version %d", current.maint)
-		}
-
-		// Upgrade to schema v6.
-		err = u.upgradeSchema5to6()
-		if err != nil {
-			return false, fmt.Errorf("failed to upgrade 1.5.1 to 1.6.0: %v", err)
-		}
-		current.schema++
-		current.maint = 0
-		if err = storeVers(u.db, &current); err != nil {
-			return false, err
-		}
-
-		fallthrough
-
-	case 6:
-		err = u.upgradeSchema6to7()
-		if err != nil {
-			return false, fmt.Errorf("failed to upgrade 1.6.0 to 1.7.0: %v", err)
-		}
-		current.schema++
-		current.maint = 0
-		if err = storeVers(u.db, &current); err != nil {
-			return false, err
-		}
-
-		fallthrough
-
-	case 7:
-		err = u.upgradeSchema7to8()
-		if err != nil {
-			return false, fmt.Errorf("failed to upgrade 1.7.0 to 1.8.0: %v", err)
-		}
-		current.schema++
-		current.maint = 0
-		if err = storeVers(u.db, &current); err != nil {
-			return false, err
-		}
-
-		fallthrough
-
-	case 8:
-		err = u.upgradeSchema8to9()
-		if err != nil {
-			return false, fmt.Errorf("failed to upgrade 1.8.0 to 1.9.0: %v", err)
-		}
-		current.schema++
-		current.maint = 0
-		if err = storeVers(u.db, &current); err != nil {
-			return false, err
-		}
-
-		fallthrough
-
-	case 9:
-		err = u.upgradeSchema9to10()
-		if err != nil {
-			return false, fmt.Errorf("failed to upgrade 1.9.0 to 1.10.0: %v", err)
-		}
-		current.schema++
-		current.maint = 0
-		if err = storeVers(u.db, &current); err != nil {
-			return false, err
-		}
-
-		fallthrough
-
-	case 10:
-		err = u.upgradeSchema10to11()
-		if err != nil {
-			return false, fmt.Errorf("failed to upgrade 1.10.0 to 1.11.0: %v", err)
-		}
-		current.schema++
-		current.maint = 0
-		if err = storeVers(u.db, &current); err != nil {
-			return false, err
-		}
-
-		fallthrough
-
-	case 11:
-		// Perform schema v11 maintenance.
-
-		// No further upgrades.
 		return upgradeCheck()
-
-		// Or continue to upgrades for the next schema version.
-		// fallthrough
-	*/
 
 	default:
 		return false, fmt.Errorf("unsupported schema version %d", current.schema)
 	}
 }
 
-func storeVers(db *sql.DB, dbVer *DatabaseVersion) error { //nolint:unused
+func (u *Upgrader) compatVersion1Upgrades(current, target DatabaseVersion) (bool, error) {
+	upgradeCheck := func() (done bool, err error) {
+		switch current.NeededToReach(&target) {
+		case OK:
+			return true, nil
+		case Upgrade, Maintenance:
+			return false, nil
+		case TimeTravel:
+			return false, fmt.Errorf("the current table version is newer than supported: "+
+				"%v > %v", current, target)
+		default:
+			return false, fmt.Errorf("rebuild of entire database required")
+		}
+	}
+
+	done, err := upgradeCheck()
+	if done || err != nil {
+		return done, err
+	}
+
+	log.Infof("Performing TEXT->BYTEA migration (compat 1 -> 2). This will take a while on large databases...")
+
+	err = u.migrateTextToBytea()
+	if err != nil {
+		return false, fmt.Errorf("failed TEXT->BYTEA migration: %v", err)
+	}
+
+	current.compat = 2
+	current.schema = 0
+	current.maint = 0
+	target.compat = 2
+
+	if err = storeVers(u.db, &current); err != nil {
+		return false, fmt.Errorf("failed to store version after compat upgrade: %v", err)
+	}
+
+	log.Infof("TEXT->BYTEA migration complete. DB now at compat=2, schema=0.")
+
+	return u.compatVersion2Upgrades(current, target)
+}
+
+func (u *Upgrader) migrateTextToBytea() error {
+	db := u.db
+
+	type migration struct {
+		table string
+		col   string
+	}
+	hashCols := []migration{
+		{"blocks", "hash"},
+		{"blocks", "previous_hash"},
+		{"transactions", "block_hash"},
+		{"transactions", "tx_hash"},
+		{"vins", "tx_hash"},
+		{"vins", "prev_tx_hash"},
+		{"vouts", "tx_hash"},
+		{"addresses", "tx_hash"},
+		{"tickets", "tx_hash"},
+		{"tickets", "block_hash"},
+		{"votes", "tx_hash"},
+		{"votes", "block_hash"},
+		{"votes", "candidate_block_hash"},
+		{"votes", "ticket_hash"},
+		{"misses", "block_hash"},
+		{"misses", "candidate_block_hash"},
+		{"misses", "ticket_hash"},
+		{"block_chain", "this_hash"},
+		{"block_chain", "prev_hash"},
+	}
+
+	for _, m := range hashCols {
+		q := fmt.Sprintf(`ALTER TABLE %s ALTER COLUMN %s TYPE BYTEA USING reverse(decode(%s, 'hex'))`,
+			m.table, m.col, m.col)
+		log.Infof("Migrating %s.%s TEXT -> BYTEA...", m.table, m.col)
+		if _, err := db.Exec(q); err != nil {
+			return fmt.Errorf("failed to migrate %s.%s: %v", m.table, m.col, err)
+		}
+	}
+
+	nullableHashCols := []migration{
+		{"addresses", "matching_tx_hash"},
+		{"meta", "best_block_hash"},
+		{"block_chain", "next_hash"},
+	}
+	for _, m := range nullableHashCols {
+		q := fmt.Sprintf(`ALTER TABLE %s ALTER COLUMN %s TYPE BYTEA USING CASE WHEN %s = '' THEN NULL ELSE reverse(decode(%s, 'hex')) END`,
+			m.table, m.col, m.col, m.col)
+		log.Infof("Migrating %s.%s TEXT -> BYTEA (nullable)...", m.table, m.col)
+		if _, err := db.Exec(q); err != nil {
+			return fmt.Errorf("failed to migrate %s.%s: %v", m.table, m.col, err)
+		}
+	}
+
+	log.Infof("Migrating blocks.winners TEXT[] -> BYTEA[]...")
+	_, err := db.Exec(`ALTER TABLE blocks ALTER COLUMN winners TYPE BYTEA[] USING
+		CASE WHEN winners IS NULL THEN NULL ELSE
+			(SELECT array_agg(reverse(decode(x, 'hex'))) FROM unnest(winners) x)
+		END`)
+	if err != nil {
+		return fmt.Errorf("failed to migrate blocks.winners: %v", err)
+	}
+
+	log.Infof("Dropping removed columns...")
+	drops := []struct{ table, col string }{
+		{"blocks", "tx"},
+		{"blocks", "stx"},
+		{"transactions", "time"},
+		{"vouts", "pkscript"},
+		{"vouts", "script_req_sigs"},
+	}
+	for _, d := range drops {
+		q := fmt.Sprintf(`ALTER TABLE %s DROP COLUMN IF EXISTS %s`, d.table, d.col)
+		log.Infof("Dropping %s.%s...", d.table, d.col)
+		if _, err := db.Exec(q); err != nil {
+			return fmt.Errorf("failed to drop %s.%s: %v", d.table, d.col, err)
+		}
+	}
+
+	return nil
+}
+
+func (u *Upgrader) upgradeSchema0to1() error {
+	return nil
+}
+
+func storeVers(db *sql.DB, dbVer *DatabaseVersion) error {
 	err := updateSchemaVersion(db, dbVer.schema)
 	if err != nil {
 		return fmt.Errorf("failed to update schema version: %w", err)
 	}
 	err = updateMaintenanceVersion(db, dbVer.maint)
-	return fmt.Errorf("failed to update maintenance version: %w", err)
+	if err != nil {
+		return fmt.Errorf("failed to update maintenance version: %w", err)
+	}
+	return nil
 }
-
-/* define when needed
-func (u *Upgrader) upgradeSchema0to1() error {
-	log.Infof("Performing database upgrade 2.0.0 -> 2.1.0")
-	// describe the actions...
-	return whatever(u.db)
-}
-*/

@@ -89,7 +89,7 @@ func (pgb *ChainDB) InsightAddressTransactions(addr []string, recentBlockHeight 
 	}
 
 	// Retrieve all merged address rows for these addresses.
-	var txns []chainhash.Hash // []txSortable
+	var txns []dbtypes.ChainHash
 	var numRecent int
 	for i := range addr {
 		rows, err := pgb.AddressRowsMerged(addr[i])
@@ -113,9 +113,9 @@ func (pgb *ChainDB) InsightAddressTransactions(addr []string, recentBlockHeight 
 	recentTxs = make([]chainhash.Hash, 0, numRecent)
 
 	for i := range txns {
-		txs = append(txs, txns[i])
+		txs = append(txs, chainhash.Hash(txns[i]))
 		if i < numRecent {
-			recentTxs = append(recentTxs, txns[i])
+			recentTxs = append(recentTxs, chainhash.Hash(txns[i]))
 		}
 	}
 
