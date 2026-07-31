@@ -1,11 +1,11 @@
-FROM golang:1.19-alpine as daemon
+FROM golang:1.25-alpine AS daemon
 RUN apk add build-base gcc --update --no-cache
 
 COPY . /go/src
 WORKDIR /go/src/cmd/exccdata
 RUN go build -ldflags='-s -w -extldflags "-static"' .
 
-FROM node:18 as gui
+FROM node:lts AS gui
 
 WORKDIR /root
 COPY ./cmd/exccdata /root
