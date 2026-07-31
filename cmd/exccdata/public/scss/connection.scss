@@ -2,7 +2,7 @@
 
 /* Notice: Portions of the connection indicator style come from html5rocks.com */
 @keyframes glowgreen {
-  from {
+  0% {
     box-shadow: rgb(0 255 0 / 0%) 0 0 0;
   }
 
@@ -10,13 +10,13 @@
     box-shadow: rgb(0 255 0 / 100%) 0 0 10px;
   }
 
-  to {
+  100% {
     box-shadow: rgb(0 255 0 / 0%) 0 0 0;
   }
 }
 
 @keyframes glowred {
-  from {
+  0% {
     box-shadow: rgb(255 0 0 / 0%) 0 0 0;
   }
 
@@ -24,7 +24,7 @@
     box-shadow: rgb(255 0 0 / 100%) 0 0 10px;
   }
 
-  to {
+  100% {
     box-shadow: rgb(255 0 0 / 0%) 0 0 0;
   }
 }
