@@ -10,23 +10,26 @@
 
 set -euxo pipefail
 
-GV=$(go version | sed "s/^.*go\([0-9.]*\).*/\1/")
-echo "Go version: $GV"
+go version
 
+TEST_ARGS=()
 if [[ -n "${TESTTAGS:-}" ]]; then
-  TESTTAGS="-tags \"${TESTTAGS}\""
-else
-  TESTTAGS=
+	TEST_ARGS=(-tags "$TESTTAGS")
 fi
 
 # Check tests
-TMPDIR=$(mktemp -d)
-git clone https://github.com/dcrlabs/bug-free-happiness "$TMPDIR/test-data-repo"
+TEST_DATA_TMP=$(mktemp -d)
+cleanup() {
+	rm -rf "$TEST_DATA_TMP"
+	rm -rf ./stakedb/pooldiffs.bdgr ./stakedb/test_ticket_pool.bdgr ./stakedb/test_ticket_pool_v1.bdgr ./testutil/dbconfig/test.data
+}
+trap cleanup EXIT
+git clone https://github.com/dcrlabs/bug-free-happiness "$TEST_DATA_TMP/test-data-repo"
 
-if [[ $TESTTAGS =~ "pgonline" || $TESTTAGS =~ "chartdata" ]]; then
+if [[ ${TESTTAGS:-} =~ "pgonline" || ${TESTTAGS:-} =~ "chartdata" ]]; then
   mkdir -p ./testutil/dbconfig/test.data
   BLOCK_RANGE="0-199"
-  tar xvf "$TMPDIR/test-data-repo/pgdb/pgsql_$BLOCK_RANGE.tar.xz" -C ./testutil/dbconfig/test.data
+	tar xvf "$TEST_DATA_TMP/test-data-repo/pgdb/pgsql_$BLOCK_RANGE.tar.xz" -C ./testutil/dbconfig/test.data
 
   # Set up the tests db.
   psql -U postgres -c "DROP DATABASE IF EXISTS dcrdata_mainnet_test"
@@ -36,8 +39,8 @@ if [[ $TESTTAGS =~ "pgonline" || $TESTTAGS =~ "chartdata" ]]; then
   ./testutil/dbload/dbload
 fi
 
-tar xvf "$TMPDIR/test-data-repo/stakedb/test_ticket_pool.bdgr.tar.xz" -C ./stakedb
-tar xvf "$TMPDIR/test-data-repo/stakedb/test_ticket_pool_v1.bdgr.tar.xz" -C ./stakedb
+tar xvf "$TEST_DATA_TMP/test-data-repo/stakedb/test_ticket_pool.bdgr.tar.xz" -C ./stakedb
+tar xvf "$TEST_DATA_TMP/test-data-repo/stakedb/test_ticket_pool_v1.bdgr.tar.xz" -C ./stakedb
 
 # Do the module paths in order so that go mod tidy updates will cascade to
 # dependent modules.
@@ -53,7 +56,7 @@ for MODPATH in $MODPATHS; do
   module=$(dirname "$MODPATH")
   echo "==> ${module}"
   (cd "${module}"
-    go test $TESTTAGS ./...
+		go test "${TEST_ARGS[@]}" ./...
     golangci-lint run -c "${ROOT}/.golangci.yml"
     MOD_STATUS=$(git status --porcelain go.mod go.sum)
     go mod tidy
@@ -66,14 +69,10 @@ for MODPATH in $MODPATHS; do
   )
 done
 
-if [[ $TESTTAGS =~ "pgonline" || $TESTTAGS =~ "chartdata" ]]; then
+if [[ ${TESTTAGS:-} =~ "pgonline" || ${TESTTAGS:-} =~ "chartdata" ]]; then
   # Drop the tests db.
   psql -U postgres -c "DROP DATABASE IF EXISTS dcrdata_mainnet_test"
 fi
 
 echo "------------------------------------------"
 echo "Tests completed successfully!"
-
-# Remove all the tests data
-rm -rf "$TMPDIR"
-rm -rf ./stakedb/pooldiffs.bdgr ./stakedb/test_ticket_pool.bdgr ./stakedb/test_ticket_pool_v1.bdgr ./testutil/dbconfig/test.data
