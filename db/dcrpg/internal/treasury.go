@@ -45,14 +45,14 @@ const (
 
 	SelectTreasuryTxns = `SELECT tx_hash, tx_type, value, block_hash,
 			block_height, block_time, is_mainchain
-		FROM treasury 
+		FROM treasury
 		WHERE is_mainchain
 		ORDER BY block_height DESC
 		LIMIT $1 OFFSET $2;`
 
 	SelectTypedTreasuryTxns = `SELECT tx_hash, tx_type, value, block_hash,
 			block_height, block_time, is_mainchain
-		FROM treasury 
+		FROM treasury
 		WHERE is_mainchain
 			AND tx_type = $1
 		ORDER BY block_height DESC
