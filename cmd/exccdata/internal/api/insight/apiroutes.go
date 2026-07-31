@@ -457,7 +457,7 @@ func (iapi *InsightApi) getAddressesTxnOutput(w http.ResponseWriter, r *http.Req
 				// need to do one more search on utxo and do not add if this is
 				// already in the list as a confirmed tx.
 				for _, utxo := range confirmedTxnOutputs {
-					if utxo.Vout == f.Index && utxo.TxHash == f.Hash {
+					if utxo.Vout == f.Index && utxo.TxHash == dbtypes.ChainHash(f.Hash) {
 						continue FUNDING_TX_DUPLICATE_CHECK
 					}
 				}

@@ -8,12 +8,12 @@
 #  TESTTAGS="pgonline" ./run_tests.sh
 #  TESTTAGS="pgonline fullpgdb" ./run_tests.sh
 
-set -ex
+set -euxo pipefail
 
 GV=$(go version | sed "s/^.*go\([0-9.]*\).*/\1/")
 echo "Go version: $GV"
 
-if [[ -v TESTTAGS ]]; then
+if [[ -n "${TESTTAGS:-}" ]]; then
   TESTTAGS="-tags \"${TESTTAGS}\""
 else
   TESTTAGS=
@@ -46,35 +46,22 @@ MODPATHS="./go.mod ./exchanges/go.mod ./gov/go.mod ./db/dcrpg/go.mod ./cmd/exccd
     ./testutil/apiload/go.mod ./exchanges/rateserver/go.mod"
 #MODPATHS=$(find . -name go.mod -type f -print)
 
+ROOT=$PWD
+
 # run tests on all modules
 for MODPATH in $MODPATHS; do
   module=$(dirname "$MODPATH")
   echo "==> ${module}"
   (cd "${module}"
     go test $TESTTAGS ./...
-    golangci-lint run --deadline=10m \
-      --out-format=github-actions,colored-line-number \
-      --disable-all \
-      --enable govet \
-      --enable staticcheck \
-      --enable gosimple \
-      --enable unconvert \
-      --enable ineffassign \
-      --enable structcheck \
-      --enable goimports \
-      --enable misspell \
-      --enable unparam \
-      --enable asciicheck \
-      --enable makezero
-    if [[ "$GV" =~ ^1.19 ]]; then
-      MOD_STATUS=$(git status --porcelain go.mod go.sum)
-      go mod tidy
-      UPDATED_MOD_STATUS=$(git status --porcelain go.mod go.sum)
-      if [ "$UPDATED_MOD_STATUS" != "$MOD_STATUS" ]; then
-        echo "$module: running 'go mod tidy' modified go.mod and/or go.sum"
+    golangci-lint run -c "${ROOT}/.golangci.yml"
+    MOD_STATUS=$(git status --porcelain go.mod go.sum)
+    go mod tidy
+    UPDATED_MOD_STATUS=$(git status --porcelain go.mod go.sum)
+    if [ "$UPDATED_MOD_STATUS" != "$MOD_STATUS" ]; then
+      echo "$module: running 'go mod tidy' modified go.mod and/or go.sum"
       git diff --unified=0 go.mod go.sum
-        exit 1
-      fi
+      exit 1
     fi
   )
 done
@@ -88,5 +75,5 @@ echo "------------------------------------------"
 echo "Tests completed successfully!"
 
 # Remove all the tests data
-rm -rf "$TMPDIR" "$TMPFILE"
+rm -rf "$TMPDIR"
 rm -rf ./stakedb/pooldiffs.bdgr ./stakedb/test_ticket_pool.bdgr ./stakedb/test_ticket_pool_v1.bdgr ./testutil/dbconfig/test.data

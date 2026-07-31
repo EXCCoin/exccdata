@@ -78,7 +78,7 @@ func (t *templates) reloadTemplates() error {
 	if errorStrings == nil {
 		return nil
 	}
-	return fmt.Errorf(strings.Join(errorStrings, " | "))
+	return fmt.Errorf("%s", strings.Join(errorStrings, " | "))
 }
 
 // execTemplateToString executes the associated input template using the

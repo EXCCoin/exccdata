@@ -139,6 +139,7 @@ func RetrieveTxsBlocksAboveHeight(ctx context.Context, db *sql.DB, height int64)
 	if err != nil {
 		return
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var height int64
@@ -149,6 +150,7 @@ func RetrieveTxsBlocksAboveHeight(ctx context.Context, db *sql.DB, height int64)
 		heights = append(heights, height)
 		hashes = append(hashes, hash)
 	}
+	err = rows.Err()
 	return
 }
 

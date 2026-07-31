@@ -915,7 +915,7 @@ func (exp *explorerUI) TxPage(w http.ResponseWriter, r *http.Request) {
 
 		// Convert to explorer.Vout, getting spending information from DB.
 		for iv := range vouts {
-			spendingTx, _, err := exp.dataSource.SpendingTransaction(hash, vouts[iv].TxIndex)
+			spendingTx, _, _, err := exp.dataSource.SpendingTransaction(hash, vouts[iv].TxIndex)
 			if exp.timeoutErrorPage(w, err, "SpendingTransaction") {
 				return
 			}
@@ -936,7 +936,7 @@ func (exp *explorerUI) TxPage(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Retrieve vins from DB.
-		vins, err := exp.dataSource.VinsForTx(dbTx0)
+		vins, _, _, err := exp.dataSource.VinsForTx(dbTx0)
 		if exp.timeoutErrorPage(w, err, "VinsForTx") {
 			return
 		}

@@ -751,8 +751,6 @@ func _main(ctx context.Context) error {
 		r.With(explorer.TransactionHashCtx, explorer.TransactionIoIndexCtx).Get("/tx/{txid}/{inout}/{inoutid}", explore.TxPage)
 		r.With(explorer.AddressPathCtx).Get("/address/{address}", explore.AddressPage)
 		r.With(explorer.AddressPathCtx).Get("/addresstable/{address}", explore.AddressTable)
-		r.Get("/proposals", explore.ProposalsPage)
-		r.With(explorer.ProposalPathCtx).Get("/proposal/{proposaltoken}", explore.ProposalPage)
 		r.Get("/decodetx", explore.DecodeTxPage)
 		r.Get("/search", explore.Search)
 		r.Get("/ticketpool", explore.Ticketpool)
@@ -775,8 +773,6 @@ func _main(ctx context.Context) error {
 		withCache.Get("/disapproved", explore.DisapprovedBlocks)
 		withCache.Get("/mempool", explore.Mempool)
 		withCache.Get("/charts", explore.Charts)
-		withCache.Get("/treasury", explore.TreasuryPage)
-		withCache.Get("/treasurytable", explore.TreasuryTable)
 		withCache.Get("/parameters", explore.ParametersPage)
 		withCache.Get("/agendas", explore.AgendasPage)
 		withCache.With(explorer.AgendaPathCtx).Get("/agenda/{agendaid}", explore.AgendaPage)
@@ -879,14 +875,10 @@ func _main(ctx context.Context) error {
 			// Collect and store data for each block in this side chain.
 			for _, hash := range sideChain.Hashes {
 				// Validate the block hash.
-				blockHash, err := chainhash.NewHashFromStr(hash)
-				if err != nil {
-					log.Errorf("Invalid block hash %s: %v.", hash, err)
-					continue
-				}
+				blockHash := chainhash.Hash(hash)
 
 				// Collect block data.
-				_, msgBlock, err := collector.CollectHash(blockHash)
+				_, msgBlock, err := collector.CollectHash(&blockHash)
 				if err != nil {
 					// Do not quit if unable to collect side chain block data.
 					log.Errorf("Unable to collect data for side chain block %s: %v.",
@@ -895,7 +887,7 @@ func _main(ctx context.Context) error {
 				}
 
 				// Get the chainwork
-				chainWork, err := rpcutils.GetChainWork(chainDB.Client, blockHash)
+				chainWork, err := rpcutils.GetChainWork(chainDB.Client, &blockHash)
 				if err != nil {
 					log.Errorf("GetChainWork failed (%s): %v", blockHash, err)
 					continue
