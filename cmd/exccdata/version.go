@@ -26,7 +26,7 @@ const (
 	AppName  string = "exccdata"
 	AppMajor uint   = 6
 	AppMinor uint   = 2
-	AppPatch uint   = 1
+	AppPatch uint   = 2
 )
 
 // go build -v -ldflags "-X main.appPreRelease= -X main.appBuild=`git rev-parse --short HEAD`"
