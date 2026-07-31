@@ -574,12 +574,12 @@ func (xc *CommonExchange) UpdateIndices(indices FiatIndices) {
 func (xc *CommonExchange) fetch(request *http.Request, response interface{}) (err error) {
 	resp, err := xc.client.Do(request)
 	if err != nil {
-		return fmt.Errorf(fmt.Sprintf("Request failed: %v", err))
+		return fmt.Errorf("Request failed: %w", err)
 	}
 	defer resp.Body.Close()
 	err = json.NewDecoder(resp.Body).Decode(response)
 	if err != nil {
-		return fmt.Errorf(fmt.Sprintf("Failed to decode json from %s: %v", request.URL.String(), err))
+		return fmt.Errorf("Failed to decode json from %s: %w", request.URL.String(), err)
 	}
 	return
 }
@@ -1643,7 +1643,7 @@ func (bittrex *BittrexExchange) msgHandler(inMsg signalr.Message) {
 func (bittrex *BittrexExchange) orderbook() (*BittrexDepthResponse, error) {
 	resp, err := bittrex.client.Do(bittrex.requests.depth)
 	if err != nil {
-		return nil, fmt.Errorf(fmt.Sprintf("Request failed: %v", err))
+		return nil, fmt.Errorf("Request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -1658,13 +1658,13 @@ func (bittrex *BittrexExchange) orderbook() (*BittrexDepthResponse, error) {
 
 	seq, err := strconv.ParseUint(seqs[0], 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf(fmt.Sprintf("Request failed: %v", err))
+		return nil, fmt.Errorf("Request failed: %w", err)
 	}
 
 	depthResponse := new(BittrexDepthResponse)
 	err = json.NewDecoder(resp.Body).Decode(depthResponse)
 	if err != nil {
-		return nil, fmt.Errorf(fmt.Sprintf("Failed to decode json from %s: %v", bittrex.requests.depth.URL.String(), err))
+		return nil, fmt.Errorf("Failed to decode json from %s: %w", bittrex.requests.depth.URL.String(), err)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("Failed to retrieve Bittrex depth chart data: %v", err)
