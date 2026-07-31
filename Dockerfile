@@ -3,7 +3,9 @@ RUN apk add build-base gcc --update --no-cache
 
 COPY . /go/src
 WORKDIR /go/src/cmd/exccdata
-RUN go build -ldflags='-s -w -extldflags "-static"' .
+ARG APP_PRERELEASE=pre
+ARG APP_BUILD=dev
+RUN go build -ldflags="-s -w -extldflags \"-static\" -X main.appPreRelease=${APP_PRERELEASE} -X main.appBuild=${APP_BUILD}" .
 
 FROM node:lts AS gui
 
