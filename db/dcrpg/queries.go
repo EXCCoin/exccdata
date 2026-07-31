@@ -530,11 +530,11 @@ func InsertVotes(db *sql.DB, dbTxns []*dbtypes.Tx, _ /*txDbIDs*/ []uint64, fTx *
 
 	// Insert each vote, and build list of missed votes equal to
 	// setdiff(Validators, votes).
-	candidateBlockHash := msgBlock.Header.PrevBlock.String()
+	candidateBlockHash := dbtypes.ChainHash(msgBlock.Header.PrevBlock)
 	ids := make([]uint64, 0, len(voteTxs))
 	spentTicketHashes := make([]dbtypes.ChainHash, 0, len(voteTxs))
 	spentTicketDbIDs := make([]uint64, 0, len(voteTxs))
-	misses := make([]string, len(msgBlock.Validators))
+	misses := make([]dbtypes.ChainHash, len(msgBlock.Validators))
 	copy(misses, msgBlock.Validators)
 	for i, tx := range voteTxs {
 		msgTx := voteMsgTxs[i]
@@ -547,18 +547,13 @@ func InsertVotes(db *sql.DB, dbTxns []*dbtypes.Tx, _ /*txDbIDs*/ []uint64, fTx *
 
 		voteReward := dcrutil.Amount(msgTx.TxIn[0].ValueIn).ToCoin()
 		stakeSubmissionAmount := dcrutil.Amount(msgTx.TxIn[1].ValueIn).ToCoin()
-		stakeSubmissionTxHashStr := msgTx.TxIn[1].PreviousOutPoint.Hash.String()
-		stakeSubmissionTxHashCH, errCH := chainhash.NewHashFromStr(stakeSubmissionTxHashStr)
-		if errCH != nil {
-			bail()
-			return nil, nil, nil, nil, nil, errCH
-		}
-		spentTicketHashes = append(spentTicketHashes, dbtypes.ChainHash(*stakeSubmissionTxHashCH))
+		stakeSubmissionTxHash := dbtypes.ChainHash(msgTx.TxIn[1].PreviousOutPoint.Hash)
+		spentTicketHashes = append(spentTicketHashes, stakeSubmissionTxHash)
 
 		// Lookup the row ID in the transactions table for the ticket purchase.
 		var ticketTxDbID uint64
 		if fTx != nil {
-			ticketTxDbID, err = fTx.TxnDbID(dbtypes.ChainHash(*stakeSubmissionTxHashCH), false)
+			ticketTxDbID, err = fTx.TxnDbID(stakeSubmissionTxHash, false)
 			if err != nil {
 				bail()
 				return nil, nil, nil, nil, nil, err
@@ -568,7 +563,7 @@ func InsertVotes(db *sql.DB, dbTxns []*dbtypes.Tx, _ /*txDbIDs*/ []uint64, fTx *
 
 		// Remove the spent ticket from missed list.
 		for im := range misses {
-			if misses[im] == stakeSubmissionTxHashStr {
+			if misses[im] == stakeSubmissionTxHash {
 				misses[im] = misses[len(misses)-1]
 				misses = misses[:len(misses)-1]
 				break
@@ -580,7 +575,7 @@ func InsertVotes(db *sql.DB, dbTxns []*dbtypes.Tx, _ /*txDbIDs*/ []uint64, fTx *
 		err = voteStmt.QueryRow(
 			tx.BlockHeight, tx.TxID, tx.BlockHash, candidateBlockHash,
 			int32(voteVersion), int16(voteBits), validBlock.Validity,
-			stakeSubmissionTxHashStr, ticketTxDbID, stakeSubmissionAmount,
+			stakeSubmissionTxHash, ticketTxDbID, stakeSubmissionAmount,
 			voteReward, tx.IsMainchainBlock, tx.BlockTime).Scan(&votesRowID)
 		if err != nil {
 			if err == sql.ErrNoRows {
@@ -672,7 +667,7 @@ func InsertVotes(db *sql.DB, dbTxns []*dbtypes.Tx, _ /*txDbIDs*/ []uint64, fTx *
 
 		// Insert the miss in the misses table, and store the row ID of the
 		// new/existing/updated miss.
-		blockHash := msgBlock.BlockHash().String()
+		blockHash := dbtypes.ChainHash(msgBlock.BlockHash())
 		for i := range misses {
 			var id uint64
 			err = stmtMissed.QueryRow(
@@ -688,15 +683,7 @@ func InsertVotes(db *sql.DB, dbTxns []*dbtypes.Tx, _ /*txDbIDs*/ []uint64, fTx *
 				}
 				return nil, nil, nil, nil, nil, err
 			}
-			missHash, errMiss := chainhash.NewHashFromStr(misses[i])
-			if errMiss != nil {
-				_ = stmtMissed.Close()
-				if errRoll := dbtx.Rollback(); errRoll != nil {
-					log.Errorf("Rollback failed: %v", errRoll)
-				}
-				return nil, nil, nil, nil, nil, errMiss
-			}
-			missHashMap[dbtypes.ChainHash(*missHash)] = id
+			missHashMap[misses[i]] = id
 		}
 		_ = stmtMissed.Close()
 	}
@@ -2795,8 +2782,8 @@ func InsertSwap(db SqlExecutor, spendHeight int64, swapInfo *txhelpers.AtomicSwa
 	if len(swapInfo.Secret) > 0 {
 		secret = swapInfo.Secret
 	}
-	_, err := db.Exec(internal.InsertContractSpend, swapInfo.ContractTx.String(), swapInfo.ContractVout,
-		swapInfo.SpendTx.String(), swapInfo.SpendVin, spendHeight,
+	_, err := db.Exec(internal.InsertContractSpend, (*dbtypes.ChainHash)(swapInfo.ContractTx), swapInfo.ContractVout,
+		(*dbtypes.ChainHash)(swapInfo.SpendTx), swapInfo.SpendVin, spendHeight,
 		swapInfo.ContractAddress, swapInfo.Value,
 		swapInfo.SecretHash[:], secret, swapInfo.Locktime)
 	return err
@@ -2808,7 +2795,7 @@ func InsertTx(db *sql.DB, dbTx *dbtypes.Tx, checked, updateExistingRecords bool)
 	insertStatement := internal.MakeTxInsertStatement(checked, updateExistingRecords)
 	var id uint64
 	err := db.QueryRow(insertStatement,
-		dbTx.BlockHash, dbTx.BlockHeight, dbTx.BlockTime, dbTx.BlockTime,
+		dbTx.BlockHash, dbTx.BlockHeight, dbTx.BlockTime,
 		dbTx.TxType, int16(dbTx.Version), dbTx.Tree, dbTx.TxID, dbTx.BlockIndex,
 		int32(dbTx.Locktime), int32(dbTx.Expiry), dbTx.Size, dbTx.Spent, dbTx.Sent, dbTx.Fees,
 		dbTx.MixCount, dbTx.MixDenom,
@@ -2823,7 +2810,7 @@ func InsertTxnsStmt(stmt *sql.Stmt, dbTxns []*dbtypes.Tx, checked, updateExistin
 	for _, tx := range dbTxns {
 		var id uint64
 		err := stmt.QueryRow(
-			tx.BlockHash, tx.BlockHeight, tx.BlockTime, tx.BlockTime,
+			tx.BlockHash, tx.BlockHeight, tx.BlockTime,
 			tx.TxType, int16(tx.Version), tx.Tree, tx.TxID, tx.BlockIndex,
 			int32(tx.Locktime), int32(tx.Expiry), tx.Size, tx.Spent, tx.Sent, tx.Fees,
 			tx.MixCount, tx.MixDenom,
@@ -2876,7 +2863,7 @@ func InsertTxns(db *sql.DB, dbTxns []*dbtypes.Tx, checked, updateExistingRecords
 	for _, tx := range dbTxns {
 		var id uint64
 		err := stmt.QueryRow(
-			tx.BlockHash, tx.BlockHeight, tx.BlockTime, tx.BlockTime,
+			tx.BlockHash, tx.BlockHeight, tx.BlockTime,
 			tx.TxType, int16(tx.Version), tx.Tree, tx.TxID, tx.BlockIndex,
 			int32(tx.Locktime), int32(tx.Expiry), tx.Size, tx.Spent, tx.Sent, tx.Fees,
 			tx.MixCount, tx.MixDenom,
@@ -2911,7 +2898,7 @@ func RetrieveDbTxByHash(ctx context.Context, db *sql.DB, txHash dbtypes.ChainHas
 	vinDbIDs := dbtypes.UInt64Array(dbTx.VinDbIds)
 	voutDbIDs := dbtypes.UInt64Array(dbTx.VoutDbIds)
 	err = db.QueryRowContext(ctx, internal.SelectFullTxByHash, txHash).Scan(&id,
-		&dbTx.BlockHash, &dbTx.BlockHeight, &dbTx.BlockTime, &dbTx.BlockTime,
+		&dbTx.BlockHash, &dbTx.BlockHeight, &dbTx.BlockTime,
 		&dbTx.TxType, &dbTx.Version, &dbTx.Tree, &dbTx.TxID, &dbTx.BlockIndex,
 		&dbTx.Locktime, &dbTx.Expiry, &dbTx.Size, &dbTx.Spent, &dbTx.Sent,
 		&dbTx.Fees, &dbTx.MixCount, &dbTx.MixDenom, &dbTx.NumVin, &vinDbIDs,
@@ -2932,11 +2919,15 @@ func RetrieveFullTxByHash(ctx context.Context, db *sql.DB, txHash dbtypes.ChainH
 	numVin int32, vinDbIDs []int64, numVout int32, voutDbIDs []int64,
 	isValidBlock, isMainchainBlock bool, err error) {
 	var hash dbtypes.ChainHash
+	var vinIDs, voutIDs pq.Int64Array
 	err = db.QueryRowContext(ctx, internal.SelectFullTxByHash, txHash).Scan(&id, &blockHash,
-		&blockHeight, &blockTime, &timeVal, &txType, &version, &tree,
+		&blockHeight, &blockTime, &txType, &version, &tree,
 		&hash, &blockInd, &lockTime, &expiry, &size, &spent, &sent, &fees,
-		&mixCount, &mixDenom, &numVin, &vinDbIDs, &numVout, &voutDbIDs,
+		&mixCount, &mixDenom, &numVin, &vinIDs, &numVout, &voutIDs,
 		&isValidBlock, &isMainchainBlock)
+	timeVal = blockTime
+	vinDbIDs = vinIDs
+	voutDbIDs = voutIDs
 	return
 }
 
@@ -2959,7 +2950,7 @@ func RetrieveDbTxsByHash(ctx context.Context, db *sql.DB, txHash dbtypes.ChainHa
 		// voutDbIDs := dbtypes.UInt64Array(dbTx.VoutDbIds)
 
 		err = rows.Scan(&id,
-			&dbTx.BlockHash, &dbTx.BlockHeight, &dbTx.BlockTime, &dbTx.BlockTime,
+			&dbTx.BlockHash, &dbTx.BlockHeight, &dbTx.BlockTime,
 			&dbTx.TxType, &dbTx.Version, &dbTx.Tree, &dbTx.TxID, &dbTx.BlockIndex,
 			&dbTx.Locktime, &dbTx.Expiry, &dbTx.Size, &dbTx.Spent, &dbTx.Sent,
 			&dbTx.Fees, &dbTx.MixCount, &dbTx.MixDenom, &dbTx.NumVin, &vinids,
@@ -3623,7 +3614,7 @@ func InsertBlock(db *sql.DB, dbBlock *dbtypes.Block, isValid, isMainchain, check
 		dbBlock.Time, int64(dbBlock.Nonce), int16(dbBlock.VoteBits), dbBlock.Voters,
 		dbBlock.FreshStake, dbBlock.Revocations, dbBlock.PoolSize, int64(dbBlock.Bits),
 		int64(dbBlock.SBits), dbBlock.Difficulty, int32(dbBlock.StakeVersion),
-		dbBlock.PreviousHash, dbBlock.ChainWork, pq.Array(dbBlock.Winners)).Scan(&id)
+		dbBlock.PreviousHash, dbBlock.ChainWork, dbtypes.ChainHashArray(dbBlock.Winners)).Scan(&id)
 	return id, err
 }
 

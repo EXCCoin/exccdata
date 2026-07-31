@@ -3479,21 +3479,28 @@ func (pgb *ChainDB) StoreBlock(msgBlock *wire.MsgBlock, isValid, isMainchain,
 	// imported side chain blocks over to main chain.
 	prevBlockHash := msgBlock.Header.PrevBlock
 
-	var winners []string
+	var winners []dbtypes.ChainHash
 	if isMainchain && !bytes.Equal(zeroHash[:], prevBlockHash[:]) {
 		lastTpi, found := pgb.stakeDB.PoolInfo(prevBlockHash)
 		if !found {
 			err = fmt.Errorf("stakedb.PoolInfo failed for block %s", blockHash)
 			return
 		}
-		winners = lastTpi.Winners
+		winners = make([]dbtypes.ChainHash, len(lastTpi.Winners))
+		for i := range winners {
+			ch, err := chainhash.NewHashFromStr(lastTpi.Winners[i])
+			if err != nil {
+				return 0, 0, 0, fmt.Errorf("chainhash.NewHashFromStr for validator: %w", err)
+			}
+			winners[i] = dbtypes.ChainHash(*ch)
+		}
 	}
 
 	// Wrap the message block with newly winning tickets and the tickets
 	// expected to vote in this block (on the previous block).
 	MsgBlockPG := &MsgBlockPG{
 		MsgBlock:       msgBlock,
-		WinningTickets: winningTickets,
+		WinningTickets: winningTicketsCH,
 		Validators:     winners,
 	}
 
@@ -3768,8 +3775,8 @@ func (r *storeTxnsResult) Error() string {
 // block's validity, Validators.
 type MsgBlockPG struct {
 	*wire.MsgBlock
-	WinningTickets []string
-	Validators     []string
+	WinningTickets []dbtypes.ChainHash
+	Validators     []dbtypes.ChainHash
 }
 
 // storeTxns inserts all vins, vouts, and transactions. The VoutDbIds and
@@ -3977,7 +3984,7 @@ txns:
 	// chain blocks, this is acceptable and necessary because the misses table
 	// does not record the block hash or main/side chain status.
 	if !isMainchain {
-		msgBlock.Validators = []string{}
+		msgBlock.Validators = []dbtypes.ChainHash{}
 	}
 
 	// If processing stake transactions, insert tickets, votes, and misses. Also

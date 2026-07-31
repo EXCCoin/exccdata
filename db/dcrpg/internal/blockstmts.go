@@ -251,7 +251,7 @@ const (
 		ORDER BY blocks.height DESC;`
 
 	SelectBlockDataByHash = `
-			SELECT blocks.hash, blocks.height, blocks.size,
+			SELECT blocks.height, blocks.size,
 				blocks.difficulty, blocks.sbits, blocks.time, stats.pool_size,
 				stats.pool_val, blocks.winners, blocks.is_mainchain, blocks.is_valid
 			FROM blocks INNER JOIN stats ON blocks.id = stats.blocks_id

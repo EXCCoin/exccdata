@@ -281,10 +281,19 @@ func (u *Upgrader) compatVersion1Upgrades(current, target DatabaseVersion) (bool
 	if done || err != nil {
 		return done, err
 	}
+	if current.schema != 11 || current.maint != 0 {
+		return false, fmt.Errorf("automatic compatibility upgrade requires database version 1.11.0, got %v; run exccdata 6.2.1 first", current)
+	}
 
 	log.Infof("Performing TEXT->BYTEA migration (compat 1 -> 2). This will take a while on large databases...")
 
-	err = u.migrateTextToBytea()
+	tx, err := u.db.BeginTx(u.ctx, nil)
+	if err != nil {
+		return false, fmt.Errorf("failed to begin TEXT->BYTEA migration: %v", err)
+	}
+	defer tx.Rollback()
+
+	err = u.migrateTextToBytea(tx)
 	if err != nil {
 		return false, fmt.Errorf("failed TEXT->BYTEA migration: %v", err)
 	}
@@ -294,8 +303,14 @@ func (u *Upgrader) compatVersion1Upgrades(current, target DatabaseVersion) (bool
 	current.maint = 0
 	target.compat = 2
 
-	if err = storeVers(u.db, &current); err != nil {
+	_, err = tx.Exec(`UPDATE meta SET compatibility_version = $1,
+		schema_version = $2, maintenance_version = $3`, current.compat,
+		current.schema, current.maint)
+	if err != nil {
 		return false, fmt.Errorf("failed to store version after compat upgrade: %v", err)
+	}
+	if err = tx.Commit(); err != nil {
+		return false, fmt.Errorf("failed to commit compat upgrade: %v", err)
 	}
 
 	log.Infof("TEXT->BYTEA migration complete. DB now at compat=2, schema=0.")
@@ -303,8 +318,22 @@ func (u *Upgrader) compatVersion1Upgrades(current, target DatabaseVersion) (bool
 	return u.compatVersion2Upgrades(current, target)
 }
 
-func (u *Upgrader) migrateTextToBytea() error {
-	db := u.db
+func (u *Upgrader) migrateTextToBytea(tx *sql.Tx) error {
+	_, err := tx.Exec(`
+		CREATE FUNCTION pg_temp.exccdata_decode_hash(hash TEXT) RETURNS BYTEA
+		LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE AS $function$
+			SELECT decode(hash, 'hex')
+		$function$;
+
+		CREATE FUNCTION pg_temp.exccdata_decode_hash_array(hashes TEXT[]) RETURNS BYTEA[]
+		LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE AS $function$
+			SELECT coalesce(array_agg(pg_temp.exccdata_decode_hash(hash) ORDER BY ord), ARRAY[]::BYTEA[])
+			FROM unnest(hashes) WITH ORDINALITY AS x(hash, ord)
+		$function$;
+	`)
+	if err != nil {
+		return fmt.Errorf("failed to create hash conversion functions: %v", err)
+	}
 
 	type migration struct {
 		table string
@@ -330,13 +359,17 @@ func (u *Upgrader) migrateTextToBytea() error {
 		{"misses", "ticket_hash"},
 		{"block_chain", "this_hash"},
 		{"block_chain", "prev_hash"},
+		{"swaps", "contract_tx"},
+		{"swaps", "spend_tx"},
+		{"treasury", "tx_hash"},
+		{"treasury", "block_hash"},
 	}
 
 	for _, m := range hashCols {
-		q := fmt.Sprintf(`ALTER TABLE %s ALTER COLUMN %s TYPE BYTEA USING reverse(decode(%s, 'hex'))`,
+		q := fmt.Sprintf(`ALTER TABLE %s ALTER COLUMN %s TYPE BYTEA USING pg_temp.exccdata_decode_hash(%s)`,
 			m.table, m.col, m.col)
 		log.Infof("Migrating %s.%s TEXT -> BYTEA...", m.table, m.col)
-		if _, err := db.Exec(q); err != nil {
+		if _, err := tx.Exec(q); err != nil {
 			return fmt.Errorf("failed to migrate %s.%s: %v", m.table, m.col, err)
 		}
 	}
@@ -347,21 +380,24 @@ func (u *Upgrader) migrateTextToBytea() error {
 		{"block_chain", "next_hash"},
 	}
 	for _, m := range nullableHashCols {
-		q := fmt.Sprintf(`ALTER TABLE %s ALTER COLUMN %s TYPE BYTEA USING CASE WHEN %s = '' THEN NULL ELSE reverse(decode(%s, 'hex')) END`,
+		q := fmt.Sprintf(`ALTER TABLE %s ALTER COLUMN %s TYPE BYTEA USING CASE WHEN %s = '' THEN NULL ELSE pg_temp.exccdata_decode_hash(%s) END`,
 			m.table, m.col, m.col, m.col)
 		log.Infof("Migrating %s.%s TEXT -> BYTEA (nullable)...", m.table, m.col)
-		if _, err := db.Exec(q); err != nil {
+		if _, err := tx.Exec(q); err != nil {
 			return fmt.Errorf("failed to migrate %s.%s: %v", m.table, m.col, err)
 		}
 	}
 
 	log.Infof("Migrating blocks.winners TEXT[] -> BYTEA[]...")
-	_, err := db.Exec(`ALTER TABLE blocks ALTER COLUMN winners TYPE BYTEA[] USING
-		CASE WHEN winners IS NULL THEN NULL ELSE
-			(SELECT array_agg(reverse(decode(x, 'hex'))) FROM unnest(winners) x)
-		END`)
+	_, err = tx.Exec(`ALTER TABLE blocks ALTER COLUMN winners TYPE BYTEA[]
+		USING pg_temp.exccdata_decode_hash_array(winners)`)
 	if err != nil {
 		return fmt.Errorf("failed to migrate blocks.winners: %v", err)
+	}
+	_, err = tx.Exec(`ALTER TABLE vouts ALTER COLUMN script_addresses TYPE TEXT
+		USING script_addresses::TEXT`)
+	if err != nil {
+		return fmt.Errorf("failed to migrate vouts.script_addresses: %v", err)
 	}
 
 	log.Infof("Dropping removed columns...")
@@ -375,9 +411,15 @@ func (u *Upgrader) migrateTextToBytea() error {
 	for _, d := range drops {
 		q := fmt.Sprintf(`ALTER TABLE %s DROP COLUMN IF EXISTS %s`, d.table, d.col)
 		log.Infof("Dropping %s.%s...", d.table, d.col)
-		if _, err := db.Exec(q); err != nil {
+		if _, err := tx.Exec(q); err != nil {
 			return fmt.Errorf("failed to drop %s.%s: %v", d.table, d.col, err)
 		}
+	}
+
+	_, err = tx.Exec(`DROP FUNCTION pg_temp.exccdata_decode_hash_array(TEXT[]),
+		pg_temp.exccdata_decode_hash(TEXT)`)
+	if err != nil {
+		return fmt.Errorf("failed to drop hash conversion functions: %v", err)
 	}
 
 	return nil
